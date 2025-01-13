@@ -1,0 +1,84 @@
+<!-- Prompt 26:- Design a travel agency's digital poster with event details and countdown timer -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>World Tour - Explore the World</title>
+
+</head>
+<body >
+  <main class="h-screen w-screen overflow-x-hidden font-mono  ">
+
+    <header class="relative  bg-cover bg-center bg-[url(https://images.unsplash.com/photo-1584967918940-a7d51b064268?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)] h-screen w-full bg-cover bg-center">
+      <nav class="flex justify-between items-center text-white px-8 py-4 bg-black bg-opacity-50 fixed w-full z-10">
+        <div class="logo flex items-center">
+          <img class="h-12 w-12 object-cover" src="https://cdn-icons-png.flaticon.com/512/69/69906.png" alt="Logo">
+          <h1 class="text-4xl font-bold ml-2">World-Tour</h1>
+        </div>
+        <div class="hidden md:flex space-x-8 text-lg font-medium">
+          <a href="#" class="hover:text-yellow-300 transition duration-300">Home</a>
+          <a href="#" class="hover:text-yellow-300 transition duration-300">Destinations</a>
+          <a href="#" class="hover:text-yellow-300 transition duration-300">Packages</a>
+          <a href="#" class="hover:text-yellow-300 transition duration-300">About Us</a>
+          <a href="#" class="hover:text-yellow-300 transition duration-300">Contact</a>
+        </div>
+        <div class="md:hidden text-3xl cursor-pointer hover:text-yellow-300">☰</div>
+      </nav>
+      <div class="flex flex-col items-center justify-center h-full text-center text-white bg-black bg-opacity-50">
+        <h1 class="text-7xl font-extrabold animate-pulse">Explore the World with Us!</h1>
+        <p class="text-xl mt-4 max-w-xl">Discover breathtaking destinations, exclusive packages, and unforgettable adventures.</p>
+        <a href="#explore" class="mt-6 bg-black text-white hover:bg-yellow-500 text-black font-bold py-3 px-8 rounded-full shadow-lg transition duration-300">Start Exploring</a>
+      </div>
+    </header>
+
+    <section id="explore" class="py-16 bg-white">
+      <h2 class="text-4xl font-bold text-center mb-8">Popular Destinations</h2>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 px-8  ">
+        <div class="relative group ">
+          <img src="https://plus.unsplash.com/premium_photo-1694475118733-73151431a100?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8cGFyaXNlJTIwZmFtb3VzfGVufDB8fDB8fHww" alt="Paris" class="rounded-lg h-[90%]  shadow-lg group-hover:scale-105 transition-transform">
+          <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+            <h3 class="text-white text-2xl font-semibold">Paris</h3>
+          </div>
+        </div>
+        <div class="relative group">
+          <img src="https://images.unsplash.com/photo-1621411539836-c514796aca4c?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MjJ8fE1hbGRpdmVzfGVufDB8fDB8fHww" alt="Maldives" class="rounded-lg h-[90%]  shadow-lg group-hover:scale-105 transition-transform">
+          <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+            <h3 class="text-white text-2xl font-semibold">Maldives</h3>
+          </div>
+        </div>
+        <div class="relative group">
+          <img src="https://images.unsplash.com/photo-1534270804882-6b5048b1c1fc?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTF8fG5ldyUyMHlvcmt8ZW58MHx8MHx8fDA%3D" alt="New York" class="rounded-lg h-[90%]  shadow-lg group-hover:scale-105 transition-transform">
+          <div class="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+            <h3 class="text-white text-2xl font-semibold">New York</h3>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="py-16 bg-gray-100">
+      <h2 class="text-4xl font-bold text-center mb-8">Limited Time Offers!</h2>
+      <div class="flex justify-center gap-8 text-center">
+        <div class="bg-white px-6 py-4 rounded-lg shadow-lg animate-pulse">
+          <h3 class="text-2xl font-semibold">Days</h3>
+          <p class="text-4xl font-bold">05</p>
+        </div>
+        <div class="bg-white px-6 py-4 rounded-lg shadow-lg animate-pulse">
+          <h3 class="text-2xl font-semibold">Hours</h3>
+          <p class="text-4xl font-bold">15</p>
+        </div>
+        <div class="bg-white px-6 py-4 rounded-lg shadow-lg animate-pulse">
+          <h3 class="text-2xl font-semibold">Minutes</h3>
+          <p class="text-4xl font-bold">35</p>
+        </div>
+        <div class="bg-white px-6 py-4 rounded-lg shadow-lg animate-pulse">
+          <h3 class="text-2xl font-semibold">Seconds</h3>
+          <p class="text-4xl font-bold">55</p>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
