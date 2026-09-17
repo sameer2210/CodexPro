@@ -1,0 +1,138 @@
+import crypto from 'crypto';
+import razorpay from '../config/payGateway.js';
+import User from '../models/user.js';
+
+export const createOrder = async (req, res) => {
+  try {
+    const { plan } = req.body;
+
+    const prices = {
+      starter: 199,
+      pro: 499,
+      ultimate: 799,
+      buy_tokens: 99,
+    };
+
+    if (!prices[plan]) {
+      return res.status(400).json({
+        success: false,
+        msg: 'Invalid plan selected.',
+      });
+    }
+
+    const amount = prices[plan] * 100;
+    const options = {
+      amount,
+      currency: 'INR',
+      receipt: `receipt_${Date.now()}`,
+      payment_capture: 1,
+      notes: {
+        plan: plan,
+        created_at: new Date().toISOString(),
+      },
+    };
+
+    const order = await razorpay.orders.create(options);
+
+    res.status(200).json({
+      success: true,
+      ...order,
+    });
+  } catch (err) {
+    console.error('❌ Razorpay Order Creation Failed:', err);
+    res.status(500).json({
+      success: false,
+      msg: 'Order creation failed',
+      error: err.message,
+    });
+  }
+};
+
+export const verifyOrder = async (req, res) => {
+  try {
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature, userId, plan } = req.body;
+
+    if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature || !userId || !plan) {
+      return res.status(400).json({
+        success: false,
+        msg: 'Missing required fields for verification',
+      });
+    }
+
+    const razorpaySecret = process.env.RAZORPAY_SECRET;
+    if (!razorpaySecret) {
+      return res.status(500).json({
+        success: false,
+        msg: 'Payment configuration error',
+      });
+    }
+
+    const generatedSignature = crypto
+      .createHmac('sha256', razorpaySecret)
+      .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+      .digest('hex');
+
+    if (generatedSignature !== razorpay_signature) {
+      return res.status(400).json({
+        success: false,
+        msg: 'Payment signature verification failed',
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        msg: 'User not found',
+      });
+    }
+
+    if (plan === 'buy_tokens') {
+      const tokens = 100;
+      user.tokensLeft = (user.tokensLeft || 0) + tokens;
+      user.paymentHistory.push({
+        orderId: razorpay_order_id,
+        paymentId: razorpay_payment_id,
+        amount: 99,
+        plan: 'buy_tokens',
+      });
+    } else {
+      let tokens = 100;
+      if (plan === 'pro') tokens = 300;
+      else if (plan === 'ultimate') tokens = 1000;
+
+      user.isPremium = true;
+      user.tokensLeft = (user.tokensLeft || 0) + tokens;
+      user.premiumExpiry = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+      user.premiumPlan = plan;
+      user.paymentHistory.push({
+        orderId: razorpay_order_id,
+        paymentId: razorpay_payment_id,
+        amount: tokens === 100 ? 199 : tokens === 300 ? 499 : 799,
+        plan: plan,
+      });
+    }
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      msg: 'Premium activated successfully',
+      user: {
+        isPremium: user.isPremium,
+        tokensLeft: user.tokensLeft,
+        premiumExpiry: user.premiumExpiry,
+        premiumPlan: user.premiumPlan,
+      },
+    });
+  } catch (err) {
+    console.error('❌ Error verifying payment:', err);
+    return res.status(500).json({
+      success: false,
+      msg: 'Payment verification failed',
+      error: err.message,
+    });
+  }
+};
+
+export default { createOrder, verifyOrder };

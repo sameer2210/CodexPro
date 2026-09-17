@@ -1,0 +1,76 @@
+// store.js
+import { combineReducers, configureStore } from '@reduxjs/toolkit';
+import { createTransform, persistReducer, persistStore } from 'redux-persist';
+import storage from 'redux-persist/lib/storage';
+import { notify } from '../lib/notify';
+import authSlice from './slices/authSlice';
+import callSlice from './slices/callSlice';
+import projectSlice from './slices/projectSlice';
+import socketSlice from './slices/socketSlice';
+import problemSlice from './slices/problemSlice';
+import { socketMiddleware } from './socketMiddleware';
+
+// Root reducer with persistence config
+const authTransform = createTransform(
+  (inboundState, key) => {
+    if (key !== 'auth') return inboundState;
+    const { isLoading: _isLoading, error: _error, ...rest } = inboundState || {};
+    return rest;
+  },
+  (outboundState, key) => {
+    if (key !== 'auth') return outboundState;
+    return { ...outboundState, isLoading: false, error: null };
+  },
+  { whitelist: ['auth'] }
+);
+
+const persistConfig = {
+  key: 'root',
+  storage,
+  whitelist: ['auth'], // Persist only auth slice (add others if needed, e.g., ['auth', 'projects'])
+  transforms: [authTransform],
+};
+
+const rootReducer = combineReducers({
+  socket: socketSlice,
+  auth: authSlice,
+  call: callSlice,
+  projects: projectSlice,
+  problem: problemSlice,
+});
+
+const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+// Error logging middleware (for rejected actions)
+const errorLogger = () => next => action => {
+  if (action.meta?.rejectedWithValue) {
+    const message = action.payload || 'Something went wrong';
+    console.error('Rejected action:', action.type, message);
+    notify(message, 'error');
+  }
+  return next(action);
+};
+
+export const store = configureStore({
+  reducer: persistedReducer,
+  middleware: getDefaultMiddleware =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [
+          'persist/PERSIST',
+          'persist/REHYDRATE',
+          'persist/PAUSE',
+          'persist/PURGE',
+          'persist/REGISTER',
+        ],
+        ignoredPaths: [
+          'call.localStream',
+          'call.remoteStream',
+          'call.peerConnection',
+        ],
+      },
+    }).concat(socketMiddleware, errorLogger),
+  devTools: import.meta.env.DEV,
+});
+
+export const persistor = persistStore(store);

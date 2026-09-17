@@ -1,0 +1,58 @@
+{
+  "name": "codex-backend",
+  "version": "1.0.0",
+  "description": "AI-powered codeX backend with Express, Mongoose, and Google GenAI",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules MONGODB_URI=mongodb://localhost:27017/codex-test jest --runInBand"
+  },
+  "keywords": [
+    "express",
+    "mongoose",
+    "ai",
+    "socket.io",
+    "genai"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "axios": "^1.7.9",
+    "bcryptjs": "^3.0.2",
+    "cloudinary": "^2.5.1",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "ejs": "^3.1.10",
+    "express": "^4.21.2",
+    "google-auth-library": "^9.15.0",
+    "helmet": "^8.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.18.1",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "node-cron": "^3.0.3",
+    "node-fetch": "^3.3.2",
+    "nodemailer": "^6.10.0",
+    "pdf-parse": "^1.1.1",
+    "razorpay": "^2.9.5",
+    "redis": "^4.7.0",
+    "socket.io": "^4.8.1",
+    "validator": "^13.12.0"
+  },
+  "devDependencies": {
+    "cross-env": "^10.1.0",
+    "eslint": "^9.12.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-node": "^0.0.0",
+    "jest": "^30.2.0",
+    "nodemon": "^1.15.1",
+    "prettier": "^3.3.3",
+    "supertest": "^7.2.2"
+  }
+}

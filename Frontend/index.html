@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- =============== BASIC META =============== -->
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>CodeX Code Editor</title>
+
+    <!-- =============== SEO META =============== -->
+    <meta
+      name="description"
+      content="CodeX is an enterprise-grade collaborative code editor with real-time collaboration, AI-powered code reviews, chat, and video calls."
+    />
+    <meta
+      name="keywords"
+      content="Code Editor, Collaborative Coding, AI Code Review, MERN, Socket.IO, WebRTC"
+    />
+    <meta name="author" content="CodeX Team" />
+
+    <!-- =============== OPEN GRAPH / SOCIAL =============== -->
+    <meta property="og:title" content="CodeX — Collaborative AI-Powered Code Editor" />
+    <meta
+      property="og:description"
+      content="Build, review, and collaborate on code in real-time with AI assistance."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:url" content="https://codex.app" />
+
+    <!-- =============== FAVICON =============== -->
+    <link rel="icon" type="image/png" href="/logo.png" />
+    <link rel="apple-touch-icon" href="/logo.png" />
+
+    <!-- =============== PERFORMANCE =============== -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- =============== ICONS =============== -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css"
+      rel="stylesheet"
+    />
+
+    <!-- =============== THEME COLOR =============== -->
+    <meta name="theme-color" content="#0f172a" />
+  </head>
+
+  <body class="antialiased bg-white text-gray-900 dark:bg-black dark:text-white">
+    <!-- =============== APP ROOT =============== -->
+    <div id="root"></div>
+
+    <!-- =============== NO-JS FALLBACK =============== -->
+    <noscript>
+      <strong>CodeX requires JavaScript to run properly. Please enable JavaScript.</strong>
+    </noscript>
+
+    <!-- =============== VITE ENTRY =============== -->
+    <script type="module" src="/src/main.jsx"></script>
+    <script type="text/javascript">
+    (function (l) {
+      if (l.search[1] === "/") {
+        var decoded = l.search
+          .slice(1)
+          .split("&")
+          .map(function (s) {
+            return s.replace(/~and~/g, "&");
+          })
+          .join("?");
+        window.history.replaceState(
+          null,
+          null,
+          l.pathname.slice(0, -1) + decoded + l.hash
+        );
+      }
+    })(window.location);
+  </script>
+  </body>
+</html>
