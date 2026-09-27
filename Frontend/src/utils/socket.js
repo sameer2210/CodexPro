@@ -1,4 +1,4 @@
-import { getSocket } from '../store/socketMiddleware';
+import { getSocket } from './socketMiddleware';
 
 export { getSocket };
 

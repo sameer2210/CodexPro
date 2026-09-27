@@ -9,10 +9,10 @@ import {
   fetchAllUserSubmissions,
   fetchHeatmapData,
 } from "../../utils/apis/dashboardApi";
-import SidebarProfileCard from "./SidebarProfileCard";
-import StatsOverview from "./StatsOverview";
-import HeatmapCalendar from "./HeatmapCalendar";
-import SubmissionsTabs from "./SubmissionsTabs";
+import SidebarProfileCard from '../common/SidebarProfileCard';
+import StatsOverview from '../project/StatsOverview';
+import HeatmapCalendar from '../common/HeatmapCalendar';
+import SubmissionsTabs from '../project/SubmissionsTabs';
 import ProblemCard from "../common/ProblemCard";
 import Navbar from "../common/Navbar";
 import LoadingSpinner from "../common/LoadingSpinner";

@@ -16,7 +16,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bar, BarChart, Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import Sidebar from '../components/layout/Sidebar';
-import ActiveMember from '../components/page/ActiveMember';
+import ActiveMember from '../components/user/ActiveMember';
 import { useTheme } from '../context/ThemeContext';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { fetchDashboardData } from '../store/slices/projectSlice';

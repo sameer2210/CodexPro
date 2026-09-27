@@ -10,34 +10,34 @@ import Layout from '../components/layout/Layout';
 import { useAppSelector } from '../store/hooks';
 
 // Lazy load components for performance
-const Login = lazy(() => import('../views/auth/Login'));
-const Register = lazy(() => import('../views/auth/Register'));
+const Login = lazy(() => import('../views/Auth/Login'));
+const Register = lazy(() => import('../views/Auth/Register'));
 const ForgotPassword = lazy(() => import('../components/auth/ForgotPassword'));
 const ResetPassword = lazy(() => import('../components/auth/ResetPassword'));
 
 const Landing = lazy(() => import('../views/Landing'));
 const Dashboard = lazy(() => import('../views/Dashboard'));
-const CreateProject = lazy(() => import('../views/create-project/CreateProject'));
-const Project = lazy(() => import('../views/home/project/Project'));
+const CreateProject = lazy(() => import('../components/project/CreateProject'));
+const Project = lazy(() => import('../components/project/Project'));
 
-const Problem = lazy(() => import('../views/Problem'));
-const ProblemSolve = lazy(() => import('../views/ProblemSolve'));
-const ContestPage = lazy(() => import('../views/ContestPage'));
-const DiscussPage = lazy(() => import('../views/DiscussPage'));
-const DiscussionDetail = lazy(() => import('../views/DiscussionDetail'));
-const DSAVisualizer = lazy(() => import('../views/DSAVisualizer'));
-const Explore = lazy(() => import('../views/Explore'));
-const Interview = lazy(() => import('../views/Interview'));
-const UserProfile = lazy(() => import('../views/UserProfile'));
-const AdminPage = lazy(() => import('../views/AdminPage'));
+const Problem = lazy(() => import('../components/academy/ProblemSolve'));
+const ProblemSolve = lazy(() => import('../components/academy/ProblemSolve'));
+const ContestPage = lazy(() => import('../views/Arena/ContestPage'));
+const DiscussPage = lazy(() => import('../components/connections/DiscussPage'));
+const DiscussionDetail = lazy(() => import('../components/connections/DiscussionDetail'));
+const DSAVisualizer = lazy(() => import('../components/academy/DSAVisualizer'));
+const Explore = lazy(() => import('../components/academy/Explore'));
+const Interview = lazy(() => import('../components/academy/Interview'));
+const UserProfile = lazy(() => import('../components/user/UserProfile'));
+const AdminPage = lazy(() => import('../views/Admin/AdminPage'));
 const Homepage = lazy(() => import('../views/Homepage'));
 
 const Settings = lazy(() => import('../components/page/Settings'));
 const Help = lazy(() => import('../components/page/Help'));
-const ActiveMemberPage = lazy(() => import('../components/page/ActiveMemberPage'));
+const ActiveMemberPage = lazy(() => import('../components/user/ActiveMemberPage'));
 const Notification = lazy(() => import('../components/page/Notification'));
-const Meeting = lazy(() => import('../components/page/Meeting'));
-const NotFound = lazy(() => import('../views/NotFound'));
+const Meeting = lazy(() => import('../components/connections/Meeting'));
+const NotFound = lazy(() => import('../components/ui/NotFound'));
 
 // Loading fallback component
 const LoadingFallback = () => (

@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { ChevronRight, CornerDownRight, Eye, EyeOff } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { HUDLabel, LEDIndicator } from '../../components/HUD';
+import { HUDLabel, LEDIndicator } from '../background/HUD';
 import { useTheme } from '../../context/ThemeContext';
 import { notify } from '../../lib/notify';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';

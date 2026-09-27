@@ -8,7 +8,7 @@ import callSlice from './slices/callSlice';
 import projectSlice from './slices/projectSlice';
 import socketSlice from './slices/socketSlice';
 import problemSlice from './slices/problemSlice';
-import { socketMiddleware } from './socketMiddleware';
+import { socketMiddleware } from '../utils/socketMiddleware';
 
 // Root reducer with persistence config
 const authTransform = createTransform(

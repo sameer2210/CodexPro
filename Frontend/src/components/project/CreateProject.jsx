@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Terminal, ChevronRight, CornerDownRight, Cpu, Zap, Globe } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { useAppDispatch, useAppSelector } from '../../../../store/hooks';
-import { createProject } from '../../../../store/slices/projectSlice';
-import { useTheme } from '../../../../context/ThemeContext';
-import { notify } from '../../../../lib/notify';
-import { HUDLabel, LEDIndicator } from '../../../../components/HUD';
+import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { createProject } from '../../store/slices/projectSlice';
+import { useTheme } from '../../context/ThemeContext';
+import { notify } from '../../lib/notify';
+import { HUDLabel, LEDIndicator } from '../background/HUD';
 
 // --- Constants ---
 const FRAMEWORKS = [

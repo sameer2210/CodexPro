@@ -1,6 +1,6 @@
 import { useEffect, useMemo } from 'react';
 import { Toaster } from 'sonner';
-import ErrorBoundary from './components/ErrorBoundary';
+import ErrorBoundary from './components/ui/ErrorBoundary';
 import Routes from './routes/Routes';
 import { useTheme } from './context/ThemeContext';
 import { useAppDispatch, useAppSelector } from './store/hooks';

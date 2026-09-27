@@ -2,7 +2,7 @@ import { AnimatePresence } from 'framer-motion';
 import { Copy, Download, RefreshCw, Sparkles, Terminal } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
-import { HUDLabel, LEDIndicator } from '../../components/HUD';
+import { HUDLabel, LEDIndicator } from '../background/HUD';
 import { useTheme } from '../../context/ThemeContext';
 import { notify } from '../../lib/notify';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';

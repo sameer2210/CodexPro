@@ -19,7 +19,7 @@ import { useSelector, useDispatch } from "react-redux";
 import axiosClient from "../../utils/axiosClient";
 import { useNavigate } from "react-router-dom";
 import { NavLink } from "react-router-dom";
-import Success from "./Success";
+import Success from '../contest/Success';
 
 const Premium = () => {
   const [isLoading, setIsLoading] = useState(null);

@@ -8,7 +8,7 @@ import { AnimatePresence } from 'framer-motion';
 import { Phone, PhoneOff, Video } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { AudioCallPage, VideoCallPage } from '../../components/CallingPage';
+import { AudioCallPage, VideoCallPage } from '../connections/CallingPage';
 import Sidebar from '../../components/layout/Sidebar';
 import ResizableContainer from '../../components/ui/ResizableContainer';
 import { useTheme } from '../../context/ThemeContext';
@@ -27,10 +27,10 @@ import {
   selectCurrentProjectMessages,
   setCurrentProject,
 } from '../../store/slices/projectSlice';
-import ChatSection from './components/ChatSection';
-import CodeEditor from './components/CodeEditor';
-import OutputPanel from './components/OutputPanel';
-import ReviewPanel from './components/ReviewPanel';
+import ChatSection from '../connections/ChatSection';
+import CodeEditor from './CodeEditor';
+import OutputPanel from './OutputPanel';
+import ReviewPanel from './ReviewPanel';
 
 const EASE = [0.22, 1, 0.36, 1];
 const DEFAULT_EDITOR_SPLIT = 70;

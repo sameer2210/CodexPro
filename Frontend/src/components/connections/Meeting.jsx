@@ -1,8 +1,8 @@
 import { motion } from 'framer-motion';
 import { useEffect, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import ActiveMember from '../../components/page/ActiveMember';
-import { useTheme } from '../../Context/ThemeContext';
+import ActiveMember from '../user/ActiveMember';
+import { useTheme } from '../../context/ThemeContext';
 import { useAppDispatch, useAppSelector } from '../../store/hooks';
 import {
   clearProjectData,
@@ -10,7 +10,7 @@ import {
   fetchProject,
   setCurrentProject,
 } from '../../store/slices/projectSlice';
-import ChatSection from '../../views/home/project/components/ChatSection';
+import ChatSection from './ChatSection';
 
 const Meeting = () => {
   const { isDarkMode } = useTheme();
