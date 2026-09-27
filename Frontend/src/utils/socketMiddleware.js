@@ -16,7 +16,7 @@ import {
   setOutgoingCall,
   setPeerConnection,
   setRemoteStream,
-} from './slices/callSlice';
+} from '../store/slices/callSlice';
 import {
   addChatMessage,
   addTypingUser,
@@ -27,7 +27,7 @@ import {
   updateTeamMemberStatus,
   updateProjectCode,
   updateProjectReview,
-} from './slices/projectSlice';
+} from '../store/slices/projectSlice';
 import {
   acceptIncoming,
   addRemoteIceCandidate,
@@ -41,8 +41,8 @@ import {
   socketConnecting,
   socketDisconnected,
   socketError,
-} from './slices/socketSlice';
-import { logout } from './slices/authSlice';
+} from '../store/slices/socketSlice';
+import { logout } from '../store/slices/authSlice';
 
 const INTERNAL_SOCKET_ACTIONS = new Set([
   socketConnecting.type,
