@@ -1,26 +1,26 @@
-import api from '../../api/config';
+import api from "../../api/config";
 
-export const requestEmailVerificationOTP = async () => {
-  const res = await api.post('/auth/send-verification-otp');
+export const requestEmailVerificationOTP = async (email) => {
+  const res = await api.post("/user/requestEmailVerificationOTP", { email });
   return res.data;
 };
 
-export const verifyEmailOTP = async (otp) => {
-  const res = await api.post('/auth/verify-email', { otp });
+export const verifyEmailOTP = async (email, otp) => {
+  const res = await api.post("/user/verifyEmailOTP", { email, otp });
   return res.data;
 };
 
 export const getUserProfile = async () => {
-  const res = await api.get('/user/profile');
-  return res.data?.data || res.data;
+  const res = await api.get("/user/getProfile");
+  return res.data?.user || res.data?.data || res.data;
 };
 
 export const updateUserProfile = async (profileData) => {
-  const res = await api.put('/user/profile', profileData);
+  const res = await api.put("/user/updateProfile", profileData);
   return res.data;
 };
 
 export const changePassword = async (passwordData) => {
-  const res = await api.put('/auth/change-password', passwordData);
+  const res = await api.post("/user/changePassword", passwordData);
   return res.data;
 };

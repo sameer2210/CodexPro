@@ -2,7 +2,6 @@
 import React, { useEffect } from "react";
 import { speakText } from "../../utils/Ai/speakText";
 
-
 const AudioPlayer = ({ text }) => {
   useEffect(() => {
     if (text) speakText(text);

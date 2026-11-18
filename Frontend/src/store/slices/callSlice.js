@@ -1,21 +1,21 @@
-import { createAction, createSlice } from '@reduxjs/toolkit';
+import { createAction, createSlice } from "@reduxjs/toolkit";
 
 export const CALL_STATUS = {
-  IDLE: 'IDLE',
-  CALLING: 'CALLING',
-  RINGING: 'RINGING',
-  ACCEPTED: 'ACCEPTED',
-  REJECTED: 'REJECTED',
-  CANCELLED: 'CANCELLED',
-  ENDED: 'ENDED',
-  FAILED: 'FAILED',
+  IDLE: "IDLE",
+  CALLING: "CALLING",
+  RINGING: "RINGING",
+  ACCEPTED: "ACCEPTED",
+  REJECTED: "REJECTED",
+  CANCELLED: "CANCELLED",
+  ENDED: "ENDED",
+  FAILED: "FAILED",
 };
 
-  const initialState = {
+const initialState = {
   status: CALL_STATUS.IDLE,
   direction: null, // 'outgoing' | 'incoming'
   callId: null,
-  callType: 'audio',
+  callType: "audio",
   caller: null,
   receiver: null,
   recipients: [],
@@ -33,18 +33,22 @@ export const CALL_STATUS = {
 };
 
 const callSlice = createSlice({
-  name: 'call',
+  name: "call",
   initialState,
   reducers: {
     resetCallState: () => ({ ...initialState }),
     setOutgoingCall: (state, action) => {
       const { callId, receiver, callType, caller, recipients } = action.payload;
       state.status = CALL_STATUS.CALLING;
-      state.direction = 'outgoing';
+      state.direction = "outgoing";
       state.callId = callId;
       state.callType = callType;
       state.receiver = receiver;
-      state.recipients = Array.isArray(recipients) ? recipients : receiver ? [receiver] : [];
+      state.recipients = Array.isArray(recipients)
+        ? recipients
+        : receiver
+          ? [receiver]
+          : [];
       state.caller = caller || null;
       state.offer = null;
       state.answer = null;
@@ -56,7 +60,7 @@ const callSlice = createSlice({
     setIncomingCall: (state, action) => {
       const { callId, caller, callType, offer, receiver } = action.payload;
       state.status = CALL_STATUS.RINGING;
-      state.direction = 'incoming';
+      state.direction = "incoming";
       state.callId = callId;
       state.callType = callType;
       state.caller = caller;
@@ -76,7 +80,7 @@ const callSlice = createSlice({
       state.reason = null;
       state.error = null;
       if (peer) {
-        if (state.direction === 'outgoing') {
+        if (state.direction === "outgoing") {
           state.receiver = peer;
         } else {
           state.caller = peer;
@@ -127,10 +131,10 @@ export const {
 } = callSlice.actions;
 
 // Side-effect actions handled by middleware
-export const callStartRequested = createAction('call/start');
-export const callAcceptRequested = createAction('call/accept');
-export const callRejectRequested = createAction('call/reject');
-export const callCancelRequested = createAction('call/cancel');
-export const callEndRequested = createAction('call/end');
+export const callStartRequested = createAction("call/start");
+export const callAcceptRequested = createAction("call/accept");
+export const callRejectRequested = createAction("call/reject");
+export const callCancelRequested = createAction("call/cancel");
+export const callEndRequested = createAction("call/end");
 
 export default callSlice.reducer;

@@ -1,13 +1,13 @@
 // src/components/project/components/OutputPanel.jsx
-import { AlertTriangle, Terminal } from 'lucide-react';
-import { useEffect, useRef } from 'react';
-import { useTheme } from '../../context/ThemeContext';
-import { useAppSelector } from '../../store/hooks';
+import { AlertTriangle, Terminal } from "lucide-react";
+import { useEffect, useRef } from "react";
+import { useTheme } from "../../context/ThemeContext";
+import { useAppSelector } from "../../store/hooks";
 import {
   selectExecutionError,
   selectExecutionOutput,
   selectIsExecuting,
-} from '../../store/slices/projectSlice';
+} from "../../store/slices/projectSlice";
 
 const OutputPanel = () => {
   const { isDarkMode } = useTheme();
@@ -24,14 +24,14 @@ const OutputPanel = () => {
   }, [output, error, isExecuting]);
 
   const renderConsole = () => {
-    if (isExecuting) return '[ RUNNING... ]\n\n';
+    if (isExecuting) return "[ RUNNING... ]\n\n";
 
     if (error) {
       return `[ ERROR ]\n${error}`;
     }
 
     if (!output) {
-      return 'Program output will appear here...';
+      return "Program output will appear here...";
     }
 
     return output;
@@ -40,13 +40,17 @@ const OutputPanel = () => {
   return (
     <div
       className={`h-full flex flex-col rounded-2xl border backdrop-blur-xl ${
-        isDarkMode ? 'bg-white/5 border-white/10' : 'bg-white/90 border-black/15'
+        isDarkMode
+          ? "bg-white/5 border-white/10"
+          : "bg-white/90 border-black/15"
       }`}
     >
       {/* Header */}
       <div className="flex items-center gap-2 px-4 py-3 border-b border-white/10">
         <Terminal className="w-5 h-5 text-[#17E1FF]" />
-        <h3 className="text-sm font-semibold tracking-wide">Execution Console</h3>
+        <h3 className="text-sm font-semibold tracking-wide">
+          Execution Console
+        </h3>
         {error && <AlertTriangle className="w-4 h-4 text-red-400 ml-auto" />}
       </div>
 

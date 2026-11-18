@@ -1,32 +1,41 @@
-
-import { useState } from 'react';
-import { motion } from 'framer-motion';
-import { 
-  MessageSquare, 
-  ThumbsUp, 
-  TrendingUp, 
+import { useState } from "react";
+import { motion } from "framer-motion";
+import {
+  MessageSquare,
+  ThumbsUp,
+  TrendingUp,
   Hash,
   Clock,
   Edit,
-  Trash
-} from 'lucide-react';
+  Trash,
+} from "lucide-react";
 
-const DiscussionCard = ({ discussion, currentUserId, onDelete, onSelect, isSelected }) => {
+const DiscussionCard = ({
+  discussion,
+  currentUserId,
+  onDelete,
+  onSelect,
+  isSelected,
+}) => {
   const [isEditing, setIsEditing] = useState(false);
   const [community, setCommunity] = useState(discussion.community);
 
   // Format date for display
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   // Determine if current user is author
-  const isAuthor = currentUserId && discussion.author && (currentUserId === discussion.author._id || currentUserId === discussion.author);
+  const isAuthor =
+    currentUserId &&
+    discussion.author &&
+    (currentUserId === discussion.author._id ||
+      currentUserId === discussion.author);
 
   // Handle community update (stub, implement as needed)
   const handleCommunityUpdate = (e) => {
@@ -40,7 +49,7 @@ const DiscussionCard = ({ discussion, currentUserId, onDelete, onSelect, isSelec
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`bg-gray-800/50 border border-gray-700/50 rounded-xl p-5 transition-all cursor-pointer ${isSelected ? 'border-orange-500' : 'hover:border-gray-600'}`}
+      className={`bg-gray-800/50 border border-gray-700/50 rounded-xl p-5 transition-all cursor-pointer ${isSelected ? "border-orange-500" : "hover:border-gray-600"}`}
       onClick={() => onSelect && onSelect(discussion)}
     >
       <div>
@@ -49,23 +58,26 @@ const DiscussionCard = ({ discussion, currentUserId, onDelete, onSelect, isSelec
             {discussion.title}
           </h3>
           <div className="px-2 py-1 bg-gray-700/50 rounded-md text-xs font-medium text-gray-300">
-            {discussion.community.charAt(0).toUpperCase() + discussion.community.slice(1)}
+            {discussion.community.charAt(0).toUpperCase() +
+              discussion.community.slice(1)}
           </div>
         </div>
-        
-        <p className="text-gray-300 mb-4 line-clamp-2">
-          {discussion.content}
-        </p>
-        
+
+        <p className="text-gray-300 mb-4 line-clamp-2">{discussion.content}</p>
+
         <div className="flex flex-wrap gap-2 mb-4">
-          {discussion.tags && discussion.tags.map((tag, index) => (
-            <div key={index} className="px-2 py-1 bg-gray-700/50 rounded-md text-xs font-medium text-gray-300 flex items-center">
-              <Hash className="w-3 h-3 mr-1" />
-              {tag}
-            </div>
-          ))}
+          {discussion.tags &&
+            discussion.tags.map((tag, index) => (
+              <div
+                key={index}
+                className="px-2 py-1 bg-gray-700/50 rounded-md text-xs font-medium text-gray-300 flex items-center"
+              >
+                <Hash className="w-3 h-3 mr-1" />
+                {tag}
+              </div>
+            ))}
         </div>
-        
+
         <div className="flex items-center justify-between text-sm text-gray-400">
           <div className="flex items-center space-x-4">
             <div className="flex items-center">
@@ -81,22 +93,22 @@ const DiscussionCard = ({ discussion, currentUserId, onDelete, onSelect, isSelec
               <span>{discussion.views || 0} views</span>
             </div>
           </div>
-          
+
           <div className="flex items-center">
             <div className="w-6 h-6 rounded-full bg-gray-700 overflow-hidden mr-2">
               {discussion.author?.profileImage ? (
-                <img 
-                  src={discussion.author.profileImage} 
-                  alt={discussion.author.name} 
+                <img
+                  src={discussion.author.profileImage}
+                  alt={discussion.author.name}
                   className="w-full h-full object-cover"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center bg-orange-500 text-white text-xs font-bold">
-                  {discussion.author?.name?.charAt(0) || '?'}
+                  {discussion.author?.name?.charAt(0) || "?"}
                 </div>
               )}
             </div>
-            <span>{discussion.author?.name || 'Anonymous'}</span>
+            <span>{discussion.author?.name || "Anonymous"}</span>
             <span className="mx-2">•</span>
             <span>{formatDate(discussion.createdAt)}</span>
           </div>

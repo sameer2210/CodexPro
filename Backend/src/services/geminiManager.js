@@ -1,11 +1,16 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-const envKeys = (process.env.GEMINI_API_KEYS || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY || '')
-  .split(',')
-  .map(k => k.trim())
+const envKeys = (
+  process.env.GEMINI_API_KEYS ||
+  process.env.GEMINI_API_KEY ||
+  process.env.GOOGLE_API_KEY ||
+  ""
+)
+  .split(",")
+  .map((k) => k.trim())
   .filter(Boolean);
 
-const keys = envKeys.length > 0 ? envKeys : ['dummy_key'];
+const keys = envKeys.length > 0 ? envKeys : ["dummy_key"];
 
 let currentIndex = 0;
 

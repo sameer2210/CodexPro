@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Calendar, 
-  Clock, 
-  Globe, 
-  Lock, 
-  Trophy, 
-  Search, 
-  CheckCircle2, 
+import {
+  Calendar,
+  Clock,
+  Globe,
+  Lock,
+  Trophy,
+  Search,
+  CheckCircle2,
   Circle,
   AlertCircle,
-  ArrowLeft
+  ArrowLeft,
 } from "lucide-react";
-import { createContest, getAllProblems } from "../../../utils/apis/contestApi/contest";
+import {
+  createContest,
+  getAllProblems,
+} from "../../../utils/apis/contestApi/contest";
 import { useNavigate } from "react-router-dom";
 
 const CreateContestForm = ({ onSuccess }) => {
@@ -69,19 +72,29 @@ const CreateContestForm = ({ onSuccess }) => {
 
     try {
       await createContest(form);
-      setForm({ name: "", startTime: "", endTime: "", isPublic: false, problems: [] });
+      setForm({
+        name: "",
+        startTime: "",
+        endTime: "",
+        isPublic: false,
+        problems: [],
+      });
       onSuccess();
     } catch (err) {
       console.error("Error creating contest:", err);
-      setError("Failed to create contest. Please check the form and try again.");
+      setError(
+        "Failed to create contest. Please check the form and try again.",
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
-  const filteredProblems = Array.isArray(problems) ? problems.filter(p => 
-    p.title.toLowerCase().includes(searchQuery.toLowerCase())
-  ) : [];
+  const filteredProblems = Array.isArray(problems)
+    ? problems.filter((p) =>
+        p.title.toLowerCase().includes(searchQuery.toLowerCase()),
+      )
+    : [];
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -90,28 +103,32 @@ const CreateContestForm = ({ onSuccess }) => {
       y: 0,
       transition: {
         duration: 0.6,
-        staggerChildren: 0.1
-      }
-    }
+        staggerChildren: 0.1,
+      },
+    },
   };
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 }
+    visible: { opacity: 1, y: 0 },
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 p-6">
       <div className="max-w-4xl mx-auto">
         <div className="flex justify-between items-center mb-8">
-          
           <h1 className="text-3xl font-bold text-white">Create New Contest</h1>
-          <button onClick={() => navigate('/admin')} className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+          <button
+            onClick={() => navigate("/admin")}
+            className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors"
+          >
             <ArrowLeft size={20} />
             Back to Admin
           </button>
         </div>
-        <p className="text-slate-400 mb-8 -mt-4">Set up challenges for your community</p>
+        <p className="text-slate-400 mb-8 -mt-4">
+          Set up challenges for your community
+        </p>
 
         <motion.div
           variants={containerVariants}
@@ -122,7 +139,9 @@ const CreateContestForm = ({ onSuccess }) => {
           <div className="bg-gradient-to-r from-orange-500/20 to-orange-600/20 p-6 border-b border-slate-700/50">
             <div className="flex items-center gap-3">
               <Trophy className="text-orange-400" size={24} />
-              <h2 className="text-xl font-semibold text-white">Contest Details</h2>
+              <h2 className="text-xl font-semibold text-white">
+                Contest Details
+              </h2>
             </div>
           </div>
 
@@ -159,7 +178,10 @@ const CreateContestForm = ({ onSuccess }) => {
                   />
                 </motion.div>
 
-                <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <motion.div
+                  variants={itemVariants}
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-4"
+                >
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
                       <Calendar className="inline mr-2" size={16} />
@@ -174,7 +196,7 @@ const CreateContestForm = ({ onSuccess }) => {
                       required
                     />
                   </div>
-                  
+
                   <div>
                     <label className="block text-sm font-medium text-slate-300 mb-2">
                       <Clock className="inline mr-2" size={16} />
@@ -202,26 +224,35 @@ const CreateContestForm = ({ onSuccess }) => {
                           onChange={handleChange}
                           className="sr-only"
                         />
-                        <div className={`w-12 h-6 rounded-full transition-colors ${
-                          form.isPublic ? 'bg-orange-500' : 'bg-slate-600'
-                        }`}>
-                          <div className={`w-5 h-5 rounded-full bg-white transition-transform duration-200 ${
-                            form.isPublic ? 'translate-x-6 translate-y-0.5' : 'translate-x-0.5 translate-y-0.5'
-                          }`} />
+                        <div
+                          className={`w-12 h-6 rounded-full transition-colors ${
+                            form.isPublic ? "bg-orange-500" : "bg-slate-600"
+                          }`}
+                        >
+                          <div
+                            className={`w-5 h-5 rounded-full bg-white transition-transform duration-200 ${
+                              form.isPublic
+                                ? "translate-x-6 translate-y-0.5"
+                                : "translate-x-0.5 translate-y-0.5"
+                            }`}
+                          />
                         </div>
                       </div>
                       <div className="flex items-center gap-2">
-                        {form.isPublic ? <Globe size={20} className="text-orange-400" /> : <Lock size={20} className="text-slate-400" />}
+                        {form.isPublic ? (
+                          <Globe size={20} className="text-orange-400" />
+                        ) : (
+                          <Lock size={20} className="text-slate-400" />
+                        )}
                         <span className="text-white font-medium">
-                          {form.isPublic ? 'Public Contest' : 'Private Contest'}
+                          {form.isPublic ? "Public Contest" : "Private Contest"}
                         </span>
                       </div>
                     </label>
                     <p className="text-sm text-slate-400 mt-2 ml-15">
-                      {form.isPublic 
-                        ? 'Anyone can discover and join this contest'
-                        : 'Only invited participants can join this contest'
-                      }
+                      {form.isPublic
+                        ? "Anyone can discover and join this contest"
+                        : "Only invited participants can join this contest"}
                     </p>
                   </div>
                 </motion.div>
@@ -233,9 +264,12 @@ const CreateContestForm = ({ onSuccess }) => {
                   <label className="block text-sm font-medium text-slate-300 mb-2">
                     Select Problems ({form.problems.length} selected)
                   </label>
-                  
+
                   <div className="relative mb-4">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" size={20} />
+                    <Search
+                      className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"
+                      size={20}
+                    />
                     <input
                       type="text"
                       placeholder="Search problems..."
@@ -265,9 +299,15 @@ const CreateContestForm = ({ onSuccess }) => {
                                 className="sr-only"
                               />
                               {form.problems.includes(p._id) ? (
-                                <CheckCircle2 className="text-orange-400" size={20} />
+                                <CheckCircle2
+                                  className="text-orange-400"
+                                  size={20}
+                                />
                               ) : (
-                                <Circle className="text-slate-400 group-hover:text-slate-300" size={20} />
+                                <Circle
+                                  className="text-slate-400 group-hover:text-slate-300"
+                                  size={20}
+                                />
                               )}
                             </div>
                             <span className="text-slate-200 group-hover:text-white transition-colors">
@@ -276,10 +316,13 @@ const CreateContestForm = ({ onSuccess }) => {
                           </motion.label>
                         ))}
                       </AnimatePresence>
-                      
+
                       {filteredProblems.length === 0 && (
                         <div className="text-center py-8 text-slate-400">
-                          <Search size={32} className="mx-auto mb-2 opacity-50" />
+                          <Search
+                            size={32}
+                            className="mx-auto mb-2 opacity-50"
+                          />
                           <p>No problems found matching your search</p>
                         </div>
                       )}
@@ -289,7 +332,7 @@ const CreateContestForm = ({ onSuccess }) => {
               </motion.div>
             </div>
 
-            <motion.div 
+            <motion.div
               variants={itemVariants}
               className="mt-8 flex justify-end gap-4"
             >
@@ -313,7 +356,6 @@ const CreateContestForm = ({ onSuccess }) => {
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                  
                     <Trophy size={20} />
                     Create Contest
                   </div>

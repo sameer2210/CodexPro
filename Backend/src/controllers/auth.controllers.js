@@ -1,4 +1,4 @@
-import authService from '../services/auth.service.js';
+import authService from "../services/auth.service.js";
 
 class AuthController {
   // Register new team
@@ -10,7 +10,7 @@ class AuthController {
       if (!teamName || !username || !password) {
         return res.status(400).json({
           success: false,
-          message: 'Team name, username, and password are required',
+          message: "Team name, username, and password are required",
         });
       }
 
@@ -18,25 +18,29 @@ class AuthController {
       if (teamName.length < 3) {
         return res.status(400).json({
           success: false,
-          message: 'Team name must be at least 3 characters long',
+          message: "Team name must be at least 3 characters long",
         });
       }
 
       if (username.length < 2) {
         return res.status(400).json({
           success: false,
-          message: 'Username must be at least 2 characters long',
+          message: "Username must be at least 2 characters long",
         });
       }
 
       if (password.length < 6) {
         return res.status(400).json({
           success: false,
-          message: 'Password must be at least 6 characters long',
+          message: "Password must be at least 6 characters long",
         });
       }
 
-      const result = await authService.registerTeam(teamName, username, password);
+      const result = await authService.registerTeam(
+        teamName,
+        username,
+        password,
+      );
 
       res.status(201).json({
         success: true,
@@ -44,7 +48,7 @@ class AuthController {
         teamName: result.teamName,
       });
     } catch (error) {
-      console.error('Registration error:', error.message);
+      console.error("Registration error:", error.message);
       res.status(400).json({
         success: false,
         message: error.message,
@@ -61,7 +65,7 @@ class AuthController {
       if (!teamName || !username || !password) {
         return res.status(400).json({
           success: false,
-          message: 'Team name, username, and password are required',
+          message: "Team name, username, and password are required",
         });
       }
 
@@ -69,12 +73,12 @@ class AuthController {
 
       res.json({
         success: true,
-        message: 'Login successful',
+        message: "Login successful",
         token: result.token,
         user: result.user,
       });
     } catch (error) {
-      console.error('Login error:', error.message);
+      console.error("Login error:", error.message);
       res.status(401).json({
         success: false,
         message: error.message,
@@ -90,7 +94,7 @@ class AuthController {
       if (!teamName) {
         return res.status(400).json({
           success: false,
-          message: 'Team name is required',
+          message: "Team name is required",
         });
       }
 
@@ -103,7 +107,7 @@ class AuthController {
         totalMembers: result.totalMembers,
       });
     } catch (error) {
-      console.error('Get team members error:', error.message);
+      console.error("Get team members error:", error.message);
       res.status(404).json({
         success: false,
         message: error.message,
@@ -127,18 +131,22 @@ class AuthController {
       ) {
         return res.status(403).json({
           success: false,
-          message: 'Access denied',
+          message: "Access denied",
         });
       }
 
-      const result = await authService.updateMemberActivity(paramTeam, paramUser, isActive);
+      const result = await authService.updateMemberActivity(
+        paramTeam,
+        paramUser,
+        isActive,
+      );
 
       res.json({
         success: true,
         message: result.message,
       });
     } catch (error) {
-      console.error('Update member activity error:', error.message);
+      console.error("Update member activity error:", error.message);
       res.status(400).json({
         success: false,
         message: error.message,
@@ -159,10 +167,10 @@ class AuthController {
         },
       });
     } catch (error) {
-      console.error('Token verification error:', error.message);
+      console.error("Token verification error:", error.message);
       res.status(401).json({
         success: false,
-        message: 'Token verification failed',
+        message: "Token verification failed",
       });
     }
   }
@@ -177,13 +185,13 @@ class AuthController {
 
       res.json({
         success: true,
-        message: 'Logged out successfully',
+        message: "Logged out successfully",
       });
     } catch (error) {
-      console.error('Logout error:', error.message);
+      console.error("Logout error:", error.message);
       res.json({
         success: true,
-        message: 'Logged out successfully',
+        message: "Logged out successfully",
       });
     }
   }
@@ -193,7 +201,7 @@ class AuthController {
       const result = await authService.getTeamMessages(teamName);
       res.json(result);
     } catch (error) {
-      console.error('Get messages error:', error.message);
+      console.error("Get messages error:", error.message);
       res.status(500).json({
         success: false,
         message: error.message,

@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const playlistSchema = new mongoose.Schema({
   name: {
@@ -8,13 +8,13 @@ const playlistSchema = new mongoose.Schema({
   },
   user: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'user',
+    ref: "user",
     required: true,
   },
   problems: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'problem',
+      ref: "problem",
     },
   ],
   createdAt: {
@@ -23,5 +23,6 @@ const playlistSchema = new mongoose.Schema({
   },
 });
 
-const Playlist = mongoose.models.Playlist || mongoose.model('Playlist', playlistSchema);
+const Playlist =
+  mongoose.models.Playlist || mongoose.model("Playlist", playlistSchema);
 export default Playlist;

@@ -1,17 +1,17 @@
-import { AnimatePresence } from 'framer-motion';
-import { Copy, Download, RefreshCw, Sparkles, Terminal } from 'lucide-react';
-import { useCallback, useState } from 'react';
-import ReactMarkdown from 'react-markdown';
-import { HUDLabel, LEDIndicator } from '../background/HUD';
-import { useTheme } from '../../context/ThemeContext';
-import { notify } from '../../lib/notify';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { motion, AnimatePresence } from "framer-motion";
+import { Copy, Download, RefreshCw, Sparkles, Terminal } from "lucide-react";
+import { useCallback, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import { HUDLabel, LEDIndicator } from "../background/HUD";
+import { useTheme } from "../../context/ThemeContext";
+import { notify } from "../../lib/notify";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import {
   selectCurrentProjectCode,
   selectCurrentProjectLanguage,
   selectCurrentProjectReview,
   updateProjectReview,
-} from '../../store/slices/projectSlice';
+} from "../../store/slices/projectSlice";
 
 const ReviewPanel = ({ projectId }) => {
   const dispatch = useAppDispatch();
@@ -20,23 +20,23 @@ const ReviewPanel = ({ projectId }) => {
   const review = useAppSelector(selectCurrentProjectReview);
   const code = useAppSelector(selectCurrentProjectCode);
   const language = useAppSelector(selectCurrentProjectLanguage);
-  const socketConnected = useAppSelector(state => state.socket.connected);
+  const socketConnected = useAppSelector((state) => state.socket.connected);
 
   const [isGenerating, setIsGenerating] = useState(false);
-  const accentText = isDarkMode ? 'text-[#17E1FF]' : 'text-[#0F6E88]';
-  const mutedText = isDarkMode ? 'text-white/50' : 'text-[#0B0E11]/60';
-  const secondaryText = isDarkMode ? 'text-white/70' : 'text-[#0B0E11]/70';
-  const headerBorder = isDarkMode ? 'border-white/10' : 'border-[#0B0E11]/10';
+  const accentText = isDarkMode ? "text-[#17E1FF]" : "text-[#0F6E88]";
+  const mutedText = isDarkMode ? "text-white/50" : "text-[#0B0E11]/60";
+  const secondaryText = isDarkMode ? "text-white/70" : "text-[#0B0E11]/70";
+  const headerBorder = isDarkMode ? "border-white/10" : "border-[#0B0E11]/10";
   const iconShell = isDarkMode
-    ? 'bg-white/5 border-white/10'
-    : 'bg-[#0B0E11]/5 border-[#0B0E11]/10';
-  const proseClass = `prose max-w-none ${isDarkMode ? 'prose-invert' : 'prose-slate'}`;
-  const emptyTitleText = isDarkMode ? 'text-white' : 'text-[#0B0E11]';
+    ? "bg-white/5 border-white/10"
+    : "bg-[#0B0E11]/5 border-[#0B0E11]/10";
+  const proseClass = `prose max-w-none ${isDarkMode ? "prose-invert" : "prose-slate"}`;
+  const emptyTitleText = isDarkMode ? "text-white" : "text-[#0B0E11]";
 
   /* ========== GENERATE REVIEW ========== */
   const getReview = useCallback(async () => {
     if (!code.trim()) {
-      notify({ message: 'Please write some code first!', type: 'warning' });
+      notify({ message: "Please write some code first!", type: "warning" });
       return;
     }
 
@@ -49,13 +49,13 @@ const ReviewPanel = ({ projectId }) => {
           updateProjectReview({
             projectId,
             review:
-              '🔄 **Analyzing your code with AI...**\n\nPlease wait while our AI reviews your code. This may take a few moments.',
-          })
+              "🔄 **Analyzing your code with AI...**\n\nPlease wait while our AI reviews your code. This may take a few moments.",
+          }),
         );
 
         // Request AI review via socket - CORRECTED: Added language parameter
         dispatch({
-          type: 'socket/getReview',
+          type: "socket/getReview",
           payload: {
             projectId,
             code,
@@ -63,7 +63,7 @@ const ReviewPanel = ({ projectId }) => {
           },
         });
 
-        notify({ message: 'AI review requested...', type: 'info' });
+        notify({ message: "AI review requested...", type: "info" });
 
         // Set timeout to reset generating state
         setTimeout(() => {
@@ -74,32 +74,35 @@ const ReviewPanel = ({ projectId }) => {
         const mockReview = generateOfflineReview(code, language);
         dispatch(updateProjectReview({ projectId, review: mockReview }));
         notify({
-          message: 'Using offline analysis (server disconnected)',
-          type: 'warning',
+          message: "Using offline analysis (server disconnected)",
+          type: "warning",
         });
         setIsGenerating(false);
       }
     } catch (error) {
-      console.error('Review error:', error);
+      console.error("Review error:", error);
       dispatch(
         updateProjectReview({
           projectId,
           review:
-            '❌ **Error generating review**\n\nAn error occurred while analyzing your code. Please try again.',
-        })
+            "❌ **Error generating review**\n\nAn error occurred while analyzing your code. Please try again.",
+        }),
       );
-      notify({ message: 'Failed to generate review', type: 'error' });
+      notify({ message: "Failed to generate review", type: "error" });
       setIsGenerating(false);
     }
   }, [code, language, socketConnected, dispatch, projectId]);
 
   /* ========== GENERATE OFFLINE REVIEW ========== */
   const generateOfflineReview = (codeText, lang) => {
-    const lines = codeText.split('\n').length;
+    const lines = codeText.split("\n").length;
     const chars = codeText.length;
     const hasComments =
-      codeText.includes('//') || codeText.includes('/*') || codeText.includes('#');
-    const hasFunctions = /function|def |func |fn |const \w+\s*=|let \w+\s*=/.test(codeText);
+      codeText.includes("//") ||
+      codeText.includes("/*") ||
+      codeText.includes("#");
+    const hasFunctions =
+      /function|def |func |fn |const \w+\s*=|let \w+\s*=/.test(codeText);
     const hasLoops = /for|while|forEach|map/.test(codeText);
     const hasConditionals = /if|else|switch|case/.test(codeText);
 
@@ -120,27 +123,27 @@ const ReviewPanel = ({ projectId }) => {
 - **Language:** ${lang.charAt(0).toUpperCase() + lang.slice(1)}
 - **Lines of Code:** ${lines}
 - **Characters:** ${chars}
-- **Has Comments:** ${hasComments ? 'Yes' : 'No'}
-- **Has Functions:** ${hasFunctions ? 'Yes' : 'No'}
-- **Has Loops:** ${hasLoops ? 'Yes' : ' No'}
-- **Has Conditionals:** ${hasConditionals ? 'Yes' : 'No'}
+- **Has Comments:** ${hasComments ? "Yes" : "No"}
+- **Has Functions:** ${hasFunctions ? "Yes" : "No"}
+- **Has Loops:** ${hasLoops ? "Yes" : " No"}
+- **Has Conditionals:** ${hasConditionals ? "Yes" : "No"}
 
 ### Strengths
-${hasComments ? '- Good: Code includes comments for clarity' : ''}
-${hasFunctions ? '- Good: Code is modular with functions' : ''}
-${hasLoops ? '- Good: Uses iteration constructs' : ''}
-${hasConditionals ? '- Good: Includes conditional logic' : ''}
+${hasComments ? "- Good: Code includes comments for clarity" : ""}
+${hasFunctions ? "- Good: Code is modular with functions" : ""}
+${hasLoops ? "- Good: Uses iteration constructs" : ""}
+${hasConditionals ? "- Good: Includes conditional logic" : ""}
 
 ### Suggestions
-${!hasComments ? '- Add comments to explain complex logic' : ''}
-${!hasFunctions ? '- Consider breaking code into reusable functions' : ''}
+${!hasComments ? "- Add comments to explain complex logic" : ""}
+${!hasFunctions ? "- Consider breaking code into reusable functions" : ""}
 - Implement error handling and input validation
 - Add documentation for better maintainability
 - Consider writing ut tests
 - Follow ${lang} best practices and style guides
 
 ### Quality Score
-**${qualityScore}/10** - ${qualityScore >= 7 ? 'Good' : qualityScore >= 5 ? 'Fair' : 'Needs Improvement'}
+**${qualityScore}/10** - ${qualityScore >= 7 ? "Good" : qualityScore >= 5 ? "Fair" : "Needs Improvement"}
 
 ### Resources
 - Review ${lang} best practices
@@ -153,35 +156,35 @@ ${!hasFunctions ? '- Consider breaking code into reusable functions' : ''}
 
   /* ========== UTILITY FUNCTIONS ========== */
   const clearReview = useCallback(() => {
-    dispatch(updateProjectReview({ projectId, review: '' }));
-    notify({ message: 'Review cleared', type: 'info' });
+    dispatch(updateProjectReview({ projectId, review: "" }));
+    notify({ message: "Review cleared", type: "info" });
   }, [dispatch, projectId]);
 
   const copyReview = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(review);
-      notify({ message: 'Review copied to clipboard!', type: 'success' });
+      notify({ message: "Review copied to clipboard!", type: "success" });
     } catch {
-      notify({ message: 'Failed to copy review', type: 'error' });
+      notify({ message: "Failed to copy review", type: "error" });
     }
   }, [review]);
 
   const downloadReview = useCallback(() => {
-    const blob = new Blob([review], { type: 'text/markdown' });
+    const blob = new Blob([review], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `code-review-${Date.now()}.md`;
     a.click();
     URL.revokeObjectURL(url);
-    notify({ message: 'Review downloaded!', type: 'success' });
+    notify({ message: "Review downloaded!", type: "success" });
   }, [review]);
 
   /* ========== RENDER ========== */
   return (
     <div
       className={`relative flex flex-col h-full w-full min-w-0 min-h-0 rounded-2xl overflow-hidden border transition-colors duration-500
-      ${isDarkMode ? 'bg-[#0B0E11] border-white/10' : 'bg-[#F4F6F5] border-[#10120F]/10'}`}
+      ${isDarkMode ? "bg-[#0B0E11] border-white/10" : "bg-[#F4F6F5] border-[#10120F]/10"}`}
     >
       {/* Background Effects */}
       <div className="absolute inset-0 grid-bg opacity-20 pointer-events-none" />
@@ -200,7 +203,9 @@ ${!hasFunctions ? '- Consider breaking code into reusable functions' : ''}
           <div>
             <div className="flex items-center gap-2">
               <LEDIndicator />
-              <span className={`text-[11px] font-mono tracking-[0.3em] uppercase ${mutedText}`}>
+              <span
+                className={`text-[11px] font-mono tracking-[0.3em] uppercase ${mutedText}`}
+              >
                 AI ANALYSIS CODE REVIEW
               </span>
             </div>
@@ -209,7 +214,7 @@ ${!hasFunctions ? '- Consider breaking code into reusable functions' : ''}
             <HUDLabel
               label="MODE"
               value="OFFLINE"
-              color={isDarkMode ? '#F59E0B' : '#B45309'}
+              color={isDarkMode ? "#F59E0B" : "#B45309"}
               labelClassName={mutedText}
               valueClassName={secondaryText}
             />
@@ -224,7 +229,7 @@ ${!hasFunctions ? '- Consider breaking code into reusable functions' : ''}
                 whileTap={{ scale: 0.95 }}
                 onClick={copyReview}
                 className={`p-2.5 transition-colors ${secondaryText} ${
-                  isDarkMode ? 'hover:text-[#17E1FF]' : 'hover:text-[#0F6E88]'
+                  isDarkMode ? "hover:text-[#17E1FF]" : "hover:text-[#0F6E88]"
                 }`}
                 title="Copy"
               >
@@ -235,7 +240,7 @@ ${!hasFunctions ? '- Consider breaking code into reusable functions' : ''}
                 whileTap={{ scale: 0.95 }}
                 onClick={downloadReview}
                 className={`p-2.5 transition-colors ${secondaryText} ${
-                  isDarkMode ? 'hover:text-[#17E1FF]' : 'hover:text-[#0F6E88]'
+                  isDarkMode ? "hover:text-[#17E1FF]" : "hover:text-[#0F6E88]"
                 }`}
                 title="Download"
               >
@@ -246,7 +251,7 @@ ${!hasFunctions ? '- Consider breaking code into reusable functions' : ''}
                 whileTap={{ scale: 0.95 }}
                 onClick={clearReview}
                 className={`p-2.5 transition-colors ${secondaryText} ${
-                  isDarkMode ? 'hover:text-[#17E1FF]' : 'hover:text-[#0F6E88]'
+                  isDarkMode ? "hover:text-[#17E1FF]" : "hover:text-[#0F6E88]"
                 }`}
                 title="Clear"
               >
@@ -262,18 +267,18 @@ ${!hasFunctions ? '- Consider breaking code into reusable functions' : ''}
             whileTap={!isGenerating ? { scale: 0.95 } : {}}
             className={`group relative h-10 sm:h-11 w-full sm:w-auto sm:ml-auto px-4 sm:px-8 rounded-full border overflow-hidden font-mono uppercase tracking-wide sm:tracking-wider text-xs sm:text-sm font-medium disabled:opacity-40 ${
               isDarkMode
-                ? 'border-white/20 hover:border-[#17E1FF] text-white'
-                : 'border-[#0B0E11]/20 hover:border-[#0F6E88] text-[#0B0E11]'
+                ? "border-white/20 hover:border-[#17E1FF] text-white"
+                : "border-[#0B0E11]/20 hover:border-[#0F6E88] text-[#0B0E11]"
             }`}
           >
             <motion.div
               className={`absolute inset-0 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ${
-                isDarkMode ? 'bg-[#c6c6c6]' : 'bg-[#0B0E11]'
+                isDarkMode ? "bg-[#c6c6c6]" : "bg-[#0B0E11]"
               }`}
             />
             <span
               className={`relative z-10 transition-colors ${
-                isDarkMode ? 'group-hover:text-black' : 'group-hover:text-white'
+                isDarkMode ? "group-hover:text-black" : "group-hover:text-white"
               }`}
             >
               {isGenerating ? (
@@ -281,8 +286,8 @@ ${!hasFunctions ? '- Consider breaking code into reusable functions' : ''}
                   <div
                     className={`w-3 h-3 border-2 rounded-full animate-spin ${
                       isDarkMode
-                        ? 'border-white/30 border-t-white'
-                        : 'border-black/30 border-t-black'
+                        ? "border-white/30 border-t-white"
+                        : "border-black/30 border-t-black"
                     }`}
                   />
                   ANALYZING
@@ -314,18 +319,21 @@ ${!hasFunctions ? '- Consider breaking code into reusable functions' : ''}
                   h1: ({ ...props }) => (
                     <h1
                       className={`text-3xl font-black tracking-tighter mb-4 ${
-                        isDarkMode ? 'text-white' : 'text-[#0B0E11]'
+                        isDarkMode ? "text-white" : "text-[#0B0E11]"
                       }`}
                       {...props}
                     />
                   ),
                   h2: ({ ...props }) => (
-                    <h2 className={`text-2xl font-bold mt-8 mb-3 ${accentText}`} {...props} />
+                    <h2
+                      className={`text-2xl font-bold mt-8 mb-3 ${accentText}`}
+                      {...props}
+                    />
                   ),
                   pre: ({ ...props }) => (
                     <pre
                       className={`max-w-full overflow-x-auto rounded-lg p-3 ${
-                        isDarkMode ? 'bg-white/5' : 'bg-[#0B0E11]/5'
+                        isDarkMode ? "bg-white/5" : "bg-[#0B0E11]/5"
                       }`}
                       {...props}
                     />
@@ -335,13 +343,16 @@ ${!hasFunctions ? '- Consider breaking code into reusable functions' : ''}
                       <code
                         className={`px-2 py-0.5 rounded font-mono break-all ${
                           isDarkMode
-                            ? 'bg-white/10 text-[#17E1FF]'
-                            : 'bg-[#0B0E11]/5 text-[#0B0E11]'
+                            ? "bg-white/10 text-[#17E1FF]"
+                            : "bg-[#0B0E11]/5 text-[#0B0E11]"
                         }`}
                         {...props}
                       />
                     ) : (
-                      <code className="block font-mono text-sm whitespace-pre" {...props} />
+                      <code
+                        className="block font-mono text-sm whitespace-pre"
+                        {...props}
+                      />
                     ),
                 }}
               >
@@ -356,11 +367,14 @@ ${!hasFunctions ? '- Consider breaking code into reusable functions' : ''}
             >
               <Sparkles className={`w-10 h-10 ${accentText}`} />
 
-              <h3 className={`text-2xl font-bold tracking-tight mb-2 ${emptyTitleText}`}>
+              <h3
+                className={`text-2xl font-bold tracking-tight mb-2 ${emptyTitleText}`}
+              >
                 Ready for Analysis
               </h3>
               <p className={`max-w-xs ${mutedText}`}>
-                Write code and press "Generate Review" to get advanced AI feedback powered by Gemini
+                Write code and press "Generate Review" to get advanced AI
+                feedback powered by Gemini
               </p>
             </motion.div>
           )}

@@ -1,8 +1,12 @@
-import { getIO } from '../config/socket.js';
-import Problem from '../models/problem.js';
-import Submission from '../models/submission.js';
-import User from '../models/user.js';
-import { getLanguageById, SubmitBatch, submitToken } from '../services/problemUtility.js';
+import { getIO } from "../config/socket.js";
+import Problem from "../models/problem.js";
+import Submission from "../models/submission.js";
+import User from "../models/user.js";
+import {
+  getLanguageById,
+  SubmitBatch,
+  submitToken,
+} from "../services/problemUtility.js";
 
 export const submitCode = async (req, res) => {
   try {
@@ -11,14 +15,27 @@ export const submitCode = async (req, res) => {
     let { code, language } = req.body;
 
     if (!userId || !problemId || !code || !language) {
-      return res.status(400).send('Fields Are Missing');
+      return res.status(400).send("Fields Are Missing");
     }
 
-    if (language === 'cpp') language = 'c++';
+    if (language === "cpp") language = "c++";
 
     const problem = await Problem.findById(problemId);
     if (!problem) {
-      return res.status(404).send('Problem not found');
+      return res.status(404).send("Problem not found");
+    }
+
+    const languageId = await getLanguageById(language);
+    if (!languageId) {
+      return res.status(404).send("Invalid Language Id");
+    }
+
+    if (!problem.hiddenTestCases || problem.hiddenTestCases.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "This problem has no hidden test cases and cannot be submitted.",
+      });
     }
 
     const submittedResult = await Submission.create({
@@ -26,30 +43,23 @@ export const submitCode = async (req, res) => {
       problemId,
       code,
       language,
-      status: 'Pending',
+      status: "Pending",
       totalTestCases: problem.hiddenTestCases.length,
     });
 
-    const languageId = await getLanguageById(language);
-    if (!languageId) {
-      return res.status(404).send('Invalid Language Id');
-    }
-
-    if (!problem.hiddenTestCases || problem.hiddenTestCases.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: 'This problem has no hidden test cases and cannot be submitted.',
-      });
-    }
-
     const referenceSolution = problem.referenceSolution.find(
-      (rs) => rs.language.toLowerCase() === language.toLowerCase()
+      (rs) => rs.language.toLowerCase() === language.toLowerCase(),
     );
-    const startCode = problem.startCode.find((sc) => sc.language.toLowerCase() === language.toLowerCase());
+    const startCode = problem.startCode.find(
+      (sc) => sc.language.toLowerCase() === language.toLowerCase(),
+    );
 
     let finalCode = code;
     if (referenceSolution && startCode) {
-      finalCode = referenceSolution.completeCode.replace(startCode.initialCode, code);
+      finalCode = referenceSolution.completeCode.replace(
+        startCode.initialCode,
+        code,
+      );
     }
 
     const submission = problem.hiddenTestCases.map((testcase) => ({
@@ -60,7 +70,9 @@ export const submitCode = async (req, res) => {
 
     const submitResult = await SubmitBatch(submission);
     if (!submitResult || !Array.isArray(submitResult)) {
-      return res.status(500).send('Judge0 submission failed or no result returned.');
+      return res
+        .status(500)
+        .send("Judge0 submission failed or no result returned.");
     }
 
     const resultToken = submitResult.map((value) => value.token);
@@ -70,7 +82,7 @@ export const submitCode = async (req, res) => {
     let runtime = 0;
     let memory = 0;
     let errorMessage = null;
-    let status = 'Accepted';
+    let status = "Accepted";
 
     for (let i = 0; i < testResult.length; i++) {
       const test = testResult[i];
@@ -78,8 +90,8 @@ export const submitCode = async (req, res) => {
       const expectedOutput = problem.hiddenTestCases[i]?.output;
       const actualOutput = test.stdout;
 
-      const normalizedExpected = expectedOutput?.trim() || '';
-      const normalizedActual = actualOutput?.trim() || '';
+      const normalizedExpected = expectedOutput?.trim() || "";
+      const normalizedActual = actualOutput?.trim() || "";
 
       if (statusId == 3) {
         if (normalizedExpected === normalizedActual) {
@@ -87,26 +99,31 @@ export const submitCode = async (req, res) => {
           runtime = runtime + parseFloat(test.time || 0);
           memory = Math.max(memory, parseInt(test.memory || 0));
         } else {
-          status = 'Wrong Answer';
+          status = "Wrong Answer";
           errorMessage = `Expected: ${normalizedExpected.substring(0, 50)}, Got: ${normalizedActual.substring(0, 50)}`;
           break;
         }
       } else {
         if (statusId == 4) {
-          status = 'Wrong Answer';
-          errorMessage = test.stderr || test.compile_output || 'Wrong Answer';
+          status = "Wrong Answer";
+          errorMessage = test.stderr || test.compile_output || "Wrong Answer";
         } else if (statusId == 6) {
-          status = 'Compilation Error';
-          errorMessage = test.compile_output || test.stderr || 'Compilation Error';
+          status = "Compilation Error";
+          errorMessage =
+            test.compile_output || test.stderr || "Compilation Error";
         } else if (statusId == 5) {
-          status = 'Time Limit Exceeded';
-          errorMessage = 'Time Limit Exceeded';
+          status = "Time Limit Exceeded";
+          errorMessage = "Time Limit Exceeded";
         } else if ([7, 8, 9, 10, 11, 12].includes(statusId)) {
-          status = 'Runtime Error';
-          errorMessage = test.stderr || test.message || 'Runtime Error';
+          status = "Runtime Error";
+          errorMessage = test.stderr || test.message || "Runtime Error";
         } else {
-          status = test.status?.description || 'Error';
-          errorMessage = test.stderr || test.compile_output || test.message || 'Unknown Error';
+          status = test.status?.description || "Error";
+          errorMessage =
+            test.stderr ||
+            test.compile_output ||
+            test.message ||
+            "Unknown Error";
         }
         break;
       }
@@ -120,30 +137,33 @@ export const submitCode = async (req, res) => {
 
     await submittedResult.save();
 
-    if (status === 'Accepted') {
+    if (status === "Accepted") {
       try {
         const updatedUser = await User.findByIdAndUpdate(
           userId,
           { $addToSet: { problemSolved: problemId } },
-          { new: true }
+          { new: true },
         );
         if (updatedUser) {
           try {
             const io = getIO();
             if (io) {
-              io.to(userId.toString()).emit('userStatsUpdate', { userId });
+              io.to(userId.toString()).emit("userStatsUpdate", { userId });
             }
           } catch (e) {}
         }
       } catch (userUpdateError) {
-        console.error('submitCode: Error updating user solved problems:', userUpdateError);
+        console.error(
+          "submitCode: Error updating user solved problems:",
+          userUpdateError,
+        );
       }
     }
 
-    const accepted = status === 'Accepted';
+    const accepted = status === "Accepted";
     res.status(201).json({
       success: true,
-      message: accepted ? 'Submission accepted' : 'Submission processed',
+      message: accepted ? "Submission accepted" : "Submission processed",
       accepted,
       totalTestCases: submittedResult.totalTestCases,
       passedTestCases: testCasesPassed,
@@ -151,8 +171,8 @@ export const submitCode = async (req, res) => {
       memory,
     });
   } catch (err) {
-    console.error('Error in submitCode:', err);
-    res.status(500).send('Internal Server Error: ' + (err.message || err));
+    console.error("Error in submitCode:", err);
+    res.status(500).send("Internal Server Error: " + (err.message || err));
   }
 };
 
@@ -163,24 +183,30 @@ export const runCode = async (req, res) => {
     const problemId = id;
 
     let { code, language } = req.body;
-    if (language === 'cpp') language = 'c++';
+    if (language === "cpp") language = "c++";
 
-    if (!userId || !problemId || !code || !language) return res.status(400).send('Fields Are Missing');
+    if (!userId || !problemId || !code || !language)
+      return res.status(400).send("Fields Are Missing");
 
     const problem = await Problem.findById(problemId);
-    if (!problem) return res.status(404).send('Problem not found');
+    if (!problem) return res.status(404).send("Problem not found");
 
     const languageId = await getLanguageById(language);
-    if (!languageId) return res.status(404).send('Invalid Language Id');
+    if (!languageId) return res.status(404).send("Invalid Language Id");
 
     const referenceSolution = problem.referenceSolution.find(
-      (rs) => rs.language.toLowerCase() === language.toLowerCase()
+      (rs) => rs.language.toLowerCase() === language.toLowerCase(),
     );
-    const startCode = problem.startCode.find((sc) => sc.language.toLowerCase() === language.toLowerCase());
+    const startCode = problem.startCode.find(
+      (sc) => sc.language.toLowerCase() === language.toLowerCase(),
+    );
 
     let finalCode = code;
     if (referenceSolution && startCode) {
-      finalCode = referenceSolution.completeCode.replace(startCode.initialCode, code);
+      finalCode = referenceSolution.completeCode.replace(
+        startCode.initialCode,
+        code,
+      );
     }
 
     const submission = problem.visibleTestCases.map((testcase) => ({
@@ -191,7 +217,9 @@ export const runCode = async (req, res) => {
 
     const submitResult = await SubmitBatch(submission);
     if (!submitResult || !Array.isArray(submitResult)) {
-      return res.status(500).send('Judge0 submission failed or no result returned.');
+      return res
+        .status(500)
+        .send("Judge0 submission failed or no result returned.");
     }
 
     const resultToken = submitResult.map((value) => value.token);
@@ -209,8 +237,8 @@ export const runCode = async (req, res) => {
       const expectedOutput = problem.visibleTestCases[i]?.output;
       const actualOutput = test.stdout;
 
-      const normalizedExpected = expectedOutput?.trim() || '';
-      const normalizedActual = actualOutput?.trim() || '';
+      const normalizedExpected = expectedOutput?.trim() || "";
+      const normalizedActual = actualOutput?.trim() || "";
 
       if (statusId == 3) {
         if (normalizedExpected === normalizedActual) {
@@ -224,13 +252,18 @@ export const runCode = async (req, res) => {
       } else {
         status = false;
         if (statusId == 4) {
-          errorMessage = test.stderr || test.compile_output || 'Wrong Answer';
+          errorMessage = test.stderr || test.compile_output || "Wrong Answer";
         } else if (statusId == 6) {
-          errorMessage = test.compile_output || test.stderr || 'Compilation Error';
+          errorMessage =
+            test.compile_output || test.stderr || "Compilation Error";
         } else if (statusId == 5) {
-          errorMessage = 'Time Limit Exceeded';
+          errorMessage = "Time Limit Exceeded";
         } else {
-          errorMessage = test.stderr || test.compile_output || test.message || 'Runtime Error';
+          errorMessage =
+            test.stderr ||
+            test.compile_output ||
+            test.message ||
+            "Runtime Error";
         }
       }
     }
@@ -243,7 +276,7 @@ export const runCode = async (req, res) => {
       errorMessage,
     });
   } catch (err) {
-    res.status(500).send('Internal Server Error: ' + err.message);
+    res.status(500).send("Internal Server Error: " + err.message);
   }
 };
 

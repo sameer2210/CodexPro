@@ -1,18 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axiosClient from '../../utils/axiosClient';
-import { useToast } from '../../hooks/useToast';
-import { useSelector } from 'react-redux';
-import { initializeSocket, getSocket } from '../../utils/socket';
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import axiosClient from "../../utils/axiosClient";
+import { useToast } from "../../hooks/useToast";
+import { useSelector } from "react-redux";
+import { initializeSocket, getSocket } from "../../utils/socket";
 
-import Chat from '../../components/discuss/Chat';
+import Chat from "../../components/discuss/Chat";
 
 // Components
-import DiscussHeader from '../../components/discuss/DiscussHeader';
-import DiscussionCard from '../../components/discuss/DiscussionCard';
-import DiscussSidebar from '../../components/discuss/DiscussSidebar';
-import CreateDiscussionModal from '../../components/discuss/CreateDiscussionModal';
-import Loader from '../../components/common/Loader';
+import DiscussHeader from "../../components/discuss/DiscussHeader";
+import DiscussionCard from "../../components/discuss/DiscussionCard";
+import DiscussSidebar from "../../components/discuss/DiscussSidebar";
+import CreateDiscussionModal from "../../components/discuss/CreateDiscussionModal";
+import Loader from "../ui/Loader";
 
 const DiscussPage = () => {
   const navigate = useNavigate();
@@ -25,9 +25,9 @@ const DiscussPage = () => {
   const [error, setError] = useState(null);
 
   // State for filters and pagination
-  const [selectedCommunity, setSelectedCommunity] = useState('all');
-  const [sortBy, setSortBy] = useState('trending');
-  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCommunity, setSelectedCommunity] = useState("all");
+  const [sortBy, setSortBy] = useState("trending");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // State for create discussion modal
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
@@ -36,23 +36,28 @@ const DiscussPage = () => {
   const [socketConnected, setSocketConnected] = React.useState(false);
 
   useEffect(() => {
-    console.log('Initializing socket with token:', token, 'isAuthenticated:', isAuthenticated);
+    console.log(
+      "Initializing socket with token:",
+      token,
+      "isAuthenticated:",
+      isAuthenticated,
+    );
     if (isAuthenticated && token) {
       const socket = initializeSocket(token);
-      socket.on('connect', () => {
-        console.log('Socket connected in DiscussPage');
+      socket.on("connect", () => {
+        console.log("Socket connected in DiscussPage");
         setSocketConnected(true);
       });
-      socket.on('disconnect', () => {
-        console.log('Socket disconnected in DiscussPage');
+      socket.on("disconnect", () => {
+        console.log("Socket disconnected in DiscussPage");
         setSocketConnected(false);
       });
-      socket.on('connect_error', (error) => {
-        console.error('Socket connection error in DiscussPage:', error);
+      socket.on("connect_error", (error) => {
+        console.error("Socket connection error in DiscussPage:", error);
         setSocketConnected(false);
       });
-      socket.on('error', (error) => {
-        console.error('Socket general error in DiscussPage:', error);
+      socket.on("error", (error) => {
+        console.error("Socket general error in DiscussPage:", error);
       });
     }
   }, [token, isAuthenticated]);
@@ -63,62 +68,72 @@ const DiscussPage = () => {
     if (!socket) return;
 
     const handleNewDiscussion = (discussion) => {
-      setDiscussions(prev => [discussion, ...prev]);
+      setDiscussions((prev) => [discussion, ...prev]);
     };
 
     const handleUpdateDiscussion = (updatedDiscussion) => {
-      setDiscussions(prev => prev.map(d => d._id === updatedDiscussion._id ? updatedDiscussion : d));
+      setDiscussions((prev) =>
+        prev.map((d) =>
+          d._id === updatedDiscussion._id ? updatedDiscussion : d,
+        ),
+      );
     };
 
     const handleDeleteDiscussion = ({ discussionId }) => {
-      setDiscussions(prev => prev.filter(d => d._id !== discussionId));
+      setDiscussions((prev) => prev.filter((d) => d._id !== discussionId));
     };
 
     const handleNewComment = (comment) => {
-      setDiscussions(prev => prev.map(d => {
-        if (d._id === comment.discussion) {
-          return { ...d, commentCount: (d.commentCount || 0) + 1 };
-        }
-        return d;
-      }));
+      setDiscussions((prev) =>
+        prev.map((d) => {
+          if (d._id === comment.discussion) {
+            return { ...d, commentCount: (d.commentCount || 0) + 1 };
+          }
+          return d;
+        }),
+      );
     };
 
     const handleUpdateComment = () => {};
 
     const handleDeleteComment = ({ discussionId }) => {
-      setDiscussions(prev => prev.map(d => {
-        if (d._id === discussionId) {
-          return { ...d, commentCount: (d.commentCount || 1) - 1 };
-        }
-        return d;
-      }));
+      setDiscussions((prev) =>
+        prev.map((d) => {
+          if (d._id === discussionId) {
+            return { ...d, commentCount: (d.commentCount || 1) - 1 };
+          }
+          return d;
+        }),
+      );
     };
 
     const handleDiscussionVoted = ({ discussionId, upvotes, downvotes }) => {
-      setDiscussions(prev => prev.map(d => {
-        if (d._id === discussionId) {
-          return { ...d, upvotes, downvotes };
-        }
-        return d;
-      }));
+      setDiscussions((prev) =>
+        prev.map((d) => {
+          if (d._id === discussionId) {
+            return { ...d, upvotes, downvotes };
+          }
+          return d;
+        }),
+      );
     };
 
-    socket.on('new-discussion', handleNewDiscussion);
-    socket.on('discussion-updated', handleUpdateDiscussion);
-    socket.on('discussion-deleted', handleDeleteDiscussion);
-    socket.on('new-comment', handleNewComment);
-    socket.on('comment-updated', handleUpdateComment);
-    socket.on('comment-deleted', handleDeleteComment);
-    socket.on('discussion-voted', handleDiscussionVoted);
+    socket.on("new-discussion", handleNewDiscussion);
+    socket.on("discussion-updated", handleUpdateDiscussion);
+    socket.on("discussion-deleted", handleDeleteDiscussion);
+    socket.on("new-comment", handleNewComment);
+    socket.on("comment-updated", handleUpdateComment);
+    socket.on("comment-deleted", handleDeleteComment);
+    socket.on("discussion-voted", handleDiscussionVoted);
 
     return () => {
-      socket.off('new-discussion', handleNewDiscussion);
-      socket.off('discussion-updated', handleUpdateDiscussion);
-      socket.off('discussion-deleted', handleDeleteDiscussion);
-      socket.off('new-comment', handleNewComment);
-      socket.off('comment-updated', handleUpdateComment);
-      socket.off('comment-deleted', handleDeleteComment);
-      socket.off('discussion-voted', handleDiscussionVoted);
+      socket.off("new-discussion", handleNewDiscussion);
+      socket.off("discussion-updated", handleUpdateDiscussion);
+      socket.off("discussion-deleted", handleDeleteDiscussion);
+      socket.off("new-comment", handleNewComment);
+      socket.off("comment-updated", handleUpdateComment);
+      socket.off("comment-deleted", handleDeleteComment);
+      socket.off("discussion-voted", handleDiscussionVoted);
     };
   }, [token]);
 
@@ -126,10 +141,14 @@ const DiscussPage = () => {
   const isFetchingRef = React.useRef(false);
 
   useEffect(() => {
-    console.log('useEffect triggered: selectedCommunity, sortBy, searchQuery', { selectedCommunity, sortBy, searchQuery });
+    console.log("useEffect triggered: selectedCommunity, sortBy, searchQuery", {
+      selectedCommunity,
+      sortBy,
+      searchQuery,
+    });
 
     if (isFetchingRef.current) {
-      console.log('Fetch in progress, skipping new fetch');
+      console.log("Fetch in progress, skipping new fetch");
       return;
     }
 
@@ -146,19 +165,22 @@ const DiscussPage = () => {
       try {
         // Build query parameters
         const params = new URLSearchParams();
-        params.append('sortBy', sortBy);
+        params.append("sortBy", sortBy);
 
-        if (selectedCommunity && selectedCommunity !== 'all') {
-          params.append('community', selectedCommunity);
+        if (selectedCommunity && selectedCommunity !== "all") {
+          params.append("community", selectedCommunity);
         }
 
         if (searchQuery) {
-          params.append('search', searchQuery);
+          params.append("search", searchQuery);
         }
 
-        const response = await axiosClient.get(`/discussions?${params.toString()}`, {
-          signal: controller.signal
-        });
+        const response = await axiosClient.get(
+          `/discussions?${params.toString()}`,
+          {
+            signal: controller.signal,
+          },
+        );
 
         if (!isMounted) return;
 
@@ -167,12 +189,12 @@ const DiscussPage = () => {
         if (!isMounted) return;
 
         // Don't show error for aborted requests (component unmounted)
-        if (error.name === 'AbortError') {
+        if (error.name === "AbortError") {
           return;
         }
 
-        console.error('Error fetching discussions:', error);
-        setError('Failed to load discussions. Please try again.');
+        console.error("Error fetching discussions:", error);
+        setError("Failed to load discussions. Please try again.");
         // Removed showToast from dependency and call to avoid re-render loops
         // showToast('Failed to load discussions', 'error');
       } finally {
@@ -206,17 +228,20 @@ const DiscussPage = () => {
 
   // Handle discussion creation
   const handleDiscussionCreated = (newDiscussion) => {
-    setDiscussions(prev => {
+    setDiscussions((prev) => {
       // Avoid duplicate discussions
-      if (prev.some(d => d._id === newDiscussion._id)) {
-        console.log('Duplicate discussion creation prevented:', newDiscussion._id);
+      if (prev.some((d) => d._id === newDiscussion._id)) {
+        console.log(
+          "Duplicate discussion creation prevented:",
+          newDiscussion._id,
+        );
         return prev;
       }
-      console.log('Adding new discussion:', newDiscussion._id);
+      console.log("Adding new discussion:", newDiscussion._id);
       return [newDiscussion, ...prev];
     });
     // Optionally trigger a re-fetch to sync with backend
-    console.log('Triggering discussions re-fetch after creation');
+    console.log("Triggering discussions re-fetch after creation");
     setTimeout(() => {
       setSelectedCommunity(selectedCommunity); // Trigger useEffect to re-fetch
     }, 1000);
@@ -228,69 +253,82 @@ const DiscussPage = () => {
     if (!socket) return;
 
     const handleNewDiscussion = (discussion) => {
-      setDiscussions(prev => {
-        if (prev.some(d => d._id === discussion._id)) {
-          console.log('Duplicate discussion from socket prevented:', discussion._id);
+      setDiscussions((prev) => {
+        if (prev.some((d) => d._id === discussion._id)) {
+          console.log(
+            "Duplicate discussion from socket prevented:",
+            discussion._id,
+          );
           return prev;
         }
-        console.log('Adding new discussion from socket:', discussion._id);
+        console.log("Adding new discussion from socket:", discussion._id);
         return [discussion, ...prev];
       });
     };
 
     const handleUpdateDiscussion = (updatedDiscussion) => {
-      setDiscussions(prev => prev.map(d => d._id === updatedDiscussion._id ? updatedDiscussion : d));
+      setDiscussions((prev) =>
+        prev.map((d) =>
+          d._id === updatedDiscussion._id ? updatedDiscussion : d,
+        ),
+      );
     };
 
     const handleDeleteDiscussion = ({ discussionId }) => {
-      setDiscussions(prev => prev.filter(d => d._id !== discussionId));
+      setDiscussions((prev) => prev.filter((d) => d._id !== discussionId));
     };
 
     const handleNewComment = (comment) => {
-      setDiscussions(prev => prev.map(d => {
-        if (d._id === comment.discussion) {
-          return { ...d, commentCount: (d.commentCount || 0) + 1 };
-        }
-        return d;
-      }));
+      setDiscussions((prev) =>
+        prev.map((d) => {
+          if (d._id === comment.discussion) {
+            return { ...d, commentCount: (d.commentCount || 0) + 1 };
+          }
+          return d;
+        }),
+      );
     };
 
     const handleUpdateComment = () => {};
 
     const handleDeleteComment = ({ discussionId }) => {
-      setDiscussions(prev => prev.map(d => {
-        if (d._id === discussionId) {
-          return { ...d, commentCount: (d.commentCount || 1) - 1 };
-        }
-        return d;
-      }));
+      setDiscussions((prev) =>
+        prev.map((d) => {
+          if (d._id === discussionId) {
+            return { ...d, commentCount: (d.commentCount || 1) - 1 };
+          }
+          return d;
+        }),
+      );
     };
 
     const handleDiscussionVoted = ({ discussionId, upvotes, downvotes }) => {
-      setDiscussions(prev => prev.map(d => {
-        if (d._id === discussionId) {
-          return { ...d, upvotes, downvotes };
-        }
-        return d;
-      }));
+      setDiscussions((prev) =>
+        prev.map((d) => {
+          if (d._id === discussionId) {
+            return { ...d, upvotes, downvotes };
+          }
+          return d;
+        }),
+      );
     };
 
-    socket.on('new-discussion', handleNewDiscussion);
-    socket.on('discussion-updated', handleUpdateDiscussion);
-    socket.on('discussion-deleted', handleDeleteDiscussion);
-    socket.on('new-comment', handleNewComment);
-    socket.on('comment-updated', handleUpdateComment);
-    socket.on('comment-deleted', handleDeleteComment);
-    socket.on('discussion-voted', handleDiscussionVoted);
+    socket.on("new-discussion", handleNewDiscussion);
+    socket.on("discussion-updated", handleUpdateDiscussion);
+    socket.on("discussion-deleted", handleDeleteDiscussion);
+    socket.on("new-comment", handleNewComment);
+    socket.on("comment-updated", handleUpdateComment);
+    socket.on("comment-deleted", handleDeleteComment);
+    socket.on("discussion-voted", handleDiscussionVoted);
 
     return () => {
-      socket.off('new-discussion', handleNewDiscussion);
-      socket.off('discussion-updated', handleUpdateDiscussion);
-      socket.off('discussion-deleted', handleDeleteDiscussion);
-      socket.off('new-comment', handleNewComment);
-      socket.off('comment-updated', handleUpdateComment);
-      socket.off('comment-deleted', handleDeleteComment);
-      socket.off('discussion-voted', handleDiscussionVoted);
+      socket.off("new-discussion", handleNewDiscussion);
+      socket.off("discussion-updated", handleUpdateDiscussion);
+      socket.off("discussion-deleted", handleDeleteDiscussion);
+      socket.off("new-comment", handleNewComment);
+      socket.off("comment-updated", handleUpdateComment);
+      socket.off("comment-deleted", handleDeleteComment);
+      socket.off("discussion-voted", handleDiscussionVoted);
     };
   }, [token]);
 
@@ -298,11 +336,14 @@ const DiscussPage = () => {
   const handleDeleteDiscussion = async (discussionId) => {
     try {
       await axiosClient.delete(`/discussions/${discussionId}`);
-      setDiscussions(prev => prev.filter(d => d._id !== discussionId));
-      showToast('Discussion deleted successfully', 'success');
+      setDiscussions((prev) => prev.filter((d) => d._id !== discussionId));
+      showToast("Discussion deleted successfully", "success");
     } catch (error) {
-      console.error('Error deleting discussion:', error);
-      showToast(error.response?.data?.message || 'Failed to delete discussion', 'error');
+      console.error("Error deleting discussion:", error);
+      showToast(
+        error.response?.data?.message || "Failed to delete discussion",
+        "error",
+      );
     }
   };
 
@@ -323,7 +364,7 @@ const DiscussPage = () => {
           {/* Main content */}
           <div className="md:w-3/4 lg:w-4/5">
             <button
-              onClick={() => navigate('/')}
+              onClick={() => navigate("/")}
               className="mb-4 px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-md text-white"
             >
               Back to Home
@@ -336,8 +377,8 @@ const DiscussPage = () => {
               selectedCommunity={selectedCommunity}
               onCreateClick={() => {
                 if (!isAuthenticated) {
-                  showToast('Please log in to create a discussion', 'warning');
-                  navigate('/login');
+                  showToast("Please log in to create a discussion", "warning");
+                  navigate("/login");
                   return;
                 }
                 setIsCreateModalOpen(true);
@@ -345,7 +386,7 @@ const DiscussPage = () => {
             />
 
             {/* Discussions list */}
-            {selectedCommunity !== 'Live Chat' && (
+            {selectedCommunity !== "Live Chat" && (
               <>
                 {loading ? (
                   <div className="flex justify-center items-center h-64">
@@ -357,19 +398,24 @@ const DiscussPage = () => {
                   </div>
                 ) : discussions.length === 0 ? (
                   <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-8 text-center">
-                    <h3 className="text-xl font-semibold mb-2">No discussions found</h3>
+                    <h3 className="text-xl font-semibold mb-2">
+                      No discussions found
+                    </h3>
                     <p className="text-gray-400 mb-4">
                       {searchQuery
-                        ? 'No discussions match your search criteria.'
-                        : selectedCommunity !== 'all'
+                        ? "No discussions match your search criteria."
+                        : selectedCommunity !== "all"
                           ? `Be the first to start a discussion in the ${selectedCommunity} community!`
-                          : 'Be the first to start a discussion!'}
+                          : "Be the first to start a discussion!"}
                     </p>
                     <button
                       onClick={() => {
                         if (!isAuthenticated) {
-                          showToast('Please log in to create a discussion', 'warning');
-                          navigate('/login');
+                          showToast(
+                            "Please log in to create a discussion",
+                            "warning",
+                          );
+                          navigate("/login");
                           return;
                         }
                         setIsCreateModalOpen(true);
@@ -381,24 +427,29 @@ const DiscussPage = () => {
                   </div>
                 ) : (
                   <div className="space-y-4">
-                    {discussions.map(discussion => (
-                  <DiscussionCard
-                    key={discussion._id}
-                    discussion={discussion}
-                    currentUserId={user?._id}
-                    onDelete={handleDeleteDiscussion}
-                    onSelect={() => navigate(`/discuss/${discussion._id}`)}
-                  />
+                    {discussions.map((discussion) => (
+                      <DiscussionCard
+                        key={discussion._id}
+                        discussion={discussion}
+                        currentUserId={user?._id}
+                        onDelete={handleDeleteDiscussion}
+                        onSelect={() => navigate(`/discuss/${discussion._id}`)}
+                      />
                     ))}
                   </div>
                 )}
               </>
             )}
             {/* Real-time Chat Section */}
-            {selectedCommunity === 'Live Chat' && (
+            {selectedCommunity === "Live Chat" && (
               <div className="mt-8">
-                <h2 className="text-xl font-semibold mb-4 text-white">Real-time Chat</h2>
-                <Chat discussionId={selectedCommunity} socketConnected={socketConnected} />
+                <h2 className="text-xl font-semibold mb-4 text-white">
+                  Real-time Chat
+                </h2>
+                <Chat
+                  discussionId={selectedCommunity}
+                  socketConnected={socketConnected}
+                />
               </div>
             )}
           </div>

@@ -1,38 +1,40 @@
-import React, { useState } from 'react';
-import axiosClient from '../../utils/axiosClient';
-import { toast } from 'sonner';
+import React, { useState } from "react";
+import axiosClient from "../../utils/axiosClient";
+import { toast } from "sonner";
 
 const PlaylistCreate = ({ onCreate }) => {
-  const [playlistName, setPlaylistName] = useState('');
+  const [playlistName, setPlaylistName] = useState("");
   const [loading, setLoading] = useState(false);
 
   const createPlaylist = async () => {
     if (!playlistName.trim()) {
-      toast.error('Playlist name cannot be empty');
+      toast.error("Playlist name cannot be empty");
       return;
     }
     setLoading(true);
     try {
-      const response = await axiosClient.post('/playlists', { name: playlistName.trim() });
+      const response = await axiosClient.post("/playlists", {
+        name: playlistName.trim(),
+      });
       if (response.data.success) {
-        toast.success('Playlist created successfully');
-        setPlaylistName('');
+        toast.success("Playlist created successfully");
+        setPlaylistName("");
         if (onCreate) {
           onCreate(response.data.data);
         }
       } else {
-        toast.error('Failed to create playlist');
+        toast.error("Failed to create playlist");
       }
     } catch (error) {
-      console.error('Error creating playlist:', error);
-      toast.error('Failed to create playlist');
+      console.error("Error creating playlist:", error);
+      toast.error("Failed to create playlist");
     } finally {
       setLoading(false);
     }
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       createPlaylist();
     }
   };
@@ -53,9 +55,8 @@ const PlaylistCreate = ({ onCreate }) => {
         disabled={loading}
         className="playlist-create-button"
       >
-        {loading ? 'Creating...' : 'Create Playlist'}
+        {loading ? "Creating..." : "Create Playlist"}
       </button>
-      <ToastContainer position="bottom-right" />
     </div>
   );
 };

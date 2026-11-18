@@ -1,4 +1,4 @@
-import { getSocket } from './socketMiddleware';
+import { getSocket } from "./socketMiddleware";
 
 export { getSocket };
 
@@ -8,20 +8,20 @@ export const initializeSocket = (token) => {
 
 export const joinDiscussion = (discussionId) => {
   const s = getSocket();
-  if (s) s.emit('join-discussion', { discussionId });
+  if (s) s.emit("join-discussion", { discussionId });
 };
 
 export const leaveDiscussion = (discussionId) => {
   const s = getSocket();
-  if (s) s.emit('leave-discussion', { discussionId });
+  if (s) s.emit("leave-discussion", { discussionId });
 };
 
 export const emitTyping = (discussionId) => {
   const s = getSocket();
-  if (s) s.emit('typing', { discussionId });
+  if (s) s.emit("typing", { discussionId });
 };
 
 export const emitStopTyping = (discussionId) => {
   const s = getSocket();
-  if (s) s.emit('stop-typing', { discussionId });
+  if (s) s.emit("stop-typing", { discussionId });
 };

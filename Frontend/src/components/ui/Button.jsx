@@ -1,8 +1,15 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { ChevronRight } from 'lucide-react';
+import React from "react";
+import { motion } from "framer-motion";
+import { ChevronRight } from "lucide-react";
 
-const Button = ({ isLoading = false, children, onClick, type = 'button', className = '', ...props }) => (
+const Button = ({
+  isLoading = false,
+  children,
+  onClick,
+  type = "button",
+  className = "",
+  ...props
+}) => (
   <motion.button
     type={type}
     disabled={isLoading}
@@ -14,7 +21,7 @@ const Button = ({ isLoading = false, children, onClick, type = 'button', classNa
   >
     <motion.div className="absolute inset-0 bg-white translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]" />
     <span className="relative z-10 font-bold uppercase tracking-[0.2em] group-hover:text-black transition-colors duration-300">
-      {isLoading ? 'Processing...' : children || 'Confirm Access'}
+      {isLoading ? "Processing..." : children || "Confirm Access"}
     </span>
     {!isLoading && (
       <ChevronRight

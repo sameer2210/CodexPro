@@ -1,13 +1,14 @@
-import bcrypt from 'bcryptjs';
-import crypto from 'crypto';
-import jwt from 'jsonwebtoken';
-import nodemailer from 'nodemailer';
-import validator from 'validator';
-import redisWrapper from '../config/redis.js';
-import User from '../models/user.js';
+import bcrypt from "bcryptjs";
+import crypto from "crypto";
+import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
+import validator from "validator";
+import redisWrapper from "../config/redis.js";
+import User from "../models/user.js";
+import config from "../config/config.js";
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -20,13 +21,13 @@ function generateOTP() {
 
 async function sendOTPEmail(email, otp) {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.log(`[DEV MODE] OTP for ${email}: ${otp}`);
+    console.log("[DEV MODE] Verification email delivery is not configured");
     return;
   }
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: email,
-    subject: 'Your OTP for CodeX Verification',
+    subject: "Your OTP for CodeX Verification",
     text: `Your OTP code is: ${otp}. It is valid for 10 minutes.`,
     html: `<p>Your OTP code is: <strong>${otp}</strong>. It is valid for 10 minutes.</p>`,
   };
@@ -38,16 +39,27 @@ export const signupWithVerification = async (req, res) => {
     const { firstName, emailId, password, confirmPassword } = req.body;
 
     if (!firstName || !emailId || !password || !confirmPassword) {
-      return res.status(400).json({ success: false, message: 'All fields are required' });
+      return res
+        .status(400)
+        .json({ success: false, message: "All fields are required" });
     }
     if (!validator.isEmail(emailId)) {
-      return res.status(400).json({ success: false, message: 'Invalid email format' });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid email format" });
     }
     if (password !== confirmPassword) {
-      return res.status(400).json({ success: false, message: 'Passwords do not match' });
+      return res
+        .status(400)
+        .json({ success: false, message: "Passwords do not match" });
     }
     if (password.length < 8) {
-      return res.status(400).json({ success: false, message: 'Password must be at least 8 characters' });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          message: "Password must be at least 8 characters",
+        });
     }
 
     const existingUser = await User.findOne({ emailId: emailId.toLowerCase() });
@@ -59,7 +71,8 @@ export const signupWithVerification = async (req, res) => {
         await sendOTPEmail(emailId, otp);
         return res.status(200).json({
           success: true,
-          message: 'User already registered but not verified. New OTP sent to email for verification.',
+          message:
+            "User already registered but not verified. New OTP sent to email for verification.",
           user: {
             _id: existingUser._id,
             firstName: existingUser.firstName,
@@ -68,7 +81,12 @@ export const signupWithVerification = async (req, res) => {
           },
         });
       } else {
-        return res.status(400).json({ success: false, message: 'User with this email already exists and is verified' });
+        return res
+          .status(400)
+          .json({
+            success: false,
+            message: "User with this email already exists and is verified",
+          });
       }
     }
 
@@ -78,10 +96,13 @@ export const signupWithVerification = async (req, res) => {
       firstName,
       emailId: emailId.toLowerCase(),
       password: hashedPassword,
-      role: 'user',
+      role: "user",
       emailVerified: false,
     };
-    await redisWrapper.set(`pending_signup:${emailId.toLowerCase()}`, JSON.stringify(tempUserData));
+    await redisWrapper.set(
+      `pending_signup:${emailId.toLowerCase()}`,
+      JSON.stringify(tempUserData),
+    );
     await redisWrapper.expire(`pending_signup:${emailId.toLowerCase()}`, 300);
 
     const otp = generateOTP();
@@ -92,13 +113,14 @@ export const signupWithVerification = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'OTP sent to your email for verification. Please complete the verification to create your account.',
+      message:
+        "OTP sent to your email for verification. Please complete the verification to create your account.",
       needsVerification: true,
       email: emailId,
     });
   } catch (error) {
-    console.error('Error in signupWithVerification:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    console.error("Error in signupWithVerification:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 
@@ -107,28 +129,39 @@ export const verifySignupOTP = async (req, res) => {
     const { email, otp } = req.body;
 
     if (!email || !otp) {
-      return res.status(400).json({ success: false, message: 'Email and OTP are required' });
+      return res
+        .status(400)
+        .json({ success: false, message: "Email and OTP are required" });
     }
     if (!validator.isEmail(email)) {
-      return res.status(400).json({ success: false, message: 'Invalid email format' });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid email format" });
     }
     if (!/^\d{6}$/.test(otp)) {
-      return res.status(400).json({ success: false, message: 'OTP must be 6 digits' });
+      return res
+        .status(400)
+        .json({ success: false, message: "OTP must be 6 digits" });
     }
 
     const storedOTP = await redisWrapper.get(`otp:${email.toLowerCase()}`);
     if (!storedOTP) {
-      return res.status(400).json({ success: false, message: 'OTP expired or not found' });
+      return res
+        .status(400)
+        .json({ success: false, message: "OTP expired or not found" });
     }
     if (storedOTP !== otp) {
-      return res.status(400).json({ success: false, message: 'Invalid OTP' });
+      return res.status(400).json({ success: false, message: "Invalid OTP" });
     }
 
-    const pendingUserDataString = await redisWrapper.get(`pending_signup:${email.toLowerCase()}`);
+    const pendingUserDataString = await redisWrapper.get(
+      `pending_signup:${email.toLowerCase()}`,
+    );
     if (!pendingUserDataString) {
       return res.status(400).json({
         success: false,
-        message: 'Signup session expired or not found. Please try signing up again.',
+        message:
+          "Signup session expired or not found. Please try signing up again.",
       });
     }
 
@@ -141,7 +174,7 @@ export const verifySignupOTP = async (req, res) => {
         await redisWrapper.del(`pending_signup:${email.toLowerCase()}`);
         return res.status(200).json({
           success: true,
-          message: 'Email already verified. Logging in.',
+          message: "Email already verified. Logging in.",
           user: {
             _id: user._id,
             firstName: user.firstName,
@@ -151,8 +184,8 @@ export const verifySignupOTP = async (req, res) => {
           },
           token: jwt.sign(
             { _id: user._id, emailId: user.emailId, role: user.role },
-            process.env.JWT_SECRET || 'your-secret-key',
-            { expiresIn: 604800 }
+            config.JWT_SECRET,
+            { expiresIn: 604800 },
           ),
         });
       } else {
@@ -175,20 +208,20 @@ export const verifySignupOTP = async (req, res) => {
 
     const token = jwt.sign(
       { _id: user._id, emailId: user.emailId, role: user.role },
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: 604800 }
+      config.JWT_SECRET,
+      { expiresIn: 604800 },
     );
 
-    res.cookie('token', token, {
+    res.cookie("token", token, {
       maxAge: 604800000,
       httpOnly: true,
-      sameSite: 'lax',
-      secure: process.env.NODE_ENV === 'production',
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
     });
 
     res.status(200).json({
       success: true,
-      message: 'Email verified successfully. Account created and logged in.',
+      message: "Email verified successfully. Account created and logged in.",
       user: {
         _id: user._id,
         firstName: user.firstName,
@@ -199,8 +232,8 @@ export const verifySignupOTP = async (req, res) => {
       token: token,
     });
   } catch (error) {
-    console.error('Error in verifySignupOTP:', error);
-    res.status(500).json({ success: false, message: 'Internal server error' });
+    console.error("Error in verifySignupOTP:", error);
+    res.status(500).json({ success: false, message: "Internal server error" });
   }
 };
 

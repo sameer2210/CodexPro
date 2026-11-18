@@ -1,16 +1,16 @@
-import express from 'express';
-import config from '../config/config.js';
-import { verifyToken } from '../middlewares/authMiddleware.js';
+import express from "express";
+import config from "../config/config.js";
+import { verifyToken } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-const normalizeUrls = value =>
-  (value || '')
-    .split(',')
-    .map(url => url.trim())
+const normalizeUrls = (value) =>
+  (value || "")
+    .split(",")
+    .map((url) => url.trim())
     .filter(Boolean);
 
-router.get('/turn', verifyToken, (req, res) => {
+router.get("/turn", verifyToken, (req, res) => {
   const stunUrls = normalizeUrls(config.STUN_URLS);
   const turnUrls = normalizeUrls(config.TURN_URLS);
 
@@ -19,7 +19,7 @@ router.get('/turn', verifyToken, (req, res) => {
       urls:
         stunUrls.length > 0
           ? stunUrls
-          : ['stun:stun.l.google.com:19302', 'stun:stun1.l.google.com:19302'],
+          : ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"],
     },
   ];
 

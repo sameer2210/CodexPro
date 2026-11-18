@@ -1,20 +1,27 @@
-import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
-import axiosClient from '../../utils/axiosClient';
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import axiosClient from "../../utils/axiosClient";
 
 export const fetchSolvedProblems = createAsyncThunk(
-  'problem/fetchSolvedProblems',
+  "problem/fetchSolvedProblems",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axiosClient.get('/problem/solvedProblem');
-      return response.data?.solvedProblems || response.data?.data || response.data || [];
+      const response = await axiosClient.get("/problem/problemsSolvedByUser");
+      return (
+        response.data?.solvedProblems ||
+        response.data?.data ||
+        response.data ||
+        []
+      );
     } catch (error) {
-      return rejectWithValue(error.response?.data?.message || 'Failed to fetch solved problems');
+      return rejectWithValue(
+        error.response?.data?.message || "Failed to fetch solved problems",
+      );
     }
-  }
+  },
 );
 
 const problemSlice = createSlice({
-  name: 'problem',
+  name: "problem",
   initialState: {
     solvedProblems: [],
     loading: false,

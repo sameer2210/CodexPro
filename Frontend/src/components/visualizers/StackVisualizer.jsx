@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "../ui/button";
+import { Button } from "../ui/Button";
 import { Input } from "../ui/input";
 import { toast } from "sonner";
 import { Plus, Minus, RotateCcw, Eye, Play } from "lucide-react";

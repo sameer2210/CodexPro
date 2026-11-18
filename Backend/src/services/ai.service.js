@@ -1,16 +1,16 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
-import config from '../config/config.js';
+import { GoogleGenerativeAI } from "@google/generative-ai";
+import config from "../config/config.js";
 
 const ai = new GoogleGenerativeAI(config.GOOGLE_API_KEY);
 
 class AIService {
-  async reviewCode(code, language = 'javascript') {
-    if (!code || typeof code !== 'string') {
-      throw new Error('Invalid input: code must be a non-empty string.');
+  async reviewCode(code, language = "javascript") {
+    if (!code || typeof code !== "string") {
+      throw new Error("Invalid input: code must be a non-empty string.");
     }
 
     const model = ai.getGenerativeModel({
-      model: 'gemini-2.5-flash',
+      model: "gemini-2.5-flash",
     });
 
     try {
@@ -26,23 +26,23 @@ class AIService {
         review: response.response.text(),
       };
     } catch (err) {
-      const msg = err?.message || '';
+      const msg = err?.message || "";
 
       // Quota exceeded
-      if (msg.includes('RESOURCE_EXHAUSTED') || msg.includes('Quota')) {
+      if (msg.includes("RESOURCE_EXHAUSTED") || msg.includes("Quota")) {
         return {
           success: false,
-          reason: 'AI_QUOTA_EXCEEDED',
+          reason: "AI_QUOTA_EXCEEDED",
           review: this.getQuotaExceededReview(language),
         };
       }
 
       //  Model overloaded / network / other
-      console.error('AI review failed:', msg);
+      console.error("AI review failed:", msg);
 
       return {
         success: false,
-        reason: 'AI_FAILED',
+        reason: "AI_FAILED",
         review: this.getFallbackReview(language),
       };
     }

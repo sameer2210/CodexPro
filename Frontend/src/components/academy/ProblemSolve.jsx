@@ -31,10 +31,10 @@ import {
   Loader2,
   Sparkles,
 } from "lucide-react";
-import Editorial from "../../components/common/Editorial";
+import Editorial from "./Editorial";
 import axiosClient from "../../utils/axiosClient";
-import DobutAi from "../../components/common/DoubtAi";
-import SubmissionHistory from "../../components/common/SubmissionHistory";
+import DobutAi from "../Ai/DoubtAi";
+import SubmissionHistory from "../contest/SubmissionHistory";
 
 const ProblemPage = () => {
   const dispatch = useDispatch();
@@ -91,7 +91,7 @@ const ProblemPage = () => {
     setLoading(true);
     try {
       const response = await axiosClient.get(
-        `/problem/getProblemById/${problemId}`
+        `/problem/getProblemById/${problemId}`,
       );
       setProblem(response.data);
     } catch (error) {
@@ -173,7 +173,7 @@ const ProblemPage = () => {
         {
           code: code,
           language: selectedLanguage,
-        }
+        },
       );
 
       setSubmitResult(response.data);
@@ -183,25 +183,29 @@ const ProblemPage = () => {
       // Update problem solved status if submission accepted
       if (response.data && response.data.accepted) {
         console.log("Submission accepted, updating problem solved status");
-        setProblem(prevProblem => ({
+        setProblem((prevProblem) => ({
           ...prevProblem,
-          solved: true
+          solved: true,
         }));
 
         // Dispatch action to update solved problems in Redux store
         try {
-          console.log("Dispatching fetchSolvedProblems after successful submission");
+          console.log(
+            "Dispatching fetchSolvedProblems after successful submission",
+          );
           await dispatch(fetchSolvedProblems()).unwrap();
           console.log("Successfully updated solved problems in Redux store");
 
           // Show success toast
           toast.success("Problem marked as solved!", {
             position: "top-right",
-            autoClose: 3000
+            autoClose: 3000,
           });
         } catch (error) {
           console.error("Error updating solved problems:", error);
-          toast.error("Problem solved, but failed to update your solved problems list");
+          toast.error(
+            "Problem solved, but failed to update your solved problems list",
+          );
         }
       }
     } catch (error) {
@@ -306,7 +310,7 @@ const ProblemPage = () => {
               </span>
               <div
                 className={`px-3 py-1 rounded-full text-xs font-medium ${getDifficultyBgColor(
-                  problem.difficulty
+                  problem.difficulty,
                 )} ${getDifficultyColor(problem.difficulty)}`}
               >
                 {problem.difficulty?.charAt(0).toUpperCase() +
@@ -824,7 +828,7 @@ const ProblemPage = () => {
                                 runResult.testCases?.every(
                                   (tc) =>
                                     tc.stdout?.trim() ===
-                                    tc.expected_output?.trim()
+                                    tc.expected_output?.trim(),
                                 )
                                   ? "text-emerald-400"
                                   : "text-red-400"
@@ -833,7 +837,7 @@ const ProblemPage = () => {
                               {runResult.testCases?.every(
                                 (tc) =>
                                   tc.stdout?.trim() ===
-                                  tc.expected_output?.trim()
+                                  tc.expected_output?.trim(),
                               ) ? (
                                 <>
                                   <CheckCircle className="w-5 h-5 mr-2 flex-shrink-0" />
@@ -1017,7 +1021,7 @@ const ProblemPage = () => {
                       className={`p-5 rounded-xl border ${
                         runResult.testCases?.every(
                           (tc) =>
-                            tc.stdout?.trim() === tc.expected_output?.trim()
+                            tc.stdout?.trim() === tc.expected_output?.trim(),
                         )
                           ? "bg-emerald-900/10 border-emerald-500/30"
                           : "bg-red-900/10 border-red-500/30"
@@ -1027,7 +1031,7 @@ const ProblemPage = () => {
                         <div className="flex items-center space-x-3">
                           {runResult.testCases?.every(
                             (tc) =>
-                              tc.stdout?.trim() === tc.expected_output?.trim()
+                              tc.stdout?.trim() === tc.expected_output?.trim(),
                           ) ? (
                             <CheckCircle className="w-6 h-6 text-emerald-400 flex-shrink-0" />
                           ) : (
@@ -1038,7 +1042,7 @@ const ProblemPage = () => {
                               {runResult.testCases?.every(
                                 (tc) =>
                                   tc.stdout?.trim() ===
-                                  tc.expected_output?.trim()
+                                  tc.expected_output?.trim(),
                               )
                                 ? "All Test Cases Passed!"
                                 : "Test Failed"}
@@ -1047,7 +1051,7 @@ const ProblemPage = () => {
                               {runResult.testCases?.every(
                                 (tc) =>
                                   tc.stdout?.trim() ===
-                                  tc.expected_output?.trim()
+                                  tc.expected_output?.trim(),
                               )
                                 ? "Your code passed all test cases"
                                 : "Some test cases didn't pass"}
@@ -1234,9 +1238,12 @@ const ProblemPage = () => {
                           <MemoryStick className="w-4 h-4 text-purple-400" />
                           <span className="text-gray-400 text-sm">Memory</span>
                         </div>
-                          <div className="text-xl font-bold text-white">
-                            {submitResult.memory !== undefined && submitResult.memory !== null ? submitResult.memory : "N/A"}
-                          </div>
+                        <div className="text-xl font-bold text-white">
+                          {submitResult.memory !== undefined &&
+                          submitResult.memory !== null
+                            ? submitResult.memory
+                            : "N/A"}
+                        </div>
                         {submitResult.memoryPercentile && (
                           <div className="text-xs text-gray-400 mt-1">
                             Beats {submitResult.memoryPercentile}% of users

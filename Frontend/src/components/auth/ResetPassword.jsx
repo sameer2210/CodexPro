@@ -6,13 +6,15 @@ import { toast } from "sonner";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import axiosClient from "../../utils/axiosClient";
 
-const resetPasswordSchema = z.object({
-  password: z.string().min(8, "Password must be at least 8 characters long"),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
-  path: ["confirmPassword"],
-});
+const resetPasswordSchema = z
+  .object({
+    password: z.string().min(8, "Password must be at least 8 characters long"),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
+  });
 
 const ResetPassword = () => {
   const { token } = useParams();
@@ -29,12 +31,16 @@ const ResetPassword = () => {
   const onSubmit = async (data) => {
     try {
       setLoading(true);
-      await axiosClient.post(`/user/reset-password/${token}`, { token, newPassword: data.password });
+      await axiosClient.post(`/user/reset-password/${token}`, {
+        token,
+        newPassword: data.password,
+      });
       toast.success("Password has been reset successfully.");
       setIsReset(true);
       setTimeout(() => navigate("/login"), 3000);
     } catch (err) {
-      const errorMsg = err.response?.data?.message || "Failed to reset password.";
+      const errorMsg =
+        err.response?.data?.message || "Failed to reset password.";
       toast.error(errorMsg);
     } finally {
       setLoading(false);

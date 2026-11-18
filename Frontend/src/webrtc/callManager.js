@@ -3,7 +3,7 @@ import {
   stopMedia,
   toggleAudio as toggleAudioTrack,
   toggleVideo as toggleVideoTrack,
-} from './media';
+} from "./media";
 import {
   addIceCandidate,
   closePeer,
@@ -11,7 +11,7 @@ import {
   createOffer,
   createPeer,
   setRemoteDescription,
-} from './peer';
+} from "./peer";
 
 let localStream = null;
 let remoteStream = null;
@@ -23,9 +23,9 @@ const cleanup = () => {
   remoteStream = null;
 };
 
-const attachRemoteTrackHandler = async onRemoteStream => {
+const attachRemoteTrackHandler = async (onRemoteStream) => {
   const peer = await createPeer();
-  peer.ontrack = event => {
+  peer.ontrack = (event) => {
     if (event.streams?.[0]) {
       remoteStream = event.streams[0];
       onRemoteStream?.(remoteStream);
@@ -44,45 +44,45 @@ const attachRemoteTrackHandler = async onRemoteStream => {
 
 const startOutgoing = async (type, onRemoteStream) => {
   cleanup();
-  localStream = await getMedia({ audio: true, video: type === 'video' });
+  localStream = await getMedia({ audio: true, video: type === "video" });
   const peer = await attachRemoteTrackHandler(onRemoteStream);
-  localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
+  localStream.getTracks().forEach((track) => peer.addTrack(track, localStream));
   const offer = await createOffer();
   return { offer, localStream, peer };
 };
 
 const acceptIncoming = async (type, offer, onRemoteStream) => {
   cleanup();
-  localStream = await getMedia({ audio: true, video: type === 'video' });
+  localStream = await getMedia({ audio: true, video: type === "video" });
   const peer = await attachRemoteTrackHandler(onRemoteStream);
-  localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
+  localStream.getTracks().forEach((track) => peer.addTrack(track, localStream));
   await setRemoteDescription(offer);
   const answer = await createAnswer();
   return { answer, localStream, peer };
 };
 
-const applyAnswer = async answer => {
+const applyAnswer = async (answer) => {
   if (!answer) return;
   await setRemoteDescription(answer);
 };
 
-const handleRemoteOffer = async offer => {
+const handleRemoteOffer = async (offer) => {
   if (!offer) return null;
   await setRemoteDescription(offer);
   const answer = await createAnswer();
   return answer;
 };
 
-const addRemoteIceCandidate = async candidate => {
+const addRemoteIceCandidate = async (candidate) => {
   if (!candidate) return;
   await addIceCandidate(candidate);
 };
 
-const toggleAudio = enabled => {
+const toggleAudio = (enabled) => {
   toggleAudioTrack(enabled);
 };
 
-const toggleVideo = enabled => {
+const toggleVideo = (enabled) => {
   toggleVideoTrack(enabled);
 };
 

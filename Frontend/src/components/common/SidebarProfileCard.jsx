@@ -1,8 +1,8 @@
 import React from "react";
 
 const SidebarProfileCard = ({ user, stats, rank }) => {
-  const solvedPercentage = stats?.totalProblems 
-    ? Math.round((stats.solvedCount / stats.totalProblems) * 100) 
+  const solvedPercentage = stats?.totalProblems
+    ? Math.round((stats.solvedCount / stats.totalProblems) * 100)
     : 0;
 
   return (
@@ -14,10 +14,14 @@ const SidebarProfileCard = ({ user, stats, rank }) => {
             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-orange-400 via-orange-500 to-orange-600 p-1 shadow-xl">
               <div className="w-full h-full rounded-full bg-gray-800 flex items-center justify-center overflow-hidden">
                 {user?.profileImage ? (
-                  <img src={user.profileImage} alt="Profile" className="w-full h-full object-cover" />
+                  <img
+                    src={user.profileImage}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   <span className="text-2xl font-bold text-orange-400">
-                    {user?.firstName?.charAt(0)?.toUpperCase() || 'U'}
+                    {user?.firstName?.charAt(0)?.toUpperCase() || "U"}
                   </span>
                 )}
               </div>
@@ -31,30 +35,52 @@ const SidebarProfileCard = ({ user, stats, rank }) => {
           </div>
 
           <h2 className="text-xl font-bold text-white text-center mb-1">
-            {user?.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : 'Anonymous'}
+            {user?.firstName
+              ? `${user.firstName} ${user.lastName || ""}`.trim()
+              : "Anonymous"}
           </h2>
           <p className="text-gray-400 text-sm font-medium">
-            @{user?.username || 'user'}
+            @{user?.username || "user"}
           </p>
           {/* Add social links display */}
           <div className="flex space-x-3 mt-3 justify-center">
             {user?.socialLinks?.linkedin && (
-              <a href={user.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:text-orange-300">
+              <a
+                href={user.socialLinks.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-orange-400 hover:text-orange-300"
+              >
                 LinkedIn
               </a>
             )}
             {user?.socialLinks?.github && (
-              <a href={user.socialLinks.github} target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:text-orange-300">
+              <a
+                href={user.socialLinks.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-orange-400 hover:text-orange-300"
+              >
                 GitHub
               </a>
             )}
             {user?.socialLinks?.twitter && (
-              <a href={user.socialLinks.twitter} target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:text-orange-300">
+              <a
+                href={user.socialLinks.twitter}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-orange-400 hover:text-orange-300"
+              >
                 Twitter
               </a>
             )}
             {user?.socialLinks?.website && (
-              <a href={user.socialLinks.website} target="_blank" rel="noopener noreferrer" className="text-orange-400 hover:text-orange-300">
+              <a
+                href={user.socialLinks.website}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-orange-400 hover:text-orange-300"
+              >
                 Website
               </a>
             )}
@@ -65,21 +91,29 @@ const SidebarProfileCard = ({ user, stats, rank }) => {
         <div className="mb-6">
           <div className="flex justify-between items-center mb-3">
             <span className="text-sm font-medium text-gray-300">Progress</span>
-            <span className="text-orange-400 font-bold text-sm">{solvedPercentage}%</span>
+            <span className="text-orange-400 font-bold text-sm">
+              {solvedPercentage}%
+            </span>
           </div>
-          
+
           <div className="relative w-full bg-gray-700 rounded-full h-3 overflow-hidden shadow-inner">
-            <div 
-              className="absolute top-0 left-0 h-full bg-gradient-to-r from-orange-500 via-orange-400 to-orange-300 rounded-full transition-all duration-1000 ease-out shadow-lg" 
+            <div
+              className="absolute top-0 left-0 h-full bg-gradient-to-r from-orange-500 via-orange-400 to-orange-300 rounded-full transition-all duration-1000 ease-out shadow-lg"
               style={{ width: `${solvedPercentage}%` }}
             >
               <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent opacity-30 rounded-full animate-pulse"></div>
             </div>
           </div>
-          
+
           <div className="flex justify-between text-xs text-gray-400 mt-2 font-medium">
-            <span>Solved: <span className="text-green-400">{stats?.solvedCount || 0}</span></span>
-            <span>Total: <span className="text-gray-300">{stats?.totalProblems || 0}</span></span>
+            <span>
+              Solved:{" "}
+              <span className="text-green-400">{stats?.solvedCount || 0}</span>
+            </span>
+            <span>
+              Total:{" "}
+              <span className="text-gray-300">{stats?.totalProblems || 0}</span>
+            </span>
           </div>
         </div>
 
@@ -89,21 +123,27 @@ const SidebarProfileCard = ({ user, stats, rank }) => {
             <div className="text-2xl font-bold text-green-400 group-hover:text-green-300 transition-colors">
               {stats?.easy || 0}
             </div>
-            <div className="text-xs text-green-300 font-semibold uppercase tracking-wider">Easy</div>
+            <div className="text-xs text-green-300 font-semibold uppercase tracking-wider">
+              Easy
+            </div>
           </div>
-          
+
           <div className="group text-center p-4 bg-gradient-to-br from-yellow-900/30 to-yellow-800/20 rounded-xl border border-yellow-700/30 hover:border-yellow-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-yellow-500/20">
             <div className="text-2xl font-bold text-yellow-400 group-hover:text-yellow-300 transition-colors">
               {stats?.medium || 0}
             </div>
-            <div className="text-xs text-yellow-300 font-semibold uppercase tracking-wider">Medium</div>
+            <div className="text-xs text-yellow-300 font-semibold uppercase tracking-wider">
+              Medium
+            </div>
           </div>
-          
+
           <div className="group text-center p-4 bg-gradient-to-br from-red-900/30 to-red-800/20 rounded-xl border border-red-700/30 hover:border-red-500/50 transition-all duration-300 hover:shadow-lg hover:shadow-red-500/20">
             <div className="text-2xl font-bold text-red-400 group-hover:text-red-300 transition-colors">
               {stats?.hard || 0}
             </div>
-            <div className="text-xs text-red-300 font-semibold uppercase tracking-wider">Hard</div>
+            <div className="text-xs text-red-300 font-semibold uppercase tracking-wider">
+              Hard
+            </div>
           </div>
         </div>
 
@@ -116,7 +156,7 @@ const SidebarProfileCard = ({ user, stats, rank }) => {
           <div className="flex flex-wrap gap-2">
             {user?.badges && user.badges.length > 0 ? (
               user.badges.slice(0, 6).map((badge, i) => (
-                <span 
+                <span
                   key={i}
                   className="group px-3 py-1.5 bg-gradient-to-r from-orange-500/20 to-orange-600/20 text-orange-300 text-xs rounded-full border border-orange-500/30 font-medium hover:border-orange-400/50 hover:bg-orange-500/30 transition-all duration-200 cursor-default"
                 >
@@ -126,8 +166,12 @@ const SidebarProfileCard = ({ user, stats, rank }) => {
             ) : (
               <div className="w-full text-center py-4">
                 <div className="text-4xl mb-2 opacity-50">🎯</div>
-                <span className="text-gray-500 text-sm italic">No achievements yet</span>
-                <div className="text-xs text-gray-600 mt-1">Start solving problems!</div>
+                <span className="text-gray-500 text-sm italic">
+                  No achievements yet
+                </span>
+                <div className="text-xs text-gray-600 mt-1">
+                  Start solving problems!
+                </div>
               </div>
             )}
           </div>

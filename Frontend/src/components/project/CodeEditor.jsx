@@ -1,5 +1,5 @@
 // src/views/home/project/components/CodeEditor.jsx
-import Editor from '@monaco-editor/react';
+import Editor from "@monaco-editor/react";
 import {
   Code2,
   Copy,
@@ -10,14 +10,14 @@ import {
   Settings,
   Sparkles,
   Zap,
-} from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { useNavigate } from 'react-router-dom';
-import { saveProjectCode } from '../../api/project.api';
-import { useTheme } from '../../context/ThemeContext';
-import { notify } from '../../lib/notify';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
+} from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
+import { useNavigate } from "react-router-dom";
+import { saveProjectCode } from "../../utils/project.api";
+import { useTheme } from "../../context/ThemeContext";
+import { notify } from "../../lib/notify";
+import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import {
   executeProjectCode,
   selectCurrentProjectCode,
@@ -26,7 +26,7 @@ import {
   setLanguage,
   updateProjectCode,
   updateProjectReview,
-} from '../../store/slices/projectSlice';
+} from "../../store/slices/projectSlice";
 
 const CodeEditor = ({ projectId }) => {
   const dispatch = useAppDispatch();
@@ -39,7 +39,7 @@ const CodeEditor = ({ projectId }) => {
   const code = useAppSelector(selectCurrentProjectCode);
   const language = useAppSelector(selectCurrentProjectLanguage);
   const { isDarkMode } = useTheme();
-  const socketConnected = useAppSelector(state => state.socket.connected);
+  const socketConnected = useAppSelector((state) => state.socket.connected);
   const isExecuting = useAppSelector(selectIsExecuting);
 
   // Local state
@@ -50,7 +50,7 @@ const CodeEditor = ({ projectId }) => {
     fontSize: 14,
     minimap: window.innerWidth > 768,
     lineNumbers: true,
-    wordWrap: 'on',
+    wordWrap: "on",
     formatOnPaste: true,
     autoComplete: true,
   });
@@ -65,8 +65,8 @@ const CodeEditor = ({ projectId }) => {
 
   const languages = [
     {
-      value: 'javascript',
-      label: 'JavaScript',
+      value: "javascript",
+      label: "JavaScript",
       template: `// javascript Example
 
 const numbers = [1, 2, 3, 4, 5];
@@ -78,41 +78,47 @@ console.log("Squared:", squared);
 console.log("Even:", even);`,
     },
     {
-      value: 'typescript',
-      label: 'TypeScript',
-      template: '// TypeScript\nconst message: string = "Hello World!";\nconsole.log(message);',
+      value: "typescript",
+      label: "TypeScript",
+      template:
+        '// TypeScript\nconst message: string = "Hello World!";\nconsole.log(message);',
     },
-    { value: 'python', label: 'Python', template: '# Python\nprint("Hello World!")' },
     {
-      value: 'java',
-      label: 'Java',
+      value: "python",
+      label: "Python",
+      template: '# Python\nprint("Hello World!")',
+    },
+    {
+      value: "java",
+      label: "Java",
       template:
         'public class Main {\n    public static void main(String[] args) {\n        System.out.println("Hello World!");\n    }\n}',
     },
     {
-      value: 'cpp',
-      label: 'C++',
+      value: "cpp",
+      label: "C++",
       template:
         '#include <iostream>\nusing namespace std;\n\nint main() {\n    cout << "Hello World!" << endl;\n    return 0;\n}',
     },
     {
-      value: 'c',
-      label: 'C',
+      value: "c",
+      label: "C",
       template:
         '#include <stdio.h>\n\nint main() {\n    printf("Hello World!\\n");\n    return 0;\n}',
     },
     {
-      value: 'go',
-      label: 'Go',
-      template: 'package main\n\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello World!")\n}',
+      value: "go",
+      label: "Go",
+      template:
+        'package main\n\nimport "fmt"\n\nfunc main() {\n    fmt.Println("Hello World!")\n}',
     },
     {
-      value: 'rust',
-      label: 'Rust',
+      value: "rust",
+      label: "Rust",
       template: 'fn main() {\n    println!("Hello World!");\n}',
     },
-    { value: 'php', label: 'PHP', template: '<?php\necho "Hello World!";\n?>' },
-    { value: 'ruby', label: 'Ruby', template: '# Ruby\nputs "Hello World!"' },
+    { value: "php", label: "PHP", template: '<?php\necho "Hello World!";\n?>' },
+    { value: "ruby", label: "Ruby", template: '# Ruby\nputs "Hello World!"' },
   ];
 
   /* ========== RESPONSIVE HANDLING ========== */
@@ -120,18 +126,18 @@ console.log("Even:", even);`,
     const handleResize = () => {
       const mobile = window.innerWidth < 768;
       setIsMobile(mobile);
-      setEditorSettings(prev => ({ ...prev, minimap: !mobile }));
+      setEditorSettings((prev) => ({ ...prev, minimap: !mobile }));
       layoutEditor();
     };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, [layoutEditor]);
 
   useEffect(() => {
     if (!isFullscreen) return;
     const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = previousOverflow;
     };
@@ -151,8 +157,9 @@ console.log("Even:", even);`,
   useEffect(() => {
     if (isInitialized) return;
 
-    const defaultLang = localStorage.getItem('selectedLanguage') || 'javascript';
-    const langConfig = languages.find(l => l.value === defaultLang);
+    const defaultLang =
+      localStorage.getItem("selectedLanguage") || "javascript";
+    const langConfig = languages.find((l) => l.value === defaultLang);
 
     dispatch(setLanguage({ projectId, language: defaultLang }));
 
@@ -160,16 +167,16 @@ console.log("Even:", even);`,
       dispatch(
         updateProjectCode({
           projectId,
-          code: langConfig?.template || '// Write your code here...',
-        })
+          code: langConfig?.template || "// Write your code here...",
+        }),
       );
 
       if (socketConnected) {
         dispatch({
-          type: 'socket/codeChange',
+          type: "socket/codeChange",
           payload: {
             projectId,
-            code: langConfig?.template || '',
+            code: langConfig?.template || "",
           },
         });
       }
@@ -195,7 +202,7 @@ console.log("Even:", even);`,
 
     // Add keyboard shortcuts
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, () => {
-      notify({ message: 'Code saved!', type: 'success' });
+      notify({ message: "Code saved!", type: "success" });
     });
 
     editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
@@ -205,8 +212,8 @@ console.log("Even:", even);`,
 
   /* ========== CODE CHANGE HANDLER ========== */
   const handleEditorChange = useCallback(
-    value => {
-      const newCode = value || '';
+    (value) => {
+      const newCode = value || "";
 
       // 1. Instant UI update (Redux)
       dispatch(updateProjectCode({ projectId, code: newCode }));
@@ -214,7 +221,7 @@ console.log("Even:", even);`,
       // 2. Real-time collaboration
       if (socketConnected) {
         dispatch({
-          type: 'socket/codeChange',
+          type: "socket/codeChange",
           payload: { projectId, code: newCode },
         });
       }
@@ -229,38 +236,45 @@ console.log("Even:", even);`,
           setIsSaving(true);
           await saveProjectCode(projectId, newCode);
           setIsSaving(false);
-          console.log(' Auto-saved');
+          console.log(" Auto-saved");
         } catch (err) {
           setIsSaving(false);
-          console.error('Auto-save failed', err);
+          console.error("Auto-save failed", err);
         }
       }, 1000);
     },
-    [dispatch, projectId, socketConnected]
+    [dispatch, projectId, socketConnected],
   );
 
   /* ========== CODE EXECUTION ========== */
 
   const executeCode = () => {
     const latestCode = editorRef.current?.getValue() ?? code;
-    const execLanguage = language || 'javascript';
+    const execLanguage = language || "javascript";
     if (!projectId) {
-      notify({ message: 'Project is not ready yet', type: 'error' });
+      notify({ message: "Project is not ready yet", type: "error" });
       return;
     }
-    if (execLanguage !== 'javascript') {
+    if (execLanguage !== "javascript") {
       notify({
-        message: 'Execution is available only for JavaScript. Use AI Review for other languages.',
-        type: 'warning',
+        message:
+          "Execution is available only for JavaScript. Use AI Review for other languages.",
+        type: "warning",
       });
       return;
     }
 
     if (!latestCode.trim()) {
-      notify({ message: 'Please write some code first!', type: 'warning' });
+      notify({ message: "Please write some code first!", type: "warning" });
       return;
     }
-    dispatch(executeProjectCode({ projectId, code: latestCode, language: execLanguage }));
+    dispatch(
+      executeProjectCode({
+        projectId,
+        code: latestCode,
+        language: execLanguage,
+      }),
+    );
     navigate(`/project/${projectId}?tab=output`);
   };
 
@@ -268,12 +282,12 @@ console.log("Even:", even);`,
     const latestCode = editorRef.current?.getValue() ?? code;
 
     if (!projectId) {
-      notify({ message: 'Project is not ready yet', type: 'error' });
+      notify({ message: "Project is not ready yet", type: "error" });
       return;
     }
 
     if (!latestCode.trim()) {
-      notify({ message: 'Please write some code first!', type: 'warning' });
+      notify({ message: "Please write some code first!", type: "warning" });
       return;
     }
 
@@ -281,22 +295,25 @@ console.log("Even:", even);`,
       updateProjectReview({
         projectId,
         review:
-          '🔄 **Analyzing your code with AI...**\n\nPlease wait while our AI reviews your code. This may take a few moments.',
-      })
+          "🔄 **Analyzing your code with AI...**\n\nPlease wait while our AI reviews your code. This may take a few moments.",
+      }),
     );
 
     if (socketConnected) {
       dispatch({
-        type: 'socket/getReview',
+        type: "socket/getReview",
         payload: {
           projectId,
           code: latestCode,
           language,
         },
       });
-      notify({ message: 'AI review requested...', type: 'info' });
+      notify({ message: "AI review requested...", type: "info" });
     } else {
-      notify({ message: 'Server disconnected. Unable to generate review.', type: 'warning' });
+      notify({
+        message: "Server disconnected. Unable to generate review.",
+        type: "warning",
+      });
     }
 
     navigate(`/project/${projectId}?tab=review`);
@@ -304,65 +321,65 @@ console.log("Even:", even);`,
 
   /* ========== LANGUAGE CHANGE ========== */
   const changeLanguage = useCallback(
-    newLanguage => {
-      const langConfig = languages.find(l => l.value === newLanguage);
+    (newLanguage) => {
+      const langConfig = languages.find((l) => l.value === newLanguage);
       dispatch(setLanguage({ projectId, language: newLanguage }));
 
-      const templateCode = langConfig?.template || '// Write your code here...';
+      const templateCode = langConfig?.template || "// Write your code here...";
       dispatch(updateProjectCode({ projectId, code: templateCode }));
 
       if (socketConnected) {
         dispatch({
-          type: 'socket/codeChange',
+          type: "socket/codeChange",
           payload: { projectId, code: templateCode },
         });
       }
 
-      localStorage.setItem('selectedLanguage', newLanguage);
+      localStorage.setItem("selectedLanguage", newLanguage);
     },
-    [dispatch, projectId, socketConnected]
+    [dispatch, projectId, socketConnected],
   );
 
   /* ========== UTILITY FUNCTIONS ========== */
   const copyCode = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(code);
-      notify({ message: 'Code copied!', type: 'success' });
+      notify({ message: "Code copied!", type: "success" });
     } catch {
-      notify({ message: 'Failed to copy', type: 'error' });
+      notify({ message: "Failed to copy", type: "error" });
     }
   }, [code]);
 
   const resetCode = useCallback(() => {
-    const langConfig = languages.find(l => l.value === language);
-    const templateCode = langConfig?.template || '// Write your code here...';
+    const langConfig = languages.find((l) => l.value === language);
+    const templateCode = langConfig?.template || "// Write your code here...";
     dispatch(updateProjectCode({ projectId, code: templateCode }));
 
     if (socketConnected) {
       dispatch({
-        type: 'socket/codeChange',
+        type: "socket/codeChange",
         payload: { projectId, code: templateCode },
       });
     }
-    notify({ message: 'Code reset', type: 'info' });
+    notify({ message: "Code reset", type: "info" });
   }, [dispatch, projectId, language, socketConnected]);
 
   const downloadCode = () => {
-    const blob = new Blob([code], { type: 'text/plain' });
+    const blob = new Blob([code], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
     a.download = `code.${language}`;
     a.click();
     URL.revokeObjectURL(url);
-    notify({ message: 'Code downloaded!', type: 'success' });
+    notify({ message: "Code downloaded!", type: "success" });
   };
 
   const formatCode = async () => {
     if (!editorRef.current) return;
 
     try {
-      await editorRef.current.getAction('editor.action.formatDocument').run();
+      await editorRef.current.getAction("editor.action.formatDocument").run();
 
       // Get formatted value from editor
       const formattedCode = editorRef.current.getValue();
@@ -373,10 +390,10 @@ console.log("Even:", even);`,
       // Save backend
       await saveProjectCode(projectId, formattedCode);
 
-      notify({ message: 'Code formatted successfully!', type: 'success' });
+      notify({ message: "Code formatted successfully!", type: "success" });
     } catch (err) {
       console.error(err);
-      notify({ message: 'Formatting failed', type: 'error' });
+      notify({ message: "Formatting failed", type: "error" });
     }
   };
 
@@ -385,13 +402,13 @@ console.log("Even:", even);`,
   };
 
   const updateEditorSettings = (key, value) => {
-    setEditorSettings(prev => {
+    setEditorSettings((prev) => {
       const newSettings = { ...prev, [key]: value };
       if (editorRef.current) {
         editorRef.current.updateOptions({
           fontSize: newSettings.fontSize,
           minimap: { enabled: newSettings.minimap },
-          lineNumbers: newSettings.lineNumbers ? 'on' : 'off',
+          lineNumbers: newSettings.lineNumbers ? "on" : "off",
           wordWrap: newSettings.wordWrap,
         });
       }
@@ -403,27 +420,31 @@ console.log("Even:", even);`,
   const editorShell = (
     <div
       className={`flex flex-col h-full overflow-hidden border ${
-        isDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-gray-200'
-      } ${isFullscreen ? 'fixed inset-0 z-[1000] rounded-none' : 'rounded-lg'}`}
+        isDarkMode ? "bg-gray-900 border-gray-700" : "bg-white border-gray-200"
+      } ${isFullscreen ? "fixed inset-0 z-[1000] rounded-none" : "rounded-lg"}`}
     >
       {/* Header */}
-      <div className={`p-3 md:p-4 border-b ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+      <div
+        className={`p-3 md:p-4 border-b ${isDarkMode ? "border-gray-700" : "border-gray-200"}`}
+      >
         <div className="flex items-center justify-between mb-2 md:mb-3 gap-2 flex-wrap">
           <div className="flex items-center space-x-2">
             <button
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate("/dashboard")}
               className="flex items-center cursor-pointer gap-2 rounded-lg px-2 py-1 hover:bg-white/5 transition-colors"
               aria-label="Go to dashboard"
             >
               <span
                 className={`text-base md:text-lg font-semibold ${
-                  isDarkMode ? 'text-white' : 'text-gray-900'
+                  isDarkMode ? "text-white" : "text-gray-900"
                 }`}
               >
                 Editor
               </span>
             </button>
-            {isSaving && <span className="text-xs text-yellow-400 ml-2">Saving…</span>}
+            {isSaving && (
+              <span className="text-xs text-yellow-400 ml-2">Saving…</span>
+            )}
             {!socketConnected && (
               <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-500/20 text-yellow-600">
                 Offline
@@ -438,8 +459,8 @@ console.log("Even:", even);`,
               disabled={isExecuting}
               className={`p-2 rounded-lg transition-all cursor-pointer ${
                 isExecuting
-                  ? 'bg-gray-400 cursor-not-allowed text-white'
-                  : 'bg-gradient-to-r from-[#17E1FF] to-[#11B6FF] hover:from-[#34E7FF] hover:to-[#1EC5FF] text-[#0B0E11] shadow-[0_8px_24px_rgba(23,225,255,0.35)]'
+                  ? "bg-gray-400 cursor-not-allowed text-white"
+                  : "bg-gradient-to-r from-[#17E1FF] to-[#11B6FF] hover:from-[#34E7FF] hover:to-[#1EC5FF] text-[#0B0E11] shadow-[0_8px_24px_rgba(23,225,255,0.35)]"
               }`}
               title="Run Code (Ctrl+Enter)"
             >
@@ -455,10 +476,10 @@ console.log("Even:", even);`,
               disabled={!code.trim()}
               className={`p-2 rounded-lg transition-all cursor-pointer ${
                 !code.trim()
-                  ? 'bg-gray-400 cursor-not-allowed text-white'
+                  ? "bg-gray-400 cursor-not-allowed text-white"
                   : isDarkMode
-                    ? 'bg-white/10 text-white hover:bg-[#17E1FF]/20 hover:text-[#17E1FF]'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? "bg-white/10 text-white hover:bg-[#17E1FF]/20 hover:text-[#17E1FF]"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
               }`}
               title="Generate AI Review"
             >
@@ -469,21 +490,21 @@ console.log("Even:", even);`,
               <>
                 <button
                   onClick={copyCode}
-                  className={`p-2 rounded-lg cursor-pointer ${isDarkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-100 hover:bg-gray-200'}`}
+                  className={`p-2 rounded-lg cursor-pointer ${isDarkMode ? "bg-gray-800 hover:bg-gray-700" : "bg-gray-100 hover:bg-gray-200"}`}
                   title="Copy"
                 >
                   <Copy className="w-4 h-4" />
                 </button>
                 <button
                   onClick={downloadCode}
-                  className={`p-2 rounded-lg cursor-pointer ${isDarkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-100 hover:bg-gray-200'}`}
+                  className={`p-2 rounded-lg cursor-pointer ${isDarkMode ? "bg-gray-800 hover:bg-gray-700" : "bg-gray-100 hover:bg-gray-200"}`}
                   title="Download"
                 >
                   <Download className="w-4 h-4" />
                 </button>
                 <button
                   onClick={formatCode}
-                  className={`p-2 rounded-lg cursor-pointer ${isDarkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-100 hover:bg-gray-200'}`}
+                  className={`p-2 rounded-lg cursor-pointer ${isDarkMode ? "bg-gray-800 hover:bg-gray-700" : "bg-gray-100 hover:bg-gray-200"}`}
                   title="Format"
                 >
                   <Code2 className="w-4 h-4" />
@@ -493,7 +514,7 @@ console.log("Even:", even);`,
 
             <button
               onClick={resetCode}
-              className={`p-2 rounded-lg cursor-pointer ${isDarkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-100 hover:bg-gray-200'}`}
+              className={`p-2 rounded-lg cursor-pointer ${isDarkMode ? "bg-gray-800 hover:bg-gray-700" : "bg-gray-100 hover:bg-gray-200"}`}
               title="Reset"
             >
               <RotateCcw className="w-4 h-4" />
@@ -501,7 +522,7 @@ console.log("Even:", even);`,
 
             <button
               onClick={() => setShowSettings(!showSettings)}
-              className={`p-2 rounded-lg cursor-pointer ${isDarkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-100 hover:bg-gray-200'}`}
+              className={`p-2 rounded-lg cursor-pointer ${isDarkMode ? "bg-gray-800 hover:bg-gray-700" : "bg-gray-100 hover:bg-gray-200"}`}
               title="Settings"
             >
               <Settings className="w-4 h-4" />
@@ -509,19 +530,25 @@ console.log("Even:", even);`,
 
             <button
               onClick={toggleFullscreen}
-              className={`p-2 rounded-lg cursor-pointer ${isDarkMode ? 'bg-gray-800 hover:bg-gray-700' : 'bg-gray-100 hover:bg-gray-200'}`}
+              className={`p-2 rounded-lg cursor-pointer ${isDarkMode ? "bg-gray-800 hover:bg-gray-700" : "bg-gray-100 hover:bg-gray-200"}`}
             >
-              {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+              {isFullscreen ? (
+                <Minimize2 className="w-4 h-4" />
+              ) : (
+                <Maximize2 className="w-4 h-4" />
+              )}
             </button>
 
             <select
               value={language}
-              onChange={e => changeLanguage(e.target.value)}
+              onChange={(e) => changeLanguage(e.target.value)}
               className={`px-2 md:px-3 py-1.5 md:py-2 border cursor-pointer rounded-lg text-xs md:text-sm ${
-                isDarkMode ? 'bg-gray-800 border-gray-600 text-white' : 'bg-white border-gray-300'
+                isDarkMode
+                  ? "bg-gray-800 border-gray-600 text-white"
+                  : "bg-white border-gray-300"
               }`}
             >
-              {languages.map(lang => (
+              {languages.map((lang) => (
                 <option key={lang.value} value={lang.value}>
                   {lang.label}
                 </option>
@@ -533,14 +560,16 @@ console.log("Even:", even);`,
         {/* Settings Panel */}
         {showSettings && (
           <div
-            className={`mt-3 p-3 rounded-lg border ${isDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-gray-50 border-gray-200'}`}
+            className={`mt-3 p-3 rounded-lg border ${isDarkMode ? "bg-gray-800 border-gray-700" : "bg-gray-50 border-gray-200"}`}
           >
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm">
               <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
                   checked={editorSettings.minimap}
-                  onChange={e => updateEditorSettings('minimap', e.target.checked)}
+                  onChange={(e) =>
+                    updateEditorSettings("minimap", e.target.checked)
+                  }
                   className="rounded"
                 />
                 <span>Minimap</span>
@@ -549,7 +578,9 @@ console.log("Even:", even);`,
                 <input
                   type="checkbox"
                   checked={editorSettings.lineNumbers}
-                  onChange={e => updateEditorSettings('lineNumbers', e.target.checked)}
+                  onChange={(e) =>
+                    updateEditorSettings("lineNumbers", e.target.checked)
+                  }
                   className="rounded"
                 />
                 <span>Line Numbers</span>
@@ -559,10 +590,12 @@ console.log("Even:", even);`,
                 <input
                   type="number"
                   value={editorSettings.fontSize}
-                  onChange={e => updateEditorSettings('fontSize', parseInt(e.target.value))}
+                  onChange={(e) =>
+                    updateEditorSettings("fontSize", parseInt(e.target.value))
+                  }
                   min="10"
                   max="24"
-                  className={`w-16 px-2 py-1 rounded ${isDarkMode ? 'bg-gray-700' : 'bg-white'}`}
+                  className={`w-16 px-2 py-1 rounded ${isDarkMode ? "bg-gray-700" : "bg-white"}`}
                 />
               </label>
             </div>
@@ -578,11 +611,11 @@ console.log("Even:", even);`,
           value={code}
           onChange={handleEditorChange}
           onMount={handleEditorDidMount}
-          theme={isDarkMode ? 'vs-dark' : 'light'}
+          theme={isDarkMode ? "vs-dark" : "light"}
           options={{
             ...editorSettings,
             minimap: { enabled: editorSettings.minimap },
-            lineNumbers: editorSettings.lineNumbers ? 'on' : 'off',
+            lineNumbers: editorSettings.lineNumbers ? "on" : "off",
             wordWrap: editorSettings.wordWrap,
             automaticLayout: true,
             formatOnType: true,
@@ -598,7 +631,7 @@ console.log("Even:", even);`,
     </div>
   );
 
-  if (isFullscreen && typeof document !== 'undefined') {
+  if (isFullscreen && typeof document !== "undefined") {
     return createPortal(editorShell, document.body);
   }
 

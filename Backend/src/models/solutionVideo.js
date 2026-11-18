@@ -1,16 +1,16 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const videoSchema = new Schema(
   {
     problemId: {
       type: Schema.Types.ObjectId,
-      ref: 'problem',
+      ref: "problem",
       required: true,
     },
     userId: {
       type: Schema.Types.ObjectId,
-      ref: 'user',
+      ref: "user",
       required: true,
     },
     cloudinaryPublicId: {
@@ -32,9 +32,9 @@ const videoSchema = new Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 const SolutionVideo =
-  mongoose.models.SolutionVideo || mongoose.model('SolutionVideo', videoSchema);
+  mongoose.models.SolutionVideo || mongoose.model("SolutionVideo", videoSchema);
 export default SolutionVideo;

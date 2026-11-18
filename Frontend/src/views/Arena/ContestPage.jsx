@@ -14,10 +14,10 @@ import {
   PlayCircle,
   TrendingUp,
   Award,
-  Flame
+  Flame,
 } from "lucide-react";
 import axiosClient from "../../utils/axiosClient";
-import LoadingSpinner from "../../components/common/LoadingSpinner";
+import LoadingSpinner from "../../components/ui/LoadingSpinner";
 
 const ContestPage = () => {
   const [contests, setContests] = useState([]);
@@ -30,7 +30,7 @@ const ContestPage = () => {
     const fetchTodayContest = async () => {
       try {
         const res = await axiosClient.get("/contest/today", {
-          signal: controller.signal
+          signal: controller.signal,
         });
 
         if (res.data && !res.data.error) {
@@ -39,7 +39,7 @@ const ContestPage = () => {
           console.log("No contest found for today or error:", res.data?.error);
         }
       } catch (err) {
-        if (err.name !== 'AbortError') {
+        if (err.name !== "AbortError") {
           console.log("Error fetching today's contest:", err);
         }
       } finally {
@@ -56,7 +56,7 @@ const ContestPage = () => {
 
   useEffect(() => {
     // Check if contests is an object with endTime property
-    if (!contests || typeof contests !== 'object' || !contests.endTime) {
+    if (!contests || typeof contests !== "object" || !contests.endTime) {
       return;
     }
 
@@ -67,7 +67,7 @@ const ContestPage = () => {
 
         // Validate that end is a valid number
         if (isNaN(end)) {
-          console.error('Invalid endTime format:', contests.endTime);
+          console.error("Invalid endTime format:", contests.endTime);
           clearInterval(timer);
           return;
         }
@@ -76,15 +76,17 @@ const ContestPage = () => {
 
         if (distance > 0) {
           setTimeLeft({
-            hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+            hours: Math.floor(
+              (distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
+            ),
             minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
-            seconds: Math.floor((distance % (1000 * 60)) / 1000)
+            seconds: Math.floor((distance % (1000 * 60)) / 1000),
           });
         } else {
           setTimeLeft({ expired: true });
         }
       } catch (error) {
-        console.error('Error in timer calculation:', error);
+        console.error("Error in timer calculation:", error);
         clearInterval(timer);
       }
     }, 1000);
@@ -98,9 +100,9 @@ const ContestPage = () => {
       opacity: 1,
       transition: {
         staggerChildren: 0.2,
-        duration: 0.6
-      }
-    }
+        duration: 0.6,
+      },
+    },
   };
 
   const itemVariants = {
@@ -108,8 +110,8 @@ const ContestPage = () => {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.6 }
-    }
+      transition: { duration: 0.6 },
+    },
   };
 
   const FloatingCard = ({ children, delay = 0 }) => (
@@ -136,8 +138,14 @@ const ContestPage = () => {
       {/* Animated Background Elements */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-orange-500/10 rounded-full blur-3xl animate-pulse" />
-        <div className="absolute top-1/3 -left-40 w-60 h-60 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-        <div className="absolute bottom-20 right-1/4 w-40 h-40 bg-blue-500/10 rounded-full blur-2xl animate-pulse" style={{ animationDelay: '2s' }} />
+        <div
+          className="absolute top-1/3 -left-40 w-60 h-60 bg-purple-500/10 rounded-full blur-3xl animate-pulse"
+          style={{ animationDelay: "1s" }}
+        />
+        <div
+          className="absolute bottom-20 right-1/4 w-40 h-40 bg-blue-500/10 rounded-full blur-2xl animate-pulse"
+          style={{ animationDelay: "2s" }}
+        />
       </div>
 
       <motion.div
@@ -160,7 +168,6 @@ const ContestPage = () => {
           </p>
         </motion.div>
 
-
         {/* Main Contest Card */}
         <AnimatePresence>
           {!contests ? (
@@ -171,17 +178,17 @@ const ContestPage = () => {
             >
               <div className="bg-slate-800/30 backdrop-blur-sm rounded-3xl border border-slate-700/50 p-12 max-w-2xl mx-auto">
                 <Trophy className="text-slate-400 mx-auto mb-6" size={64} />
-                <h3 className="text-2xl font-bold text-white mb-4">No Active Contest</h3>
+                <h3 className="text-2xl font-bold text-white mb-4">
+                  No Active Contest
+                </h3>
                 <p className="text-slate-400 text-lg">
-                  No contests are running today. Check back tomorrow for new challenges!
+                  No contests are running today. Check back tomorrow for new
+                  challenges!
                 </p>
               </div>
             </motion.div>
           ) : (
-            <motion.div
-              variants={itemVariants}
-              className="relative"
-            >
+            <motion.div variants={itemVariants} className="relative">
               {/* Main Contest Card */}
               <div className="bg-gradient-to-br from-slate-800/60 to-slate-900/60 backdrop-blur-sm rounded-3xl border border-slate-700/50 overflow-hidden shadow-2xl">
                 {/* Contest Header */}
@@ -190,7 +197,9 @@ const ContestPage = () => {
                     <div>
                       <div className="flex items-center gap-3 mb-3">
                         <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse" />
-                        <span className="text-green-400 font-semibold">LIVE</span>
+                        <span className="text-green-400 font-semibold">
+                          LIVE
+                        </span>
                       </div>
                       <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
                         {contests.name}
@@ -198,11 +207,15 @@ const ContestPage = () => {
                       <div className="flex items-center gap-4 text-slate-300">
                         <div className="flex items-center gap-2">
                           <Calendar size={18} />
-                          <span>{new Date(contests.createdAt).toLocaleDateString()}</span>
+                          <span>
+                            {new Date(contests.createdAt).toLocaleDateString()}
+                          </span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Clock size={18} />
-                          <span>{new Date(contests.createdAt).toLocaleTimeString()}</span>
+                          <span>
+                            {new Date(contests.createdAt).toLocaleTimeString()}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -210,27 +223,35 @@ const ContestPage = () => {
                     {/* Timer */}
                     {timeLeft.expired ? (
                       <div className="text-center">
-                        <div className="text-red-400 font-bold text-lg">CONTEST ENDED</div>
+                        <div className="text-red-400 font-bold text-lg">
+                          CONTEST ENDED
+                        </div>
                       </div>
                     ) : (
                       <div className="text-center">
-                        <div className="text-slate-300 mb-2">Time Remaining</div>
+                        <div className="text-slate-300 mb-2">
+                          Time Remaining
+                        </div>
                         <div className="flex gap-2 justify-center">
                           {[
-                            { label: 'H', value: timeLeft.hours || 0 },
-                            { label: 'M', value: timeLeft.minutes || 0 },
-                            { label: 'S', value: timeLeft.seconds || 0 }
+                            { label: "H", value: timeLeft.hours || 0 },
+                            { label: "M", value: timeLeft.minutes || 0 },
+                            { label: "S", value: timeLeft.seconds || 0 },
                           ].map((item) => (
                             <motion.div
                               key={item.label}
-                              animate={{ scale: item.label === 'S' ? [1, 1.1, 1] : 1 }}
+                              animate={{
+                                scale: item.label === "S" ? [1, 1.1, 1] : 1,
+                              }}
                               transition={{ duration: 1, repeat: Infinity }}
                               className="bg-slate-700/50 rounded-lg p-3 min-w-[60px]"
                             >
                               <div className="text-2xl font-bold text-orange-400">
-                                {String(item.value).padStart(2, '0')}
+                                {String(item.value).padStart(2, "0")}
                               </div>
-                              <div className="text-xs text-slate-400">{item.label}</div>
+                              <div className="text-xs text-slate-400">
+                                {item.label}
+                              </div>
                             </motion.div>
                           ))}
                         </div>
@@ -244,7 +265,9 @@ const ContestPage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Contest Info */}
                     <div>
-                      <h3 className="text-xl font-semibold text-white mb-4">Contest Highlights</h3>
+                      <h3 className="text-xl font-semibold text-white mb-4">
+                        Contest Highlights
+                      </h3>
                       <div className="space-y-3">
                         <div className="flex items-center gap-3 text-slate-300">
                           <Zap className="text-yellow-400" size={20} />
@@ -268,8 +291,12 @@ const ContestPage = () => {
                     {/* Action Section */}
                     <div className="flex flex-col justify-center">
                       <div className="text-center mb-6">
-                        <div className="text-slate-300 mb-2">Ready to compete?</div>
-                        <div className="text-3xl font-bold text-white">Join the Battle!</div>
+                        <div className="text-slate-300 mb-2">
+                          Ready to compete?
+                        </div>
+                        <div className="text-3xl font-bold text-white">
+                          Join the Battle!
+                        </div>
                       </div>
 
                       <motion.div
@@ -282,9 +309,15 @@ const ContestPage = () => {
                           className="block w-full"
                         >
                           <button className="w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-orange-500/25 transition-all duration-300 flex items-center justify-center gap-3 group">
-                            <PlayCircle size={24} className="group-hover:scale-110 transition-transform" />
+                            <PlayCircle
+                              size={24}
+                              className="group-hover:scale-110 transition-transform"
+                            />
                             <span className="text-lg">Enter Contest Arena</span>
-                            <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
+                            <ArrowRight
+                              size={24}
+                              className="group-hover:translate-x-1 transition-transform"
+                            />
                           </button>
                         </Link>
 
@@ -302,10 +335,13 @@ const ContestPage = () => {
         {/* Bottom Section */}
         <motion.div variants={itemVariants} className="mt-12 text-center">
           <div className="bg-slate-800/30 backdrop-blur-sm rounded-2xl border border-slate-700/50 p-8">
-            <h3 className="text-2xl font-bold text-white mb-4">🚀 Level Up Your Skills</h3>
+            <h3 className="text-2xl font-bold text-white mb-4">
+              🚀 Level Up Your Skills
+            </h3>
             <p className="text-slate-300 text-lg max-w-3xl mx-auto">
-              Join thousands of developers pushing their limits, solving complex problems, and climbing the leaderboard.
-              Every contest is a new opportunity to showcase your skills and learn from the best.
+              Join thousands of developers pushing their limits, solving complex
+              problems, and climbing the leaderboard. Every contest is a new
+              opportunity to showcase your skills and learn from the best.
             </p>
           </div>
         </motion.div>

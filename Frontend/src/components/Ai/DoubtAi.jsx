@@ -70,8 +70,7 @@ function DoubtAI({ problem }) {
 
   const detectLanguage = (code) => {
     // Simple language detection based on code patterns
-    if (code.includes("function"))
-      return "javascript";
+    if (code.includes("function")) return "javascript";
     if (code.includes("def ") || code.includes("import ")) return "python";
     if (code.includes("public class") || code.includes("System.out.println"))
       return "java";
@@ -87,7 +86,7 @@ function DoubtAI({ problem }) {
 
     // Split by code blocks, lists, and other markdown
     const parts = text.split(
-      /(```[\s\S]*?```|`[^`]+`|\n\s*[-*•] |\n\s*\d+\. |\n\s*🔹 |\n\s*💡 |\n\s*⚠️ |\n\s*📝 )/
+      /(```[\s\S]*?```|`[^`]+`|\n\s*[-*•] |\n\s*\d+\. |\n\s*🔹 |\n\s*💡 |\n\s*⚠️ |\n\s*📝 )/,
     );
 
     let isList = false;
@@ -346,7 +345,7 @@ function DoubtAI({ problem }) {
             .replace(/(["'].*?["'])/g, '<span class="text-green-400">$&</span>')
             .replace(
               /(\/\/.*|\/\*[\s\S]*?\*\/)/g,
-              '<span class="text-gray-500">$&</span>'
+              '<span class="text-gray-500">$&</span>',
             )
             .replace(/\b(\d+)\b/g, '<span class="text-purple-400">$&</span>'),
         }}
@@ -405,10 +404,10 @@ function DoubtAI({ problem }) {
 
       // Use fetch for SSE streaming (axios doesn't support SSE properly)
       const response = await fetch(`${import.meta.env.VITE_API_URL}/ai/chat`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${authToken}`,
         },
         body: JSON.stringify({
           messages: [...messages, userMessage],
@@ -416,7 +415,7 @@ function DoubtAI({ problem }) {
           description: problem?.description,
           testCases: problem?.visibleTestCases,
           startCode: problem?.startCode,
-        })
+        }),
       });
 
       if (!response.ok) {
@@ -468,8 +467,8 @@ function DoubtAI({ problem }) {
                         parts: [{ text: msg.parts[0].text + content }],
                         timestamp: new Date(),
                       }
-                    : msg
-                )
+                    : msg,
+                ),
               );
             }
           }
@@ -633,8 +632,14 @@ function DoubtAI({ problem }) {
                       {msg.streaming && msg.parts[0].text.length === 0 ? (
                         <div className="flex items-center gap-2">
                           <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"></div>
-                          <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
-                          <div className="w-2 h-2 bg-orange-400 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                          <div
+                            className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"
+                            style={{ animationDelay: "0.2s" }}
+                          ></div>
+                          <div
+                            className="w-2 h-2 bg-orange-400 rounded-full animate-pulse"
+                            style={{ animationDelay: "0.4s" }}
+                          ></div>
                         </div>
                       ) : (
                         formatMessage(msg.parts[0].text)

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "../ui/button";
+import { Button } from "../ui/Button";
 import { Input } from "../ui/input";
 import { toast } from "sonner";
 import { Plus, Minus, RotateCcw, Eye, Play } from "lucide-react";
@@ -170,8 +170,8 @@ export const QueueVisualizer = () => {
                         index === 0
                           ? "bg-[#F9A825] text-slate-900 border-2 border-[#F9A825] shadow-lg"
                           : index === queue.length - 1
-                          ? "bg-[#475569] text-white border-2 border-[#F9A825]"
-                          : "bg-[#334155] text-gray-300 border-2 border-[#475569]"
+                            ? "bg-[#475569] text-white border-2 border-[#F9A825]"
+                            : "bg-[#334155] text-gray-300 border-2 border-[#475569]"
                       }
                     `}
                   >

@@ -1,26 +1,28 @@
 //src/lib/notify.js
 
-import { toast } from 'sonner';
+import { toast } from "sonner";
 
 let lastFire = 0;
+let lastMessage = "";
 
-export const notify = (input, type = 'info') => {
-  const now = Date.now();
-  if (now - lastFire < 2000) return;
-  lastFire = now;
-
+export const notify = (input, type = "info") => {
   let message = input;
   let toastType = type;
 
   // Support object-style calls: notify({ message, type })
-  if (typeof input === 'object' && input !== null) {
+  if (typeof input === "object" && input !== null) {
     message = input.message;
-    toastType = input.type || 'info';
+    toastType = input.type || "info";
   }
 
-  if (typeof message !== 'string') {
-    message = String(message);
+  if (typeof message !== "string") {
+    message = String(message || "");
   }
+
+  const now = Date.now();
+  if (message === lastMessage && now - lastFire < 1500) return;
+  lastFire = now;
+  lastMessage = message;
 
   const map = {
     success: toast.success,

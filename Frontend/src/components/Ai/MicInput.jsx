@@ -3,18 +3,20 @@ import React from "react";
 import { startSpeechRecognition } from "../../utils/Ai/speechToText";
 import axiosClient from "../../utils/axiosClient";
 
-const MicInput = ({ onAIResponse, onUserInput }) => {
+const MicInput = ({ sessionId, onAIResponse, onUserInput }) => {
   const handleMicClick = () => {
     startSpeechRecognition(async (transcript) => {
       onUserInput(transcript); // send to parent
-      const res = await axiosClient.post("/api/ai/ask", { question: transcript });
-      onAIResponse(res.data.answer);
+      if (!sessionId) return;
+      const res = await axiosClient.post("/ai/continue", {
+        sessionId,
+        userAnswer: transcript,
+      });
+      onAIResponse(res.data?.data?.question);
     });
   };
 
-  return (
-    <button onClick={handleMicClick}>🎤 Speak Answer</button>
-  );
+  return <button onClick={handleMicClick}>🎤 Speak Answer</button>;
 };
 
 export default MicInput;

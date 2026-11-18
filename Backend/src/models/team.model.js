@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const memberSchema = new mongoose.Schema({
   username: {
@@ -48,14 +48,16 @@ const teamSchema = new mongoose.Schema({
 });
 
 // Update the updatedAt field before saving
-teamSchema.pre('save', function (next) {
+teamSchema.pre("save", function (next) {
   this.updatedAt = Date.now();
   next();
 });
 
 // Instance method to add member
 teamSchema.methods.addMember = function (username, isAdmin = false) {
-  const existingMember = this.members.find(member => member.username === username);
+  const existingMember = this.members.find(
+    (member) => member.username === username,
+  );
 
   if (!existingMember) {
     this.members.push({
@@ -74,9 +76,9 @@ teamSchema.methods.addMember = function (username, isAdmin = false) {
 
 // Instance method to get active members
 teamSchema.methods.getActiveMembers = function () {
-  return this.members.filter(member => member.isActive);
+  return this.members.filter((member) => member.isActive);
 };
 
-const Team = mongoose.model('Team', teamSchema);
+const Team = mongoose.model("Team", teamSchema);
 
 export default Team;

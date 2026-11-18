@@ -1,9 +1,13 @@
-import Contest from '../models/contest.js';
-import ContestSubmission from '../models/contestSubmission.js';
-import Problem from '../models/problem.js';
-import User from '../models/user.js';
-import { getLanguageById, SubmitBatch, submitToken } from '../services/problemUtility.js';
-import { updateAndEmitLeaderboard } from './leaderboardController.js';
+import Contest from "../models/contest.js";
+import ContestSubmission from "../models/contestSubmission.js";
+import Problem from "../models/problem.js";
+import User from "../models/user.js";
+import {
+  getLanguageById,
+  SubmitBatch,
+  submitToken,
+} from "../services/problemUtility.js";
+import { updateAndEmitLeaderboard } from "./leaderboardController.js";
 
 const calculateScore = (problem, testCasesPassed) => {
   if (!problem.hiddenTestCases || problem.hiddenTestCases.length === 0) {
@@ -12,13 +16,13 @@ const calculateScore = (problem, testCasesPassed) => {
   const difficulty = problem.difficulty.toLowerCase();
   let baseScore = 0;
   switch (difficulty) {
-    case 'easy':
+    case "easy":
       baseScore = 10;
       break;
-    case 'medium':
+    case "medium":
       baseScore = 20;
       break;
-    case 'hard':
+    case "hard":
       baseScore = 30;
       break;
     default:
@@ -36,19 +40,19 @@ export const submitContestCode = async (req, res) => {
     if (!code?.trim()) {
       return res.status(400).json({
         success: false,
-        message: 'Code is required',
+        message: "Code is required",
       });
     }
 
     let normalizedLanguage = language?.toLowerCase();
-    if (normalizedLanguage === 'cpp') {
-      normalizedLanguage = 'c++';
+    if (normalizedLanguage === "cpp") {
+      normalizedLanguage = "c++";
     }
 
     if (!normalizedLanguage) {
       return res.status(400).json({
         success: false,
-        message: 'Language is required',
+        message: "Language is required",
       });
     }
 
@@ -56,7 +60,7 @@ export const submitContestCode = async (req, res) => {
     if (!contest) {
       return res.status(404).json({
         success: false,
-        message: 'Contest not found',
+        message: "Contest not found",
       });
     }
 
@@ -64,7 +68,7 @@ export const submitContestCode = async (req, res) => {
     if (!problem || !contest.problems.includes(problemId)) {
       return res.status(404).json({
         success: false,
-        message: 'Problem not found in this contest',
+        message: "Problem not found in this contest",
       });
     }
 
@@ -74,19 +78,19 @@ export const submitContestCode = async (req, res) => {
       problemId,
       code,
       language: normalizedLanguage,
-      status: 'Processing',
+      status: "Processing",
       totalTestCases: problem.hiddenTestCases?.length || 0,
       submissionTime: new Date(),
     });
 
     const languageId = getLanguageById(normalizedLanguage);
     if (!languageId) {
-      submission.status = 'Error';
-      submission.errorMessage = 'Unsupported language';
+      submission.status = "Error";
+      submission.errorMessage = "Unsupported language";
       await submission.save();
       return res.status(400).json({
         success: false,
-        message: 'Unsupported programming language',
+        message: "Unsupported programming language",
       });
     }
 
@@ -98,7 +102,7 @@ export const submitContestCode = async (req, res) => {
 
     const submitResult = await SubmitBatch(testCases);
     if (!submitResult?.length) {
-      throw new Error('Failed to submit to judge');
+      throw new Error("Failed to submit to judge");
     }
 
     const resultTokens = submitResult.map((value) => value.token);
@@ -107,7 +111,7 @@ export const submitContestCode = async (req, res) => {
     let testCasesPassed = 0;
     let runtime = 0;
     let memory = 0;
-    let status = 'Accepted';
+    let status = "Accepted";
     let errorMessage = null;
 
     for (let i = 0; i < testResults.length; i++) {
@@ -116,8 +120,8 @@ export const submitContestCode = async (req, res) => {
       const expectedOutput = problem.hiddenTestCases[i]?.output;
       const actualOutput = result.stdout;
 
-      const normalizedExpected = expectedOutput?.trim() || '';
-      const normalizedActual = actualOutput?.trim() || '';
+      const normalizedExpected = expectedOutput?.trim() || "";
+      const normalizedActual = actualOutput?.trim() || "";
 
       if (statusId === 3) {
         if (normalizedExpected === normalizedActual) {
@@ -125,26 +129,32 @@ export const submitContestCode = async (req, res) => {
           runtime += parseFloat(result.time || 0);
           memory = Math.max(memory, parseInt(result.memory || 0));
         } else {
-          status = 'Wrong Answer';
+          status = "Wrong Answer";
           errorMessage = `Expected: ${normalizedExpected.substring(0, 50)}, Got: ${normalizedActual.substring(0, 50)}`;
           break;
         }
       } else {
         if (statusId === 4) {
-          status = 'Wrong Answer';
-          errorMessage = result.stderr || result.compile_output || 'Wrong Answer';
+          status = "Wrong Answer";
+          errorMessage =
+            result.stderr || result.compile_output || "Wrong Answer";
         } else if (statusId === 6) {
-          status = 'Compilation Error';
-          errorMessage = result.compile_output || result.stderr || 'Compilation Error';
+          status = "Compilation Error";
+          errorMessage =
+            result.compile_output || result.stderr || "Compilation Error";
         } else if (statusId === 5) {
-          status = 'Time Limit Exceeded';
-          errorMessage = 'Time Limit Exceeded';
+          status = "Time Limit Exceeded";
+          errorMessage = "Time Limit Exceeded";
         } else if ([7, 8, 9, 10, 11, 12].includes(statusId)) {
-          status = 'Runtime Error';
-          errorMessage = result.stderr || result.message || 'Runtime Error';
+          status = "Runtime Error";
+          errorMessage = result.stderr || result.message || "Runtime Error";
         } else {
-          status = result.status?.description || 'Error';
-          errorMessage = result.stderr || result.compile_output || result.message || 'Test case failed';
+          status = result.status?.description || "Error";
+          errorMessage =
+            result.stderr ||
+            result.compile_output ||
+            result.message ||
+            "Test case failed";
         }
         break;
       }
@@ -158,21 +168,23 @@ export const submitContestCode = async (req, res) => {
     submission.score = calculateScore(problem, testCasesPassed);
     await submission.save();
 
-    if (status === 'Accepted') {
+    if (status === "Accepted") {
       const user = await User.findById(userId);
       if (user) {
         const totalProblemsInContest = contest.problems.length;
         const solvedProblems = await ContestSubmission.find({
           userId,
           contestId,
-          status: 'Accepted',
-        }).distinct('problemId');
+          status: "Accepted",
+        }).distinct("problemId");
 
         if (solvedProblems.length === totalProblemsInContest) {
           if (!user.contestsCompleted.some((c) => c.toString() === contestId)) {
             user.contestsCompleted.push(contestId);
             const today = new Date();
-            const lastCompletion = user.lastContestCompletion ? new Date(user.lastContestCompletion) : null;
+            const lastCompletion = user.lastContestCompletion
+              ? new Date(user.lastContestCompletion)
+              : null;
 
             if (lastCompletion) {
               const diffTime = Math.abs(today - lastCompletion);
@@ -208,10 +220,11 @@ export const submitContestCode = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Submission error:', error);
+    console.error("Submission error:", error);
     return res.status(500).json({
       success: false,
-      message: error.message || 'Internal server error while processing submission',
+      message:
+        error.message || "Internal server error while processing submission",
     });
   }
 };
@@ -225,7 +238,7 @@ export const runContestCode = async (req, res) => {
     if (!userId || !contestId || !problemId || !code || !language) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields',
+        message: "Missing required fields",
       });
     }
 
@@ -233,7 +246,7 @@ export const runContestCode = async (req, res) => {
     if (!contest) {
       return res.status(404).json({
         success: false,
-        message: 'Contest not found',
+        message: "Contest not found",
       });
     }
 
@@ -244,21 +257,21 @@ export const runContestCode = async (req, res) => {
     if (now < startTime) {
       return res.status(400).json({
         success: false,
-        message: 'Contest has not started yet',
+        message: "Contest has not started yet",
       });
     }
 
     if (now > endTime) {
       return res.status(400).json({
         success: false,
-        message: 'Contest has ended',
+        message: "Contest has ended",
       });
     }
 
     if (!contest.problems.includes(problemId)) {
       return res.status(400).json({
         success: false,
-        message: 'Problem is not part of this contest',
+        message: "Problem is not part of this contest",
       });
     }
 
@@ -266,20 +279,20 @@ export const runContestCode = async (req, res) => {
     if (!problem) {
       return res.status(404).json({
         success: false,
-        message: 'Problem not found',
+        message: "Problem not found",
       });
     }
 
     let normalizedLanguage = language;
-    if (language === 'cpp') {
-      normalizedLanguage = 'c++';
+    if (language === "cpp") {
+      normalizedLanguage = "c++";
     }
 
     const languageId = getLanguageById(normalizedLanguage);
     if (!languageId) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid language',
+        message: "Invalid language",
       });
     }
 
@@ -293,7 +306,7 @@ export const runContestCode = async (req, res) => {
     if (!submitResult || !Array.isArray(submitResult)) {
       return res.status(500).json({
         success: false,
-        message: 'Code evaluation failed',
+        message: "Code evaluation failed",
       });
     }
 
@@ -311,8 +324,8 @@ export const runContestCode = async (req, res) => {
       const expectedOutput = problem.visibleTestCases[index]?.output;
       const actualOutput = test.stdout;
 
-      const normalizedExpected = expectedOutput?.trim() || '';
-      const normalizedActual = actualOutput?.trim() || '';
+      const normalizedExpected = expectedOutput?.trim() || "";
+      const normalizedActual = actualOutput?.trim() || "";
 
       const passed = statusId === 3 && normalizedExpected === normalizedActual;
 
@@ -323,9 +336,10 @@ export const runContestCode = async (req, res) => {
       } else {
         status = false;
         if (statusId === 3 && normalizedExpected !== normalizedActual) {
-          errorMessage = 'Wrong Answer';
+          errorMessage = "Wrong Answer";
         } else {
-          errorMessage = test.stderr || test.compile_output || 'Execution Error';
+          errorMessage =
+            test.stderr || test.compile_output || "Execution Error";
         }
       }
 
@@ -333,7 +347,7 @@ export const runContestCode = async (req, res) => {
         passed,
         input: problem.visibleTestCases[index].input,
         expectedOutput: problem.visibleTestCases[index].output,
-        actualOutput: test.stdout || test.output || '',
+        actualOutput: test.stdout || test.output || "",
         error: test.stderr || test.compile_output || null,
         runtime: test.time ? parseFloat(test.time) * 1000 : null,
       };
@@ -349,7 +363,7 @@ export const runContestCode = async (req, res) => {
       errorMessage,
     });
   } catch (error) {
-    console.error('❌ Error running contest code:', error);
+    console.error("❌ Error running contest code:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -362,7 +376,7 @@ export const getUserContestSubmissions = async (req, res) => {
     if (!userId || !contestId || !problemId) {
       return res.status(400).json({
         success: false,
-        message: 'Missing required fields',
+        message: "Missing required fields",
       });
     }
 
@@ -390,7 +404,7 @@ export const getUserContestSubmissions = async (req, res) => {
       submissions: formattedSubmissions,
     });
   } catch (error) {
-    console.error('❌ Error getting user contest submissions:', error);
+    console.error("❌ Error getting user contest submissions:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };

@@ -1,4 +1,4 @@
-import messageService from '../services/message.service.js';
+import messageService from "../services/message.service.js";
 
 export const getProjectMessages = async (req, res) => {
   try {
@@ -6,11 +6,15 @@ export const getProjectMessages = async (req, res) => {
     const { limit, before, after } = req.query;
     const { teamName } = req.user;
 
-    const messages = await messageService.getProjectMessages(teamName, projectId, {
-      limit: limit ? parseInt(limit) : 100,
-      before,
-      after,
-    });
+    const messages = await messageService.getProjectMessages(
+      teamName,
+      projectId,
+      {
+        limit: limit ? parseInt(limit) : 100,
+        before,
+        after,
+      },
+    );
 
     res.json({
       success: true,
@@ -18,10 +22,10 @@ export const getProjectMessages = async (req, res) => {
       count: messages.length,
     });
   } catch (error) {
-    console.error('Get messages error:', error);
+    console.error("Get messages error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch messages',
+      message: "Failed to fetch messages",
       error: error.message,
     });
   }
@@ -33,17 +37,21 @@ export const getUnreadCount = async (req, res) => {
     const { since } = req.query;
     const { teamName } = req.user;
 
-    const count = await messageService.getUnreadCount(teamName, projectId, since);
+    const count = await messageService.getUnreadCount(
+      teamName,
+      projectId,
+      since,
+    );
 
     res.json({
       success: true,
       count,
     });
   } catch (error) {
-    console.error('Get unread count error:', error);
+    console.error("Get unread count error:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to get unread count',
+      message: "Failed to get unread count",
       error: error.message,
     });
   }

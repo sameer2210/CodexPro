@@ -1,8 +1,8 @@
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import config from '../config/config.js';
-import Message from '../models/message.model.js';
-import Team from '../models/team.model.js';
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import config from "../config/config.js";
+import Message from "../models/message.model.js";
+import Team from "../models/team.model.js";
 
 class AuthService {
   constructor() {
@@ -22,7 +22,7 @@ class AuthService {
 
   // Generate JWT token
   generateToken(payload) {
-    return jwt.sign(payload, this.jwtSecret, { expiresIn: '24h' });
+    return jwt.sign(payload, this.jwtSecret, { expiresIn: "24h" });
   }
 
   // Verify JWT token
@@ -30,7 +30,7 @@ class AuthService {
     try {
       return jwt.verify(token, this.jwtSecret);
     } catch (error) {
-      throw new Error('Invalid token');
+      throw new Error("Invalid token");
     }
   }
 
@@ -38,9 +38,11 @@ class AuthService {
   async registerTeam(teamName, username, password) {
     try {
       // Check if team already exists
-      const existingTeam = await Team.findOne({ teamName: teamName.toLowerCase() });
+      const existingTeam = await Team.findOne({
+        teamName: teamName.toLowerCase(),
+      });
       if (existingTeam) {
-        throw new Error('Team name already exists');
+        throw new Error("Team name already exists");
       }
 
       // Hash password
@@ -65,10 +67,10 @@ class AuthService {
       return {
         success: true,
         teamName: newTeam.teamName,
-        message: 'Team created successfully',
+        message: "Team created successfully",
       };
     } catch (error) {
-      throw new Error(error.message || 'Registration failed');
+      throw new Error(error.message || "Registration failed");
     }
   }
 
@@ -78,25 +80,28 @@ class AuthService {
       // Find team
       const team = await Team.findOne({ teamName: teamName.toLowerCase() });
       if (!team) {
-        throw new Error('Invalid team credentials');
+        throw new Error("Invalid team credentials");
       }
 
       // Check password
-      const isPasswordValid = await this.comparePassword(password, team.password);
+      const isPasswordValid = await this.comparePassword(
+        password,
+        team.password,
+      );
       if (!isPasswordValid) {
-        throw new Error('Invalid team credentials');
+        throw new Error("Invalid team credentials");
       }
 
       // Find or add member
       const normalizedUsername = username?.toLowerCase();
       let member = team.members.find(
-        m => m.username?.toLowerCase() === normalizedUsername
+        (m) => m.username?.toLowerCase() === normalizedUsername,
       );
       if (!member) {
         // Add new team member
         await team.addMember(username, false);
         member = team.members.find(
-          m => m.username?.toLowerCase() === normalizedUsername
+          (m) => m.username?.toLowerCase() === normalizedUsername,
         );
       } else {
         // Update last login
@@ -124,7 +129,7 @@ class AuthService {
         },
       };
     } catch (error) {
-      throw new Error(error.message || 'Login failed');
+      throw new Error(error.message || "Login failed");
     }
   }
 
@@ -133,10 +138,10 @@ class AuthService {
     try {
       const team = await Team.findOne({ teamName: teamName.toLowerCase() });
       if (!team) {
-        throw new Error('Team not found');
+        throw new Error("Team not found");
       }
 
-      const members = team.members.map(member => ({
+      const members = team.members.map((member) => ({
         username: member.username,
         isAdmin: member.isAdmin,
         lastLogin: member.lastLogin,
@@ -149,10 +154,10 @@ class AuthService {
         teamName: team.teamName,
         members,
         totalMembers: members.length,
-        activeCount: members.filter(member => member.isActive).length,
+        activeCount: members.filter((member) => member.isActive).length,
       };
     } catch (error) {
-      throw new Error(error.message || 'Failed to get team members');
+      throw new Error(error.message || "Failed to get team members");
     }
   }
 
@@ -161,15 +166,15 @@ class AuthService {
     try {
       const team = await Team.findOne({ teamName: teamName.toLowerCase() });
       if (!team) {
-        throw new Error('Team not found');
+        throw new Error("Team not found");
       }
 
       const normalizedUsername = username?.toLowerCase();
       const member = team.members.find(
-        m => m.username?.toLowerCase() === normalizedUsername
+        (m) => m.username?.toLowerCase() === normalizedUsername,
       );
       if (!member) {
-        throw new Error('Member not found');
+        throw new Error("Member not found");
       }
 
       member.isActive = isActive;
@@ -181,7 +186,7 @@ class AuthService {
         message: `Member activity updated`,
       };
     } catch (error) {
-      throw new Error(error.message || 'Failed to update member activity');
+      throw new Error(error.message || "Failed to update member activity");
     }
   }
 
@@ -194,7 +199,7 @@ class AuthService {
       }
 
       const member = team.members.find(
-        m => m.username?.toLowerCase() === username?.toLowerCase()
+        (m) => m.username?.toLowerCase() === username?.toLowerCase(),
       );
       return !!member;
     } catch (error) {
@@ -213,8 +218,8 @@ class AuthService {
         messages,
       };
     } catch (error) {
-      console.error('getTeamMessages error:', error);
-      throw new Error(error.message || 'Failed to get messages');
+      console.error("getTeamMessages error:", error);
+      throw new Error(error.message || "Failed to get messages");
     }
   }
 }

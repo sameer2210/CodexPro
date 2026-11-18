@@ -276,7 +276,11 @@ const UserProfile = () => {
         newPassword: passwordData.newPassword,
       });
       toast.success("Password changed successfully! 🎉");
-      setPasswordData({ oldPassword: "", newPassword: "", confirmPassword: "" });
+      setPasswordData({
+        oldPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
       setShowChangePassword(false);
     } catch (err) {
       const msg = err.response?.data?.message || "Failed to change password";
@@ -293,7 +297,9 @@ const UserProfile = () => {
       return;
     }
     try {
-      await axiosClient.post("/user/requestEmailVerificationOTP", { email: emailForVerification });
+      await axiosClient.post("/user/requestEmailVerificationOTP", {
+        email: emailForVerification,
+      });
       toast.success("Verification OTP sent to your email.");
       setShowEmailVerification(true);
     } catch (err) {
@@ -307,7 +313,10 @@ const UserProfile = () => {
       return;
     }
     try {
-      await axiosClient.post("/user/verifyEmailOTP", { email: emailForVerification, otp: verificationOtp });
+      await axiosClient.post("/user/verifyEmailOTP", {
+        email: emailForVerification,
+        otp: verificationOtp,
+      });
       toast.success("Email verified successfully! 🎉");
       setShowEmailVerification(false);
       fetchUserProfile();
@@ -355,9 +364,12 @@ const UserProfile = () => {
       <div className="max-w-4xl mx-auto">
         {/* Header */}
 
-      <NavLink to="/" className="mb-6 inline-block text-gray-400 hover:text-orange-400 transition-colors ">
+        <NavLink
+          to="/"
+          className="mb-6 inline-block text-gray-400 hover:text-orange-400 transition-colors "
+        >
           <ArrowLeft className="inline-block mr-2" />
-         Back
+          Back
         </NavLink>
 
         <div className="text-center mb-8">
@@ -705,7 +717,9 @@ const UserProfile = () => {
                 </span>
               ) : (
                 <button
-                  onClick={() => setShowEmailVerification(!showEmailVerification)}
+                  onClick={() =>
+                    setShowEmailVerification(!showEmailVerification)
+                  }
                   className="px-3 py-1 bg-orange-500/20 text-orange-400 text-sm rounded-full hover:bg-orange-500/30 transition-colors"
                 >
                   {showEmailVerification ? "Hide" : "Verify Email"}
@@ -842,7 +856,8 @@ const UserProfile = () => {
               Delete Account
             </h3>
             <p className="text-gray-400 mb-4">
-              Permanently delete your account and all associated data. This action cannot be undone.
+              Permanently delete your account and all associated data. This
+              action cannot be undone.
             </p>
             <button
               onClick={() => setShowDeleteModal(true)}
@@ -856,7 +871,7 @@ const UserProfile = () => {
           {(formData.firstName ||
             formData.lastName ||
             Object.values(formData).some(
-              (val) => typeof val === "string" && val.startsWith("http")
+              (val) => typeof val === "string" && val.startsWith("http"),
             )) && (
             <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl p-6 border border-gray-700 shadow-2xl">
               <h3 className="text-xl font-semibold text-orange-400 mb-6 flex items-center">
@@ -985,7 +1000,9 @@ const UserProfile = () => {
                 </div>
                 <div>
                   <div className="text-gray-400 text-sm">Contest Streak</div>
-                  <div className="text-white text-2xl font-bold">{profile?.streak || 0}</div>
+                  <div className="text-white text-2xl font-bold">
+                    {profile?.streak || 0}
+                  </div>
                 </div>
               </div>
               <div className="bg-gray-700/50 p-4 rounded-xl flex items-center">
@@ -993,13 +1010,19 @@ const UserProfile = () => {
                   <span className="text-2xl">🏅</span>
                 </div>
                 <div>
-                  <div className="text-gray-400 text-sm">Contests Completed</div>
-                  <div className="text-white text-2xl font-bold">{profile?.contestsCompleted?.length || 0}</div>
+                  <div className="text-gray-400 text-sm">
+                    Contests Completed
+                  </div>
+                  <div className="text-white text-2xl font-bold">
+                    {profile?.contestsCompleted?.length || 0}
+                  </div>
                 </div>
               </div>
             </div>
             <div className="mt-6">
-              <h4 className="text-lg font-semibold text-white mb-4">Contest History</h4>
+              <h4 className="text-lg font-semibold text-white mb-4">
+                Contest History
+              </h4>
               {contestHistoryLoading ? (
                 <div className="flex justify-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
@@ -1009,21 +1032,37 @@ const UserProfile = () => {
                   <table className="w-full text-sm text-left text-gray-400">
                     <thead className="text-xs text-gray-400 uppercase bg-gray-700/50">
                       <tr>
-                        <th scope="col" className="px-6 py-3">Contest</th>
-                        <th scope="col" className="px-6 py-3">Rank</th>
-                        <th scope="col" className="px-6 py-3">Score</th>
-                        <th scope="col" className="px-6 py-3">Problems Solved</th>
+                        <th scope="col" className="px-6 py-3">
+                          Contest
+                        </th>
+                        <th scope="col" className="px-6 py-3">
+                          Rank
+                        </th>
+                        <th scope="col" className="px-6 py-3">
+                          Score
+                        </th>
+                        <th scope="col" className="px-6 py-3">
+                          Problems Solved
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
                       {contestHistory.map((contest) => (
-                        <tr key={contest.contestId} className="bg-gray-800/50 border-b border-gray-700">
-                          <th scope="row" className="px-6 py-4 font-medium text-white whitespace-nowrap">
+                        <tr
+                          key={contest.contestId}
+                          className="bg-gray-800/50 border-b border-gray-700"
+                        >
+                          <th
+                            scope="row"
+                            className="px-6 py-4 font-medium text-white whitespace-nowrap"
+                          >
                             {contest.name}
                           </th>
                           <td className="px-6 py-4">{contest.rank}</td>
                           <td className="px-6 py-4">{contest.score}</td>
-                          <td className="px-6 py-4">{contest.problemsSolved}</td>
+                          <td className="px-6 py-4">
+                            {contest.problemsSolved}
+                          </td>
                         </tr>
                       ))}
                     </tbody>
@@ -1039,9 +1078,12 @@ const UserProfile = () => {
       {showDeleteModal && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
           <div className="bg-slate-800 rounded-lg p-8 shadow-2xl max-w-md w-full">
-            <h2 className="text-2xl font-bold text-red-400 mb-4">Are you sure?</h2>
+            <h2 className="text-2xl font-bold text-red-400 mb-4">
+              Are you sure?
+            </h2>
             <p className="text-gray-300 mb-6">
-              This action is irreversible. All your data, including submissions and profile information, will be permanently deleted.
+              This action is irreversible. All your data, including submissions
+              and profile information, will be permanently deleted.
             </p>
             <div className="flex justify-end space-x-4">
               <button

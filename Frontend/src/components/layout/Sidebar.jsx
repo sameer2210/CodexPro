@@ -12,12 +12,12 @@ import {
   TrophyIcon,
   UserIcon,
   XMarkIcon,
-} from '@heroicons/react/24/outline';
-import { motion } from 'framer-motion';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { useTheme } from '../../Context/ThemeContext';
-import { useAppDispatch } from '../../store/hooks';
-import { logout } from '../../store/slices/authSlice';
+} from "@heroicons/react/24/outline";
+import { motion } from "framer-motion";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useTheme } from "../../Context/ThemeContext";
+import { useAppDispatch } from "../../store/hooks";
+import { logout } from "../../store/slices/authSlice";
 
 const Sidebar = ({
   isCollapsed = false,
@@ -32,9 +32,13 @@ const Sidebar = ({
   const { isDarkMode } = useTheme();
   const expandedWidth = 256;
   const collapsedWidth = 80;
-  const sidebarWidth = isMobile ? expandedWidth : isCollapsed ? collapsedWidth : expandedWidth;
+  const sidebarWidth = isMobile
+    ? expandedWidth
+    : isCollapsed
+      ? collapsedWidth
+      : expandedWidth;
 
-  const handleLogout = (redirectTo = '/login') => {
+  const handleLogout = (redirectTo = "/login") => {
     dispatch(logout());
     navigate(redirectTo);
     if (isMobile && onClose) {
@@ -61,43 +65,44 @@ const Sidebar = ({
   };
 
   const navItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: Squares2X2Icon },
-    { name: 'Projects', path: '/projects', icon: FolderIcon },
-    { name: 'Problems', path: '/problems', icon: CodeBracketIcon },
-    { name: 'Contests', path: '/contests', icon: TrophyIcon },
-    { name: 'Discuss', path: '/discuss', icon: ChatBubbleLeftRightIcon },
-    { name: 'Visualizer', path: '/visualizer', icon: CpuChipIcon },
-    { name: 'AI Mock', path: '/interview', icon: SparklesIcon },
-    { name: 'Profile', path: '/profile', icon: UserIcon },
-    { name: 'Admin', path: '/admin', icon: ShieldCheckIcon },
+    { name: "Dashboard", path: "/dashboard", icon: Squares2X2Icon },
+    { name: "Projects", path: "/projects", icon: FolderIcon },
+    { name: "Problems", path: "/problems", icon: CodeBracketIcon },
+    { name: "Contests", path: "/contests", icon: TrophyIcon },
+    { name: "Discuss", path: "/discuss", icon: ChatBubbleLeftRightIcon },
+    { name: "Visualizer", path: "/visualizer", icon: CpuChipIcon },
+    { name: "AI Mock", path: "/interview", icon: SparklesIcon },
+    { name: "Profile", path: "/profile", icon: UserIcon },
+    { name: "Admin", path: "/admin", icon: ShieldCheckIcon },
   ];
 
   const bottomItems = [
-    { name: 'Settings', path: '/settings', icon: Cog6ToothIcon },
-    { name: 'Help', path: '/help', icon: QuestionMarkCircleIcon },
+    { name: "Settings", path: "/settings", icon: Cog6ToothIcon },
+    { name: "Help", path: "/help", icon: QuestionMarkCircleIcon },
   ];
 
   const isCollapsedView = !isMobile && isCollapsed;
-  const navLinkClass = isActive => {
-    const base = 'group/item relative flex items-center rounded-full transition-all';
-    const layout = isCollapsedView ? 'justify-center p-1' : 'gap-3 px-4 py-3.5';
+  const navLinkClass = (isActive) => {
+    const base =
+      "group/item relative flex items-center rounded-full transition-all";
+    const layout = isCollapsedView ? "justify-center p-1" : "gap-3 px-4 py-3.5";
     const state = isActive
       ? isDarkMode
-        ? 'bg-[#17E1FF]/10 text-[#17E1FF] font-bold border border-[#17E1FF]/20'
-        : 'bg-[#0B0E11] text-[#E6E8E5] font-bold  '
+        ? "bg-[#17E1FF]/10 text-[#17E1FF] font-bold border border-[#17E1FF]/20"
+        : "bg-[#0B0E11] text-[#E6E8E5] font-bold  "
       : isDarkMode
-        ? 'text-[#E6E8E5]/50 hover:bg-white/5 hover:text-[#E6E8E5]'
-        : 'text-[#0B0E11]/70 hover:bg-[#0B0E11]/15 hover:text-[#0B0E11]';
+        ? "text-[#E6E8E5]/50 hover:bg-white/5 hover:text-[#E6E8E5]"
+        : "text-[#0B0E11]/70 hover:bg-[#0B0E11]/15 hover:text-[#0B0E11]";
     return `${base} ${layout} ${state}`;
   };
 
   const iconShellClass = isCollapsedView
     ? `flex items-center justify-center w-10 h-9.5 p-2 rounded-full border ${
         isDarkMode
-          ? 'bg-white/5 border-white/10 group-hover/item:bg-white/10'
-          : 'bg-white/90 border-[#0B0E11]/10 group-hover/item:bg-white'
+          ? "bg-white/5 border-white/10 group-hover/item:bg-white/10"
+          : "bg-white/90 border-[#0B0E11]/10 group-hover/item:bg-white"
       }`
-    : 'flex items-center justify-center';
+    : "flex items-center justify-center";
 
   return (
     <motion.aside
@@ -112,22 +117,22 @@ const Sidebar = ({
       aria-hidden={isMobile && !isOpen}
       className={`fixed left-0 top-0 h-screen z-50 group overflow-hidden ${
         isDarkMode
-          ? 'bg-[#0B0E11] border-r border-white/5'
-          : 'bg-[#E6E8E5] border-r border-[#0B0E11]/15'
-      } ${isMobile && !isOpen ? 'pointer-events-none' : ''}`}
+          ? "bg-[#0B0E11] border-r border-white/5"
+          : "bg-[#E6E8E5] border-r border-[#0B0E11]/15"
+      } ${isMobile && !isOpen ? "pointer-events-none" : ""}`}
     >
       {/* Subtle glow effect */}
       <div className="absolute inset-0 bg-gradient-to-b from-[#17E1FF]/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
 
       <div
-        className={`h-full flex flex-col relative z-10 ${isCollapsedView ? 'px-4 py-4' : 'p-4'}`}
+        className={`h-full flex flex-col relative z-10 ${isCollapsedView ? "px-4 py-4" : "p-4"}`}
       >
         {/* Brand Header */}
         <div
           className={`mb-10 ${
             isCollapsedView
-              ? 'flex flex-col items-center gap-4'
-              : 'flex items-center justify-between'
+              ? "flex flex-col items-center gap-4"
+              : "flex items-center justify-between"
           }`}
         >
           <motion.button
@@ -137,12 +142,12 @@ const Sidebar = ({
               x: 0,
               scale: isCollapsedView ? 0.95 : 1,
             }}
-            onClick={() => handleLogout('/')}
+            onClick={() => handleLogout("/")}
             className={`flex items-center justify-center rounded-full transition-all ${
               isDarkMode
-                ? 'bg-white/5 hover:bg-white/10 border border-white/10'
-                : 'bg-white/90 hover:bg-white border border-[#0B0E11]/15'
-            } ${isCollapsedView ? 'w-12 h-12' : 'w-11 h-11'}`}
+                ? "bg-white/5 hover:bg-white/10 border border-white/10"
+                : "bg-white/90 hover:bg-white border border-[#0B0E11]/15"
+            } ${isCollapsedView ? "w-12 h-12" : "w-11 h-11"}`}
             aria-label="Logout and return to landing page"
           >
             <img
@@ -156,8 +161,8 @@ const Sidebar = ({
               onClick={onClose}
               className={`p-2 rounded-xl transition-all ${
                 isDarkMode
-                  ? 'text-[#E6E8E5]/60 hover:text-[#17E1FF] hover:bg-white/5'
-                  : 'text-[#0B0E11]/80 hover:text-[#17E1FF] hover:bg-[#0B0E11]/15'
+                  ? "text-[#E6E8E5]/60 hover:text-[#17E1FF] hover:bg-white/5"
+                  : "text-[#0B0E11]/80 hover:text-[#17E1FF] hover:bg-[#0B0E11]/15"
               }`}
               aria-label="Close sidebar"
             >
@@ -188,7 +193,7 @@ const Sidebar = ({
 
                 <span
                   className={`relative z-10 flex items-center ${
-                    isCollapsedView ? 'justify-center w-full' : 'gap-3'
+                    isCollapsedView ? "justify-center w-full" : "gap-3"
                   }`}
                 >
                   <span className={iconShellClass}>
@@ -197,7 +202,9 @@ const Sidebar = ({
                   {isCollapsedView ? (
                     <span className="sr-only">{item.name}</span>
                   ) : (
-                    <span className="text-sm relative z-10 whitespace-nowrap">{item.name}</span>
+                    <span className="text-sm relative z-10 whitespace-nowrap">
+                      {item.name}
+                    </span>
                   )}
                 </span>
               </NavLink>
@@ -206,11 +213,17 @@ const Sidebar = ({
         </nav>
 
         {/* Bottom Section */}
-        <motion.div initial={false} animate={{ opacity: 1 }} className="space-y-2 mb-6">
-          <div className={`h-px my-6 ${isDarkMode ? 'bg-white/5' : 'bg-[#0B0E11]/10'}`} />
+        <motion.div
+          initial={false}
+          animate={{ opacity: 1 }}
+          className="space-y-2 mb-6"
+        >
+          <div
+            className={`h-px my-6 ${isDarkMode ? "bg-white/5" : "bg-[#0B0E11]/10"}`}
+          />
 
           {/* Settings & Help */}
-          {bottomItems.map(item => (
+          {bottomItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
@@ -220,7 +233,7 @@ const Sidebar = ({
             >
               <span
                 className={`relative z-10 flex items-center ${
-                  isCollapsedView ? 'justify-center w-full' : 'gap-3'
+                  isCollapsedView ? "justify-center w-full" : "gap-3"
                 }`}
               >
                 <span className={iconShellClass}>
@@ -237,19 +250,19 @@ const Sidebar = ({
 
           {/* Logout Button */}
           <button
-            onClick={() => handleLogout('/login')}
+            onClick={() => handleLogout("/login")}
             className={`group/item relative w-full flex items-center rounded-2xl transition-all ${
-              isCollapsedView ? 'justify-center p-2' : 'gap-3 px-4 py-3.5'
+              isCollapsedView ? "justify-center p-2" : "gap-3 px-4 py-3.5"
             } ${
               isDarkMode
-                ? 'text-[#E6E8E5]/50 hover:bg-red-500/10 hover:text-red-400'
-                : 'text-[#0B0E11]/70 hover:bg-red-500/10 hover:text-red-500'
+                ? "text-[#E6E8E5]/50 hover:bg-red-500/10 hover:text-red-400"
+                : "text-[#0B0E11]/70 hover:bg-red-500/10 hover:text-red-500"
             }`}
-            title={isCollapsedView ? 'Logout' : undefined}
+            title={isCollapsedView ? "Logout" : undefined}
           >
             <span
               className={`relative z-10 flex items-center ${
-                isCollapsedView ? 'justify-center w-full' : 'gap-3'
+                isCollapsedView ? "justify-center w-full" : "gap-3"
               }`}
             >
               <span className={iconShellClass}>
@@ -271,8 +284,12 @@ const Sidebar = ({
             animate={{ opacity: 1, y: 0 }}
             className="relative overflow-hidden rounded-3xl border p-6 backdrop-blur-sm transition-all duration-500"
             style={{
-              borderColor: isDarkMode ? 'rgba(23, 225, 255, 0.1)' : 'rgba(11, 14, 17, 0.1)',
-              backgroundColor: isDarkMode ? 'rgba(23, 225, 255, 0.05)' : 'rgba(11, 14, 17, 0.03)',
+              borderColor: isDarkMode
+                ? "rgba(23, 225, 255, 0.1)"
+                : "rgba(11, 14, 17, 0.1)",
+              backgroundColor: isDarkMode
+                ? "rgba(23, 225, 255, 0.05)"
+                : "rgba(11, 14, 17, 0.03)",
             }}
           >
             {/* Decorative Background */}
@@ -297,14 +314,14 @@ const Sidebar = ({
               </div>
               <h4
                 className={`font-black text-sm mb-1 uppercase tracking-tight ${
-                  isDarkMode ? 'text-[#E6E8E5]' : 'text-[#0B0E11]'
+                  isDarkMode ? "text-[#E6E8E5]" : "text-[#0B0E11]"
                 }`}
               >
                 Upgrade Pro
               </h4>
               <p
                 className={`text-xs mb-4 leading-relaxed font-light ${
-                  isDarkMode ? 'text-[#E6E8E5]/50' : 'text-[#0B0E11]/70'
+                  isDarkMode ? "text-[#E6E8E5]/50" : "text-[#0B0E11]/70"
                 }`}
               >
                 Unlock advanced features and unlimited projects.

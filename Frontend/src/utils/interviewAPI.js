@@ -1,13 +1,13 @@
-import { useState } from 'react';
-import axiosClient from './axiosClient';
+import { useState } from "react";
+import axiosClient from "./axiosClient";
 
 export const createInterviewSession = async (config) => {
-  const res = await axiosClient.post('/ai/create-session', config);
+  const res = await axiosClient.post("/ai/create-session", config);
   return res.data;
 };
 
 export const handleAPIError = (error) => {
-  return error.response?.data?.message || error.message || 'An error occurred';
+  return error.response?.data?.message || error.message || "An error occurred";
 };
 
 export const useInterviewAPI = () => {
@@ -18,10 +18,10 @@ export const useInterviewAPI = () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await axiosClient.post('/ai/create-session', config);
+      const res = await axiosClient.post("/ai/create-session", config);
       return res.data;
     } catch (err) {
-      const msg = err.response?.data?.message || 'Failed to create session';
+      const msg = err.response?.data?.message || "Failed to create session";
       setError(msg);
       throw err;
     } finally {
@@ -33,10 +33,13 @@ export const useInterviewAPI = () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await axiosClient.post('/ai/continue', { sessionId, responseText });
+      const res = await axiosClient.post("/ai/continue", {
+        sessionId,
+        userAnswer: responseText,
+      });
       return res.data;
     } catch (err) {
-      const msg = err.response?.data?.message || 'Failed to continue interview';
+      const msg = err.response?.data?.message || "Failed to continue interview";
       setError(msg);
       throw err;
     } finally {
@@ -48,10 +51,10 @@ export const useInterviewAPI = () => {
     try {
       setLoading(true);
       setError(null);
-      const res = await axiosClient.post('/ai/end', { sessionId });
+      const res = await axiosClient.post("/ai/end", { sessionId });
       return res.data;
     } catch (err) {
-      const msg = err.response?.data?.message || 'Failed to end interview';
+      const msg = err.response?.data?.message || "Failed to end interview";
       setError(msg);
       throw err;
     } finally {
@@ -64,7 +67,7 @@ export const useInterviewAPI = () => {
       const res = await axiosClient.get(`/ai/session/${sessionId}`);
       return res.data;
     } catch (err) {
-      console.warn('Failed to get session status', err);
+      console.warn("Failed to get session status", err);
       return null;
     }
   };
@@ -75,7 +78,7 @@ export const useInterviewAPI = () => {
       const res = await axiosClient.get(`/ai/feedback/${sessionId}`);
       return res.data;
     } catch (err) {
-      console.warn('Failed to get feedback', err);
+      console.warn("Failed to get feedback", err);
       return null;
     } finally {
       setLoading(false);
@@ -88,7 +91,7 @@ export const useInterviewAPI = () => {
       const res = await axiosClient.post(`/ai/generate-feedback/${sessionId}`);
       return res.data;
     } catch (err) {
-      console.warn('Failed to generate feedback', err);
+      console.warn("Failed to generate feedback", err);
       return null;
     } finally {
       setLoading(false);

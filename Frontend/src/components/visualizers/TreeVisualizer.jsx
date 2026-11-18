@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "../ui/button";
+import { Button } from "../ui/Button";
 import { Input } from "../ui/input";
 import { toast } from "sonner";
 import { Plus, Minus, RotateCcw, Search, Play } from "lucide-react";
@@ -141,7 +141,7 @@ export const TreeVisualizer = () => {
           y2={leftY - 20}
           stroke="#475569"
           strokeWidth="2"
-        />
+        />,
       );
       elements.push(...renderTree(node.left, leftX, leftY, xOffset / 2));
     }
@@ -158,7 +158,7 @@ export const TreeVisualizer = () => {
           y2={rightY - 20}
           stroke="#475569"
           strokeWidth="2"
-        />
+        />,
       );
       elements.push(...renderTree(node.right, rightX, rightY, xOffset / 2));
     }
@@ -184,7 +184,7 @@ export const TreeVisualizer = () => {
         >
           {node.value}
         </text>
-      </g>
+      </g>,
     );
 
     return elements;

@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const ContestSchema = new Schema(
@@ -8,7 +8,7 @@ const ContestSchema = new Schema(
     problems: [
       {
         type: Schema.Types.ObjectId,
-        ref: 'problem',
+        ref: "problem",
         required: true,
       },
     ],
@@ -22,20 +22,21 @@ const ContestSchema = new Schema(
     },
     createdBy: {
       type: Schema.Types.ObjectId,
-      ref: 'user',
+      ref: "user",
       required: true,
     },
     participants: [
       {
         type: Schema.Types.ObjectId,
-        ref: 'user',
+        ref: "user",
       },
     ],
     date: String,
     isPublic: { type: Boolean, default: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-const Contest = mongoose.models.contest || mongoose.model('contest', ContestSchema);
+const Contest =
+  mongoose.models.contest || mongoose.model("contest", ContestSchema);
 export default Contest;

@@ -1,12 +1,13 @@
-import express from 'express';
-import { OAuth2Client } from 'google-auth-library';
-import jwt from 'jsonwebtoken';
-import User from '../models/user.js';
+import express from "express";
+import { OAuth2Client } from "google-auth-library";
+import jwt from "jsonwebtoken";
+import User from "../models/user.js";
+import config from "../config/config.js";
 
 const router = express.Router();
 const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
-router.post('/googleLogin', async (req, res) => {
+router.post("/googleLogin", async (req, res) => {
   const { token } = req.body;
 
   try {
@@ -22,8 +23,8 @@ router.post('/googleLogin', async (req, res) => {
     if (!user) {
       user = new User({
         emailId: email,
-        firstName: name ? name.split(' ')[0] : 'User',
-        lastName: name && name.split(' ').length > 1 ? name.split(' ')[1] : '',
+        firstName: name ? name.split(" ")[0] : "User",
+        lastName: name && name.split(" ").length > 1 ? name.split(" ")[1] : "",
         profileImage: picture,
         emailVerified: true,
         isPremium: false,
@@ -34,14 +35,16 @@ router.post('/googleLogin', async (req, res) => {
 
     const jwtToken = jwt.sign(
       { _id: user._id, userId: user._id, email: user.emailId, role: user.role },
-      process.env.JWT_SECRET || 'your-secret-key',
-      { expiresIn: '7d' }
+      config.JWT_SECRET,
+      { expiresIn: "7d" },
     );
 
-    res.status(200).json({ message: 'Login successful', user, token: jwtToken });
+    res
+      .status(200)
+      .json({ message: "Login successful", user, token: jwtToken });
   } catch (error) {
-    console.error('Error during Google Login:', error.message);
-    res.status(500).json({ message: error.message || 'Internal Server Error' });
+    console.error("Error during Google Login:", error.message);
+    res.status(500).json({ message: error.message || "Internal Server Error" });
   }
 });
 

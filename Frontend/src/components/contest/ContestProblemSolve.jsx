@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Editor from "@monaco-editor/react";
 import { motion } from "framer-motion";
-import LoadingSpinner from "../../components/common/LoadingSpinner";
+import LoadingSpinner from "../ui/LoadingSpinner";
 import {
   Play,
   Send,
@@ -83,7 +83,7 @@ const ContestProblemSolve = () => {
         }
 
         const problemResponse = await axiosClient.get(
-          `/contest/${contestId}/problem/${problemId}`
+          `/contest/${contestId}/problem/${problemId}`,
         );
         if (!isMounted) return;
 
@@ -123,7 +123,7 @@ const ContestProblemSolve = () => {
       setCode(savedCode);
     } else if (problem.startCode && Array.isArray(problem.startCode)) {
       const starter = problem.startCode.find(
-        (sc) => sc.language.toLowerCase() === selectedLanguage
+        (sc) => sc.language.toLowerCase() === selectedLanguage,
       );
       setCode(starter ? starter.initialCode : "");
     } else {
@@ -196,7 +196,7 @@ const ContestProblemSolve = () => {
         {
           code,
           language: selectedLanguage,
-        }
+        },
       );
       setRunResults(response.data);
     } catch (error) {
@@ -204,7 +204,7 @@ const ContestProblemSolve = () => {
       showToast(
         error.response?.data?.message ||
           "An error occurred while running the code.",
-        "error"
+        "error",
       );
     } finally {
       setIsRunning(false);
@@ -226,7 +226,7 @@ const ContestProblemSolve = () => {
         {
           code,
           language: selectedLanguage,
-        }
+        },
       );
       const data = response.data;
       if (data.success) {
@@ -249,7 +249,7 @@ const ContestProblemSolve = () => {
       });
       showToast(
         error.response?.data?.message || "Failed to submit code.",
-        "error"
+        "error",
       );
     } finally {
       setIsSubmitting(false);
@@ -259,7 +259,7 @@ const ContestProblemSolve = () => {
   const resetCode = () => {
     if (problem && problem.startCode && Array.isArray(problem.startCode)) {
       const starter = problem.startCode.find(
-        (sc) => sc.language.toLowerCase() === selectedLanguage
+        (sc) => sc.language.toLowerCase() === selectedLanguage,
       );
       const localStorageKey = `contest_${contestId}_problem_${problemId}_${selectedLanguage}_code`;
       localStorage.removeItem(localStorageKey);
@@ -276,25 +276,25 @@ const ContestProblemSolve = () => {
       java: "java",
       cpp: "cpp",
       c: "c",
-    }[language] || language);
+    })[language] || language;
 
   const getDifficultyColor = (difficulty) =>
     ({
       easy: "text-green-400",
       medium: "text-yellow-400",
       hard: "text-red-400",
-    }[difficulty.toLowerCase()] || "text-gray-400");
+    })[difficulty.toLowerCase()] || "text-gray-400";
 
   const getDifficultyBgColor = (difficulty) =>
     ({
       easy: "bg-green-400/10 border-green-400/30",
       medium: "bg-yellow-400/10 border-yellow-400/30",
       hard: "bg-red-400/10 border-red-400/30",
-    }[difficulty.toLowerCase()] || "bg-gray-400/10 border-gray-400/30");
+    })[difficulty.toLowerCase()] || "bg-gray-400/10 border-gray-400/30";
 
   const currentProblemIndex = useMemo(
     () => contest?.problems?.findIndex((p) => p._id === problemId),
-    [contest, problemId]
+    [contest, problemId],
   );
 
   const nextProblem = useMemo(
@@ -304,12 +304,12 @@ const ContestProblemSolve = () => {
       currentProblemIndex < contest.problems.length - 1
         ? contest.problems[currentProblemIndex + 1]
         : null,
-    [contest, currentProblemIndex]
+    [contest, currentProblemIndex],
   );
 
   const isLastProblem = useMemo(
     () => contest && currentProblemIndex === contest.problems.length - 1,
-    [contest, currentProblemIndex]
+    [contest, currentProblemIndex],
   );
 
   if (isLoading) {
@@ -355,7 +355,7 @@ const ContestProblemSolve = () => {
           <h1 className="text-xl font-bold text-white mr-3">{problem.title}</h1>
           <div
             className={`px-2 py-1 text-xs font-medium rounded-md border ${getDifficultyBgColor(
-              problem.difficulty
+              problem.difficulty,
             )}`}
           >
             <span className={getDifficultyColor(problem.difficulty)}>
@@ -580,7 +580,7 @@ const ContestProblemSolve = () => {
                     <button
                       onClick={() =>
                         navigate(
-                          `/contest/${contestId}/problem/${nextProblem._id}`
+                          `/contest/${contestId}/problem/${nextProblem._id}`,
                         )
                       }
                       className="flex items-center px-3 py-1.5 bg-green-600 hover:bg-green-700 rounded-md text-sm text-white"

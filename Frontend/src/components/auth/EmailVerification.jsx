@@ -34,10 +34,10 @@ const EmailVerification = ({ email, onVerified }) => {
 
     setLoading(true);
     setErrorMsg(null);
-    setVerificationAttempts(prev => prev + 1);
+    setVerificationAttempts((prev) => prev + 1);
 
     try {
-      await axiosClient.post('/user/verifyEmailOTP', { email, otp });
+      await axiosClient.post("/user/verifyEmailOTP", { email, otp });
       toast.success("Email verified successfully");
       if (onVerified) onVerified(otp);
     } catch (error) {
@@ -61,12 +61,13 @@ const EmailVerification = ({ email, onVerified }) => {
     setCountdown(60);
 
     try {
-      await axiosClient.post('/user/requestEmailVerificationOTP', { email });
+      await axiosClient.post("/user/requestEmailVerificationOTP", { email });
       toast.success("New verification code sent to your email");
       setOtp("");
       setVerificationAttempts(0);
     } catch (error) {
-      const msg = error.response?.data?.message || "Failed to send new verification code";
+      const msg =
+        error.response?.data?.message || "Failed to send new verification code";
       toast.error(msg);
     } finally {
       setLoading(false);
@@ -94,7 +95,9 @@ const EmailVerification = ({ email, onVerified }) => {
         <div className="h-1 bg-gradient-to-r from-orange-500 to-amber-500 rounded-t-2xl"></div>
 
         <div className="bg-slate-800/90 backdrop-blur-sm border border-slate-700/50 rounded-b-2xl p-8 shadow-2xl">
-          <h2 className="text-2xl font-bold text-white mb-4 text-center">Verify Your Email</h2>
+          <h2 className="text-2xl font-bold text-white mb-4 text-center">
+            Verify Your Email
+          </h2>
 
           <div className="mb-6 text-gray-300 text-center">
             <p>A verification code has been sent to:</p>
@@ -154,7 +157,9 @@ const EmailVerification = ({ email, onVerified }) => {
             </button>
 
             <div className="mt-6 p-4 bg-slate-700/30 border border-slate-600/50 rounded-lg">
-              <h3 className="text-sm font-medium text-white mb-2">Having trouble?</h3>
+              <h3 className="text-sm font-medium text-white mb-2">
+                Having trouble?
+              </h3>
               <ul className="text-sm text-gray-300 space-y-2">
                 <li>• Check your spam or junk folder</li>
                 <li>• Verify you entered the correct email address</li>

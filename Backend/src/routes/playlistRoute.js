@@ -1,10 +1,10 @@
-import express from 'express';
-import { userMiddleware } from '../middlewares/userMiddleware.js';
-import Playlist from '../models/playlist.js';
+import express from "express";
+import { userMiddleware } from "../middlewares/userMiddleware.js";
+import Playlist from "../models/playlist.js";
 
 const playlistRouter = express.Router();
 
-playlistRouter.post('/', userMiddleware, async (req, res) => {
+playlistRouter.post("/", userMiddleware, async (req, res) => {
   try {
     const playlist = new Playlist({
       name: req.body.name,
@@ -19,13 +19,13 @@ playlistRouter.post('/', userMiddleware, async (req, res) => {
   } catch (err) {
     res.status(400).json({
       success: false,
-      message: 'Failed to create playlist',
+      message: "Failed to create playlist",
       error: err.message,
     });
   }
 });
 
-playlistRouter.post('/:id/problems', userMiddleware, async (req, res) => {
+playlistRouter.post("/:id/problems", userMiddleware, async (req, res) => {
   try {
     const playlist = await Playlist.findOneAndUpdate(
       {
@@ -36,16 +36,16 @@ playlistRouter.post('/:id/problems', userMiddleware, async (req, res) => {
       {
         $addToSet: { problems: req.body.problemId },
       },
-      { new: true }
+      { new: true },
     ).populate({
-      path: 'problems',
-      select: 'title difficulty tags acceptance description',
+      path: "problems",
+      select: "title difficulty tags acceptance description",
     });
 
     if (!playlist) {
       return res.status(404).json({
         success: false,
-        message: 'Playlist not found or problem already exists in playlist',
+        message: "Playlist not found or problem already exists in playlist",
       });
     }
 
@@ -56,17 +56,17 @@ playlistRouter.post('/:id/problems', userMiddleware, async (req, res) => {
   } catch (err) {
     res.status(400).json({
       success: false,
-      message: 'Failed to add problem to playlist',
+      message: "Failed to add problem to playlist",
       error: err.message,
     });
   }
 });
 
-playlistRouter.get('/user', userMiddleware, async (req, res) => {
+playlistRouter.get("/user", userMiddleware, async (req, res) => {
   try {
     const playlists = await Playlist.find({ user: req.result._id }).populate({
-      path: 'problems',
-      select: 'title difficulty tags',
+      path: "problems",
+      select: "title difficulty tags",
     });
 
     res.status(200).json({
@@ -76,26 +76,26 @@ playlistRouter.get('/user', userMiddleware, async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch playlists',
+      message: "Failed to fetch playlists",
       error: err.message,
     });
   }
 });
 
-playlistRouter.get('/:id', userMiddleware, async (req, res) => {
+playlistRouter.get("/:id", userMiddleware, async (req, res) => {
   try {
     const playlist = await Playlist.findOne({
       _id: req.params.id,
       user: req.result._id,
     }).populate({
-      path: 'problems',
-      select: 'title difficulty tags acceptance description',
+      path: "problems",
+      select: "title difficulty tags acceptance description",
     });
 
     if (!playlist) {
       return res.status(404).json({
         success: false,
-        message: 'Playlist not found',
+        message: "Playlist not found",
       });
     }
 
@@ -106,47 +106,54 @@ playlistRouter.get('/:id', userMiddleware, async (req, res) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: 'Failed to fetch playlist',
+      message: "Failed to fetch playlist",
       error: err.message,
     });
   }
 });
 
-playlistRouter.delete('/:playlistId/problems/:problemId', userMiddleware, async (req, res) => {
-  try {
-    const playlist = await Playlist.findOneAndUpdate(
-      {
-        _id: req.params.playlistId,
-        user: req.result._id,
-      },
-      {
-        $pull: { problems: req.params.problemId },
-      },
-      { new: true }
-    ).populate('problems');
+playlistRouter.delete(
+  "/:playlistId/problems/:problemId",
+  userMiddleware,
+  async (req, res) => {
+    try {
+      const playlist = await Playlist.findOneAndUpdate(
+        {
+          _id: req.params.playlistId,
+          user: req.result._id,
+        },
+        {
+          $pull: { problems: req.params.problemId },
+        },
+        { new: true },
+      ).populate({
+        path: "problems",
+        select: "title difficulty tags acceptance description",
+      });
 
-    if (!playlist) {
-      return res.status(404).json({
+      if (!playlist) {
+        return res.status(404).json({
+          success: false,
+          message: "Playlist not found or you dont have permission",
+        });
+      }
+
+      res.status(200).json({
+        success: true,
+        data: playlist,
+        message: "Problem removed from playlist",
+      });
+    } catch (err) {
+      res.status(400).json({
         success: false,
-        message: 'Playlist not found or you dont have permission',
+        message: "Failed to remove problem from playlist",
+        error: err.message,
       });
     }
+  },
+);
 
-    res.status(200).json({
-      success: true,
-      data: playlist,
-      message: 'Problem removed from playlist',
-    });
-  } catch (err) {
-    res.status(400).json({
-      success: false,
-      message: 'Failed to remove problem from playlist',
-      error: err.message,
-    });
-  }
-});
-
-playlistRouter.delete('/:id', userMiddleware, async (req, res) => {
+playlistRouter.delete("/:id", userMiddleware, async (req, res) => {
   try {
     const playlist = await Playlist.findOneAndDelete({
       _id: req.params.id,
@@ -156,18 +163,18 @@ playlistRouter.delete('/:id', userMiddleware, async (req, res) => {
     if (!playlist) {
       return res.status(404).json({
         success: false,
-        message: 'Playlist not found or you do not have permission to delete',
+        message: "Playlist not found or you do not have permission to delete",
       });
     }
 
     res.status(200).json({
       success: true,
-      message: 'Playlist deleted successfully',
+      message: "Playlist deleted successfully",
     });
   } catch (err) {
     res.status(400).json({
       success: false,
-      message: 'Failed to delete playlist',
+      message: "Failed to delete playlist",
       error: err.message,
     });
   }

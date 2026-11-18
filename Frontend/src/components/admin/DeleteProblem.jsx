@@ -29,7 +29,9 @@ const DeleteProblem = () => {
       setProblems(response.data);
     } catch (err) {
       setError(
-        err.response?.data?.message || err.message || "Failed to fetch problems"
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to fetch problems",
       );
     } finally {
       setLoading(false);
@@ -49,7 +51,9 @@ const DeleteProblem = () => {
       toast.success("Problem Deleted Successfully");
     } catch (err) {
       setError(
-        err.response?.data?.message || err.message || "Failed to delete problem"
+        err.response?.data?.message ||
+          err.message ||
+          "Failed to delete problem",
       );
       toast.error("Error Occurred While Deleting the Problem.");
     } finally {
@@ -60,7 +64,7 @@ const DeleteProblem = () => {
   const filteredProblems = problems.filter(
     (problem) =>
       problem.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      problem.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      problem.description?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   useEffect(() => {
@@ -155,8 +159,8 @@ const DeleteProblem = () => {
                               problem.difficulty === "easy"
                                 ? "bg-green-500/20 text-green-500"
                                 : problem.difficulty === "medium"
-                                ? "bg-orange-500/20 text-orange-500"
-                                : "bg-red-500/20 text-red-500"
+                                  ? "bg-orange-500/20 text-orange-500"
+                                  : "bg-red-500/20 text-red-500"
                             }`}
                           >
                             {problem.difficulty}

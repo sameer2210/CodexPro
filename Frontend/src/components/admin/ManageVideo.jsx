@@ -72,7 +72,7 @@ const ManageVideo = () => {
     const statusPromises = problemsData.map(async (problem) => {
       try {
         const response = await axiosClient.get(
-          `/video/videoExists/${problem._id}`
+          `/video/videoExists/${problem._id}`,
         );
         return {
           problemId: problem._id,
@@ -172,7 +172,7 @@ const ManageVideo = () => {
     if (!videoStatus.videoUrl) {
       try {
         const response = await axiosClient.get(
-          `/video/videoExists/${problem._id}`
+          `/video/videoExists/${problem._id}`,
         );
         if (response.data.exists && response.data.videoUrl) {
           setVideoPreview((prev) => ({
@@ -229,7 +229,7 @@ const ManageVideo = () => {
 
     if (difficultyFilter !== "All") {
       filtered = filtered.filter(
-        (problem) => problem.difficulty === difficultyFilter
+        (problem) => problem.difficulty === difficultyFilter,
       );
     }
 
@@ -549,7 +549,7 @@ const ManageVideo = () => {
                           <td className="px-6 py-4">
                             <span
                               className={`px-3 py-1 rounded-full text-xs font-medium bg-gradient-to-r text-white ${getDifficultyColor(
-                                problem.difficulty
+                                problem.difficulty,
                               )}`}
                             >
                               {problem.difficulty}

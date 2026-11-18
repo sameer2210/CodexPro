@@ -7,13 +7,13 @@ export const startSpeechRecognition = (onResult) => {
     window.SpeechRecognition || window.webkitSpeechRecognition;
 
   if (!SpeechRecognition) {
-    console.warn('SpeechRecognition API not available in this browser.');
-    onResult?.('');
+    console.warn("SpeechRecognition API not available in this browser.");
+    onResult?.("");
     return null;
   }
 
   const recognition = new SpeechRecognition();
-  recognition.lang = 'en-US';
+  recognition.lang = "en-US";
   recognition.interimResults = false;
   recognition.maxAlternatives = 1;
 
@@ -23,8 +23,8 @@ export const startSpeechRecognition = (onResult) => {
   };
 
   recognition.onerror = (event) => {
-    console.error('SpeechRecognition error:', event.error);
-    onResult?.('');
+    console.error("SpeechRecognition error:", event.error);
+    onResult?.("");
   };
 
   recognition.start();

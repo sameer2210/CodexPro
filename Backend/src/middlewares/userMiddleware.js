@@ -1,28 +1,33 @@
-import jwt from 'jsonwebtoken';
-import redisWrapper from '../config/redis.js';
-import User from '../models/user.js';
+import jwt from "jsonwebtoken";
+import redisWrapper from "../config/redis.js";
+import User from "../models/user.js";
+import config from "../config/config.js";
 
 export const userMiddleware = async (req, res, next) => {
   try {
     let token = req.cookies?.token || req.query?.token;
-    if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    if (
+      !token &&
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer ")
+    ) {
       token = req.headers.authorization.substring(7);
     }
 
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: 'Authentication token missing',
+        message: "Authentication token missing",
       });
     }
 
-    const payload = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    const payload = jwt.verify(token, config.JWT_SECRET);
     const { _id } = payload;
 
     if (!_id) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid token payload',
+        message: "Invalid token payload",
       });
     }
 
@@ -30,15 +35,21 @@ export const userMiddleware = async (req, res, next) => {
     if (!result) {
       return res.status(404).json({
         success: false,
-        message: 'User not found',
+        message: "User not found",
       });
     }
 
     const isBlocked = await redisWrapper.exists(`token:${token}`);
+    if (isBlocked === null) {
+      return res.status(503).json({
+        success: false,
+        message: "Authentication service temporarily unavailable",
+      });
+    }
     if (isBlocked) {
       return res.status(401).json({
         success: false,
-        message: 'Session expired',
+        message: "Session expired",
       });
     }
 
@@ -49,20 +60,20 @@ export const userMiddleware = async (req, res, next) => {
     if (err instanceof jwt.TokenExpiredError) {
       return res.status(401).json({
         success: false,
-        message: 'Token expired, please login again',
+        message: "Token expired, please login again",
         error: err.message,
       });
     } else if (err instanceof jwt.JsonWebTokenError) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid token',
+        message: "Invalid token",
         error: err.message,
       });
     }
 
     res.status(500).json({
       success: false,
-      message: 'Authentication failed',
+      message: "Authentication failed",
       error: err.message,
     });
   }
@@ -71,12 +82,16 @@ export const userMiddleware = async (req, res, next) => {
 export const optionalUserMiddleware = async (req, res, next) => {
   try {
     let token = req.cookies?.token || req.query?.token;
-    if (!token && req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+    if (
+      !token &&
+      req.headers.authorization &&
+      req.headers.authorization.startsWith("Bearer ")
+    ) {
       token = req.headers.authorization.substring(7);
     }
 
     if (token) {
-      const payload = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+      const payload = jwt.verify(token, config.JWT_SECRET);
       const { _id } = payload;
       if (_id) {
         const result = await User.findById(_id);
@@ -99,14 +114,14 @@ export const checkPremiumAndTokens = (req, res, next) => {
     if (!user || !user.isPremium) {
       return res.status(403).json({
         success: false,
-        message: 'Access denied. Premium subscription required.',
+        message: "Access denied. Premium subscription required.",
       });
     }
 
     if (user.tokensLeft <= 0) {
       return res.status(403).json({
         success: false,
-        message: 'Insufficient tokens. Please purchase more.',
+        message: "Insufficient tokens. Please purchase more.",
       });
     }
 
@@ -114,7 +129,7 @@ export const checkPremiumAndTokens = (req, res, next) => {
   } catch (err) {
     res.status(500).json({
       success: false,
-      message: 'Middleware check failed',
+      message: "Middleware check failed",
       error: err.message,
     });
   }

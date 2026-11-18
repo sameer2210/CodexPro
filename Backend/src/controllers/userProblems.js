@@ -1,15 +1,25 @@
-import Problem from '../models/problem.js';
-import SolutionVideo from '../models/solutionVideo.js';
-import Submission from '../models/submission.js';
-import User from '../models/user.js';
-import { getLanguageById, SubmitBatch, submitToken } from '../services/problemUtility.js';
+import Problem from "../models/problem.js";
+import SolutionVideo from "../models/solutionVideo.js";
+import Submission from "../models/submission.js";
+import User from "../models/user.js";
+import {
+  getLanguageById,
+  SubmitBatch,
+  submitToken,
+} from "../services/problemUtility.js";
+import {
+  publicProblemSelect,
+  toPublicProblem,
+} from "../services/problemSerializer.js";
 
 export const createProblem = async (req, res) => {
   const { visibleTestCases, referenceSolution } = req.body;
   try {
     for (const { language, completeCode } of referenceSolution) {
       if (!language || !completeCode) {
-        return res.status(400).send('Missing language or completeCode in referenceSolution.');
+        return res
+          .status(400)
+          .send("Missing language or completeCode in referenceSolution.");
       }
 
       const languageId = getLanguageById(language);
@@ -21,7 +31,9 @@ export const createProblem = async (req, res) => {
       }));
       const submitResult = await SubmitBatch(submission);
       if (!submitResult || !Array.isArray(submitResult)) {
-        return res.status(500).send('Judge0 submission failed or no result returned.');
+        return res
+          .status(500)
+          .send("Judge0 submission failed or no result returned.");
       }
 
       const resultToken = submitResult.map((value) => value.token);
@@ -33,8 +45,8 @@ export const createProblem = async (req, res) => {
         const expectedOutput = visibleTestCases[i].output;
         const actualOutput = test.stdout;
 
-        const normalizedExpected = expectedOutput?.trim() || '';
-        const normalizedActual = actualOutput?.trim() || '';
+        const normalizedExpected = expectedOutput?.trim() || "";
+        const normalizedActual = actualOutput?.trim() || "";
 
         if (statusId !== 3 || normalizedExpected !== normalizedActual) {
           const failedTestCase = visibleTestCases[i];
@@ -65,9 +77,9 @@ export const createProblem = async (req, res) => {
       problemCreator: req.result._id,
     });
 
-    res.status(201).send('Problem Created Successfully');
+    res.status(201).send("Problem Created Successfully");
   } catch (err) {
-    res.status(401).send('Error Occurred: ' + err.message);
+    res.status(401).send("Error Occurred: " + err.message);
   }
 };
 
@@ -76,16 +88,18 @@ export const updateProblem = async (req, res) => {
   const { visibleTestCases, referenceSolution } = req.body;
 
   try {
-    if (!id) return res.status(404).send('Id is Missing');
+    if (!id) return res.status(404).send("Id is Missing");
 
     const getProblem = await Problem.findById(id);
     if (!getProblem) {
-      return res.status(403).send('Problem is Missing');
+      return res.status(403).send("Problem is Missing");
     }
 
     for (const { language, completeCode } of referenceSolution) {
       if (!language || !completeCode) {
-        return res.status(400).send('Missing language or completeCode in referenceSolution.');
+        return res
+          .status(400)
+          .send("Missing language or completeCode in referenceSolution.");
       }
 
       const languageId = getLanguageById(language);
@@ -99,7 +113,9 @@ export const updateProblem = async (req, res) => {
       const submitResult = await SubmitBatch(submission);
 
       if (!submitResult || !Array.isArray(submitResult)) {
-        return res.status(500).send('Judge0 submission failed or no result returned.');
+        return res
+          .status(500)
+          .send("Judge0 submission failed or no result returned.");
       }
 
       const resultToken = submitResult.map((value) => value.token);
@@ -111,42 +127,47 @@ export const updateProblem = async (req, res) => {
         const expectedOutput = visibleTestCases[i].output;
         const actualOutput = test.stdout;
 
-        const normalizedExpected = expectedOutput?.trim() || '';
-        const normalizedActual = actualOutput?.trim() || '';
+        const normalizedExpected = expectedOutput?.trim() || "";
+        const normalizedActual = actualOutput?.trim() || "";
 
         if (statusId !== 3 || normalizedExpected !== normalizedActual) {
           return res
             .status(400)
             .send(
-              `Reference solution for ${language} failed on test case ${i + 1}. Expected: "${normalizedExpected}", Got: "${normalizedActual}"`
+              `Reference solution for ${language} failed on test case ${i + 1}. Expected: "${normalizedExpected}", Got: "${normalizedActual}"`,
             );
         }
       }
 
-      const newProblem = await Problem.findByIdAndUpdate(id, { ...req.body }, { runValidators: true, new: true });
+      const newProblem = await Problem.findByIdAndUpdate(
+        id,
+        { ...req.body },
+        { runValidators: true, new: true },
+      );
       return res.status(200).send(newProblem);
     }
   } catch (err) {
-    res.status(403).send('Error Occurred: ' + err.message);
+    res.status(403).send("Error Occurred: " + err.message);
   }
 };
 
 export const deleteProblem = async (req, res) => {
   const { id } = req.params;
   try {
-    if (!id) return res.status(404).send('Id is Missing');
+    if (!id) return res.status(404).send("Id is Missing");
 
     const getProblem = await Problem.findById(id);
     if (!getProblem) {
-      return res.status(403).send('Problem is Missing');
+      return res.status(403).send("Problem is Missing");
     }
 
     const deleted = await Problem.findByIdAndDelete(id);
-    if (!deleted) return res.status(500).send('Problem is Missing Cannot be deleted');
+    if (!deleted)
+      return res.status(500).send("Problem is Missing Cannot be deleted");
 
-    res.status(200).send('Problem Deleted Successfully');
+    res.status(200).send("Problem Deleted Successfully");
   } catch (err) {
-    res.status(404).send('Error Occurred: ' + err.message);
+    res.status(404).send("Error Occurred: " + err.message);
   }
 };
 
@@ -155,13 +176,11 @@ export const getProblemById = async (req, res) => {
     const { id } = req.params;
     const userId = req.result._id;
 
-    if (!id) return res.status(403).send('Id is Missing');
+    if (!id) return res.status(403).send("Id is Missing");
 
-    const getProblem = await Problem.findById(id).select(
-      'title description difficulty tags visibleTestCases startCode referenceSolution secureUrl thumbnailUrl duration'
-    );
+    const getProblem = await Problem.findById(id).select(publicProblemSelect);
 
-    if (!getProblem) return res.status(403).send('Problem is Missing');
+    if (!getProblem) return res.status(403).send("Problem is Missing");
 
     const video = await SolutionVideo.findOne({ problemId: id, userId });
 
@@ -175,26 +194,28 @@ export const getProblemById = async (req, res) => {
     }
 
     const responseData = {
-      ...getProblem.toObject(),
+      ...toPublicProblem(getProblem),
       video: videoData,
     };
 
     res.status(200).send(responseData);
   } catch (err) {
-    console.error('Error fetching problem by ID:', err);
-    res.status(500).send('Error Occurred: ' + err.message);
+    console.error("Error fetching problem by ID:", err);
+    res.status(500).send("Error Occurred: " + err.message);
   }
 };
 
 export const getAllProblems = async (req, res) => {
   try {
-    const getProblems = await Problem.find({}).select('_id title tags difficulty');
+    const getProblems = await Problem.find({}).select(
+      "_id title tags difficulty",
+    );
 
-    if (!getProblems) return res.status(403).send('Problems are Missing');
+    if (!getProblems) return res.status(403).send("Problems are Missing");
 
     res.status(200).send(getProblems);
   } catch (err) {
-    res.status(500).send('Error Occurred: ' + err.message);
+    res.status(500).send("Error Occurred: " + err.message);
   }
 };
 
@@ -203,22 +224,24 @@ export const problemsSolvedByUser = async (req, res) => {
     const userId = req.result._id;
 
     const user = await User.findById(userId).populate({
-      path: 'problemSolved',
-      select: '_id title difficulty tags',
+      path: "problemSolved",
+      select: "_id title difficulty tags",
     });
 
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
     res.status(200).json({
       success: true,
       problems: user.problemSolved,
     });
   } catch (err) {
-    console.error('problemsSolvedByUser: Error occurred:', err);
+    console.error("problemsSolvedByUser: Error occurred:", err);
     res.status(500).json({
       success: false,
-      message: 'Error occurred while fetching solved problems',
+      message: "Error occurred while fetching solved problems",
       error: err.message,
     });
   }
@@ -233,7 +256,7 @@ export const submittedProblem = async (req, res) => {
 
     res.status(200).send(ans);
   } catch (err) {
-    res.status(403).send('Error Occurred: ' + err.message);
+    res.status(403).send("Error Occurred: " + err.message);
   }
 };
 
@@ -243,8 +266,8 @@ export const getProfileProblemsSolved = async (req, res) => {
 
     const submissions = await Submission.find({
       userId,
-      status: 'Accepted',
-    }).select('problemId createdAt -_id');
+      status: "Accepted",
+    }).select("problemId createdAt -_id");
 
     const activity = submissions.map((submission) => ({
       date: submission.createdAt,
@@ -255,7 +278,7 @@ export const getProfileProblemsSolved = async (req, res) => {
       const date = new Date(curr.date);
       const offset = 5.5 * 60 * 60 * 1000;
       const adjustedDate = new Date(date.getTime() + offset);
-      const dateStr = adjustedDate.toISOString().split('T')[0];
+      const dateStr = adjustedDate.toISOString().split("T")[0];
 
       if (!acc[dateStr]) {
         acc[dateStr] = { date: dateStr, count: 0 };
@@ -269,7 +292,7 @@ export const getProfileProblemsSolved = async (req, res) => {
       activity: Object.values(aggregatedActivity),
     });
   } catch (err) {
-    console.error('Error in getProfileProblemsSolved:', err);
+    console.error("Error in getProfileProblemsSolved:", err);
     res.status(500).json({ error: err.message });
   }
 };
@@ -278,23 +301,30 @@ export const getProfileAllProblems = async (req, res) => {
   try {
     const userId = req.result._id;
 
-    const allProblems = await Problem.find({}).select('_id title difficulty tags');
+    const allProblems = await Problem.find({}).select(
+      "_id title difficulty tags",
+    );
 
     const solvedSubmissions = await Submission.find({
       userId,
-      status: 'Accepted',
+      status: "Accepted",
     });
-    const solvedProblemIds = [...new Set(solvedSubmissions.map((s) => s.problemId))];
+    const solvedProblemIds = [
+      ...new Set(solvedSubmissions.map((s) => s.problemId)),
+    ];
 
     const attemptingSubmissions = await Submission.find({
       userId,
-      status: { $ne: 'Accepted' },
+      status: { $ne: "Accepted" },
     });
-    const attemptingProblemIds = [...new Set(attemptingSubmissions.map((s) => s.problemId))];
+    const attemptingProblemIds = [
+      ...new Set(attemptingSubmissions.map((s) => s.problemId)),
+    ];
 
     const problemsWithStatus = allProblems.map((problem) => {
       const isSolved = solvedProblemIds.some((id) => id.equals(problem._id));
-      const isAttempting = !isSolved && attemptingProblemIds.some((id) => id.equals(problem._id));
+      const isAttempting =
+        !isSolved && attemptingProblemIds.some((id) => id.equals(problem._id));
       return {
         ...problem.toObject(),
         isSolved,
@@ -305,9 +335,15 @@ export const getProfileAllProblems = async (req, res) => {
     const totalProblems = problemsWithStatus.length;
     const solvedCount = problemsWithStatus.filter((p) => p.isSolved).length;
     const unsolvedCount = totalProblems - solvedCount;
-    const easy = problemsWithStatus.filter((p) => p.difficulty === 'easy').length;
-    const medium = problemsWithStatus.filter((p) => p.difficulty === 'medium').length;
-    const hard = problemsWithStatus.filter((p) => p.difficulty === 'hard').length;
+    const easy = problemsWithStatus.filter(
+      (p) => p.difficulty === "easy",
+    ).length;
+    const medium = problemsWithStatus.filter(
+      (p) => p.difficulty === "medium",
+    ).length;
+    const hard = problemsWithStatus.filter(
+      (p) => p.difficulty === "hard",
+    ).length;
     const attempting = problemsWithStatus.filter((p) => p.isAttempting).length;
 
     res.status(200).json({
@@ -321,7 +357,7 @@ export const getProfileAllProblems = async (req, res) => {
       problems: problemsWithStatus,
     });
   } catch (err) {
-    console.error('Error in getProfileAllProblems:', err);
+    console.error("Error in getProfileAllProblems:", err);
     res.status(500).json({ error: err.message });
   }
 };

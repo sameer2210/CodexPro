@@ -5,27 +5,30 @@ import {
   getProjectById,
   reviewProject,
   updateProject,
-} from '../services/project.service.js';
+} from "../services/project.service.js";
 
 export async function createProjectController(req, res) {
   try {
     const { projectName } = req.body;
-    if (!projectName || projectName.trim() === '') {
+    if (!projectName || projectName.trim() === "") {
       return res.status(400).json({
         success: false,
-        message: 'Project name is required',
+        message: "Project name is required",
       });
     }
-    const newProject = await createProject({ name: projectName, teamName: req.user.teamName });
+    const newProject = await createProject({
+      name: projectName,
+      teamName: req.user.teamName,
+    });
     return res.status(201).json({
       success: true,
-      message: 'Project created successfully',
+      message: "Project created successfully",
       data: newProject,
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message || 'Internal Server Error',
+      message: error.message || "Internal Server Error",
     });
   }
 }
@@ -35,13 +38,13 @@ export async function getAllProjectsController(req, res) {
     const projects = await getAllProjects(req.user.teamName);
     return res.status(200).json({
       success: true,
-      message: 'Projects fetched successfully',
+      message: "Projects fetched successfully",
       data: projects,
     });
   } catch (error) {
     return res.status(500).json({
       success: false,
-      message: error.message || 'Internal Server Error',
+      message: error.message || "Internal Server Error",
     });
   }
 }
@@ -54,7 +57,7 @@ export async function getProjectController(req, res) {
     if (!project) {
       return res.status(404).json({
         success: false,
-        message: 'Project not found',
+        message: "Project not found",
       });
     }
     return res.status(200).json({
@@ -78,12 +81,12 @@ export async function updateProjectController(req, res) {
     if (!project) {
       return res.status(404).json({
         success: false,
-        message: 'Project not found',
+        message: "Project not found",
       });
     }
     return res.status(200).json({
       success: true,
-      message: 'Project updated successfully',
+      message: "Project updated successfully",
       data: project,
     });
   } catch (error) {
@@ -101,7 +104,7 @@ export async function reviewProjectController(req, res) {
     const { review } = await reviewProject(id, req.user.teamName);
     return res.status(200).json({
       success: true,
-      message: 'Review completed',
+      message: "Review completed",
       data: { review },
     });
   } catch (error) {
@@ -117,10 +120,10 @@ export async function executeProjectCodeController(req, res) {
     const { id } = req.params;
     const { code, language } = req.body;
 
-    if (language !== 'javascript') {
+    if (language !== "javascript") {
       return res.status(400).json({
         success: false,
-        message: 'Only JavaScript execution is supported currently',
+        message: "Only JavaScript execution is supported currently",
       });
     }
 
@@ -131,6 +134,13 @@ export async function executeProjectCodeController(req, res) {
       data: result,
     });
   } catch (error) {
+    if (error.message?.includes("isolated runner")) {
+      return res.status(503).json({
+        success: false,
+        code: "EXECUTION_UNAVAILABLE",
+        message: "Code execution is temporarily unavailable",
+      });
+    }
     return res.status(500).json({
       success: false,
       message: error.message,

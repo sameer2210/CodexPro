@@ -22,7 +22,9 @@ const ResumeUpload = ({ onFirstQuestion }) => {
     const reader = new FileReader();
     reader.onload = async function () {
       try {
-        const pdf = await pdfjsLib.getDocument({ data: new Uint8Array(this.result) }).promise;
+        const pdf = await pdfjsLib.getDocument({
+          data: new Uint8Array(this.result),
+        }).promise;
         let text = "";
 
         for (let i = 1; i <= pdf.numPages; i++) {
@@ -44,8 +46,8 @@ const ResumeUpload = ({ onFirstQuestion }) => {
 
   const sendResumeToBackend = async (resumeText) => {
     try {
-      const res = await axiosClient.post("/api/ai/start", { resume: resumeText });
-      const { question } = res.data;
+      const res = await axiosClient.post("/ai/create-session", { resumeText });
+      const question = res.data?.data?.question;
       onFirstQuestion(question);
     } catch (err) {
       alert("Backend failed to respond");

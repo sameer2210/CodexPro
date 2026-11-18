@@ -23,14 +23,12 @@ const Comment = memo(
     onCommentDelete,
     isReply = false,
   }) => {
+    const { user } = useSelector((state) => state.auth);
+    const { showToast } = useToast();
 
-
-  const { user } = useSelector(state => state.auth);
-  const { showToast } = useToast();
-
-  const [replyText, setReplyText] = useState("");
-  const [replyingTo, setReplyingTo] = useState(false);
-  const [showReplies, setShowReplies] = useState(false);
+    const [replyText, setReplyText] = useState("");
+    const [replyingTo, setReplyingTo] = useState(false);
+    const [showReplies, setShowReplies] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
     const [editText, setEditText] = useState(comment.content);
 
@@ -71,7 +69,7 @@ const Comment = memo(
       try {
         const response = await axiosClient.post(
           `/discussions/comments/${comment._id}/vote`,
-          { voteType: type }
+          { voteType: type },
         );
 
         // Update comment with new vote arrays (not counts)
@@ -84,7 +82,8 @@ const Comment = memo(
         }
       } catch (error) {
         console.error("Error voting on comment:", error);
-        const errorMessage = error.response?.data?.message || "Failed to register vote";
+        const errorMessage =
+          error.response?.data?.message || "Failed to register vote";
         showToast(errorMessage, "error");
       }
     };
@@ -101,7 +100,7 @@ const Comment = memo(
           {
             content: replyText,
             parentComment: comment._id,
-          }
+          },
         );
 
         // Add reply to parent comment
@@ -146,7 +145,7 @@ const Comment = memo(
       try {
         const response = await axiosClient.put(
           `/discussions/comments/${comment._id}`,
-          { content: editText }
+          { content: editText },
         );
 
         if (response.data.success) {
@@ -185,7 +184,11 @@ const Comment = memo(
             </div>
             <div>
               <div className="font-medium text-white">
-                {(comment.author?.name && comment.author?.name !== "Anonymous") ? comment.author.name : (user ? user.name : "Anonymous")}
+                {comment.author?.name && comment.author?.name !== "Anonymous"
+                  ? comment.author.name
+                  : user
+                    ? user.name
+                    : "Anonymous"}
                 {isAuthor() && (
                   <span className="ml-2 text-xs bg-orange-500/20 text-orange-400 px-2 py-0.5 rounded">
                     Author
@@ -345,7 +348,7 @@ const Comment = memo(
                   discussionId={discussionId}
                   onCommentUpdate={(updatedReply) => {
                     const updatedReplies = comment.replies.map((r) =>
-                      r._id === updatedReply._id ? updatedReply : r
+                      r._id === updatedReply._id ? updatedReply : r,
                     );
                     onCommentUpdate({
                       ...comment,
@@ -354,7 +357,7 @@ const Comment = memo(
                   }}
                   onCommentDelete={(replyId) => {
                     const updatedReplies = comment.replies.filter(
-                      (r) => r._id !== replyId
+                      (r) => r._id !== replyId,
                     );
                     onCommentUpdate({
                       ...comment,
@@ -368,7 +371,7 @@ const Comment = memo(
           )}
       </div>
     );
-  }
+  },
 );
 
 export default Comment;

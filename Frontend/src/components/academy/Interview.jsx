@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import Navbar from "../../components/common/Navbar";
+import Navbar from "../layout/Navbar";
 import {
   Upload,
   Mic,
@@ -32,7 +32,7 @@ import {
   useInterviewAPI,
   handleAPIError,
   createInterviewSession,
-} from "../../utils/Ai/interviewAPI";
+} from "../../utils/interviewAPI";
 
 const Interview = () => {
   const navigate = useNavigate();
@@ -61,12 +61,8 @@ const Interview = () => {
   const textareaRef = useRef(null);
 
   // Initialize API hooks
-  const {
-    continueInterview,
-    endInterview,
-    getFeedback,
-    generateFeedback,
-  } = useInterviewAPI();
+  const { continueInterview, endInterview, getFeedback, generateFeedback } =
+    useInterviewAPI();
 
   // Timer management
   useEffect(() => {
@@ -1143,9 +1139,8 @@ const Interview = () => {
                       setLoading(true);
                       setError(""); // Clear any previous errors
                       try {
-                        const feedbackResponse = await generateFeedback(
-                          sessionId
-                        );
+                        const feedbackResponse =
+                          await generateFeedback(sessionId);
                         if (feedbackResponse.success && feedbackResponse.data) {
                           const feedbackData = feedbackResponse.data;
 
@@ -1164,13 +1159,13 @@ const Interview = () => {
                         } else {
                           setError(
                             feedbackResponse.error ||
-                              "Failed to generate feedback. Please try again."
+                              "Failed to generate feedback. Please try again.",
                           );
                         }
                       } catch (error) {
                         console.error("Error generating feedback:", error);
                         setError(
-                          "Failed to generate feedback. Please try again."
+                          "Failed to generate feedback. Please try again.",
                         );
                       } finally {
                         setLoading(false);

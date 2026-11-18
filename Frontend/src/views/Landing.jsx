@@ -1,4 +1,4 @@
-import { useScroll, useTransform } from 'framer-motion';
+import { motion, useScroll, useTransform } from "framer-motion";
 import {
   Github,
   Globe,
@@ -10,17 +10,19 @@ import {
   Twitter,
   Users,
   Zap,
-} from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+} from "lucide-react";
+import { useNavigate } from "react-router-dom";
 const EASE = [0.22, 1, 0.36, 1];
 
-const HUDLabel = ({ children, className = '' }) => (
-  <span className={`text-[10px] uppercase tracking-[0.2em] font-mono opacity-50 ${className}`}>
+const HUDLabel = ({ children, className = "" }) => (
+  <span
+    className={`text-[10px] uppercase tracking-[0.2em] font-mono opacity-50 ${className}`}
+  >
     {children}
   </span>
 );
 
-const GlassCard = ({ children, className = '', delay = 0 }) => (
+const GlassCard = ({ children, className = "", delay = 0 }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
     whileInView={{ opacity: 1, y: 0 }}
@@ -49,13 +51,16 @@ const Hero = ({ onInitialize }) => {
           className="absolute inset-0 opacity-[0.03]"
           style={{
             backgroundImage:
-              'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)',
-            backgroundSize: '100px 100px',
+              "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)",
+            backgroundSize: "100px 100px",
           }}
         />
       </div>
 
-      <motion.div style={{ y, opacity }} className="relative z-10 text-center px-6">
+      <motion.div
+        style={{ y, opacity }}
+        className="relative z-10 text-center px-6"
+      >
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -68,8 +73,8 @@ const Hero = ({ onInitialize }) => {
         </motion.div>
 
         <motion.h1
-          initial={{ opacity: 0, letterSpacing: '0.2em' }}
-          animate={{ opacity: 1, letterSpacing: '-0.04em' }}
+          initial={{ opacity: 0, letterSpacing: "0.2em" }}
+          animate={{ opacity: 1, letterSpacing: "-0.04em" }}
           // Fix: Transition corrected by using typed EASE constant to avoid line 172 error
           transition={{ duration: 1.5, ease: EASE }}
           className="text-6xl md:text-[140px] font-black leading-[0.85] uppercase mb-10"
@@ -86,8 +91,8 @@ const Hero = ({ onInitialize }) => {
           transition={{ delay: 0.5, duration: 1 }}
           className="text-white/40 text-lg md:text-xl max-w-2xl mx-auto font-light leading-relaxed mb-12"
         >
-          High-performance collaborative engineering. Powered by Gemini AI for real-time reviews and
-          aerospace-grade sync.
+          High-performance collaborative engineering. Powered by Gemini AI for
+          real-time reviews and aerospace-grade sync.
         </motion.p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
@@ -120,19 +125,26 @@ const Hero = ({ onInitialize }) => {
             <div className="w-2.5 h-2.5 rounded-full bg-yellow-500/30" />
             <div className="w-2.5 h-2.5 rounded-full bg-green-500/30" />
           </div>
-          <HUDLabel className="opacity-20 text-[8px]">CORE_WORKFLOW_V2.JS</HUDLabel>
+          <HUDLabel className="opacity-20 text-[8px]">
+            CORE_WORKFLOW_V2.JS
+          </HUDLabel>
           <div className="w-10" />
         </div>
         <div className="aspect-video bg-[#0B0E11] border-x border-b border-white/10 rounded-b-3xl overflow-hidden relative group">
           <div className="absolute inset-0 p-10 font-mono text-sm opacity-40 group-hover:opacity-100 transition-opacity duration-700">
-            <div className="text-[#17E1FF]">async function</div> analyzeCode(bundle) {'{'}
+            <div className="text-[#17E1FF]">async function</div>{" "}
+            analyzeCode(bundle) {"{"}
             <div className="ml-4 text-white/60 mt-1">
               const review = await gemini.review(bundle);
             </div>
-            <div className="ml-4 text-[#FFB020] mt-1">if (review.hasOptimizations) {'{'}</div>
-            <div className="ml-8 text-white/60">return review.apply(bundle);</div>
-            <div className="ml-4">{'}'}</div>
-            {'}'}
+            <div className="ml-4 text-[#FFB020] mt-1">
+              if (review.hasOptimizations) {"{"}
+            </div>
+            <div className="ml-8 text-white/60">
+              return review.apply(bundle);
+            </div>
+            <div className="ml-4">{"}"}</div>
+            {"}"}
           </div>
           {/* Glass Overlay Module */}
           <div className="absolute right-8 top-12 bottom-12 w-1/3 bg-white/5 backdrop-blur-md rounded-2xl border border-white/10 p-6 flex flex-col gap-6">
@@ -172,7 +184,9 @@ const BentoGrid = () => {
   return (
     <section className="py-32 px-8 max-w-[1440px] mx-auto">
       <div className="mb-20">
-        <HUDLabel className="text-[#17E1FF] mb-4 block">Engineered for Scale</HUDLabel>
+        <HUDLabel className="text-[#17E1FF] mb-4 block">
+          Engineered for Scale
+        </HUDLabel>
         <h2 className="text-4xl md:text-7xl font-black uppercase tracking-tighter">
           Unified Workspace.
         </h2>
@@ -186,7 +200,7 @@ const BentoGrid = () => {
                 <Users className="w-8 h-8" />
               </div>
               <div className="flex -space-x-4">
-                {[1, 2, 3, 4].map(i => (
+                {[1, 2, 3, 4].map((i) => (
                   <div
                     key={i}
                     className="w-12 h-12 rounded-full border-4 border-[#10120F] bg-zinc-800 flex items-center justify-center text-[10px] font-bold"
@@ -201,8 +215,8 @@ const BentoGrid = () => {
                 Global Sync Engine
               </h3>
               <p className="text-white/40 max-w-md font-light">
-                Our proprietary operational transformation layer ensures conflict-free editing
-                across continents with sub-50ms latency.
+                Our proprietary operational transformation layer ensures
+                conflict-free editing across continents with sub-50ms latency.
               </p>
             </div>
           </div>
@@ -210,9 +224,12 @@ const BentoGrid = () => {
 
         <GlassCard className="md:col-span-4 border-[#FFB020]/20">
           <Zap className="w-8 h-8 text-[#FFB020] mb-6" />
-          <h3 className="text-xl font-black uppercase mb-2 tracking-tight">Gemini 2.5 Pro</h3>
+          <h3 className="text-xl font-black uppercase mb-2 tracking-tight">
+            Gemini 2.5 Pro
+          </h3>
           <p className="text-sm text-white/30 font-light italic">
-            Automated refactoring and deep logical analysis integrated into your commit flow.
+            Automated refactoring and deep logical analysis integrated into your
+            commit flow.
           </p>
         </GlassCard>
 
@@ -231,8 +248,8 @@ const BentoGrid = () => {
               Enterprise Shielding
             </h3>
             <p className="text-white/40 font-light">
-              End-to-end encryption for every keystroke. Your source code never leaves your private
-              cloud instance.
+              End-to-end encryption for every keystroke. Your source code never
+              leaves your private cloud instance.
             </p>
           </div>
           <Shield className="w-24 h-24 text-white/5 opacity-40 shrink-0" />
@@ -244,10 +261,10 @@ const BentoGrid = () => {
 
 const StatsSection = () => {
   const stats = [
-    { label: 'Latency', value: '14ms' },
-    { label: 'Availability', value: '99.9%' },
-    { label: 'Security', value: 'A+' },
-    { label: 'Users', value: '850K+' },
+    { label: "Latency", value: "14ms" },
+    { label: "Availability", value: "99.9%" },
+    { label: "Security", value: "A+" },
+    { label: "Users", value: "850K+" },
   ];
 
   return (
@@ -269,24 +286,24 @@ const StatsSection = () => {
 const ProcessSection = () => {
   const steps = [
     {
-      id: '01',
-      title: 'Initialize',
-      desc: 'Sync your repositories via secure SSH tunneling in seconds.',
+      id: "01",
+      title: "Initialize",
+      desc: "Sync your repositories via secure SSH tunneling in seconds.",
     },
     {
-      id: '02',
-      title: 'Collaborate',
-      desc: 'Invite your team and begin zero-latency pair programming.',
+      id: "02",
+      title: "Collaborate",
+      desc: "Invite your team and begin zero-latency pair programming.",
     },
     {
-      id: '03',
-      title: 'Optimize',
-      desc: 'Run Gemini AI reviews to scan for performance bottlenecks.',
+      id: "03",
+      title: "Optimize",
+      desc: "Run Gemini AI reviews to scan for performance bottlenecks.",
     },
     {
-      id: '04',
-      title: 'Deploy',
-      desc: 'Push verified, high-quality code to production effortlessly.',
+      id: "04",
+      title: "Deploy",
+      desc: "Push verified, high-quality code to production effortlessly.",
     },
   ];
 
@@ -303,7 +320,7 @@ const ProcessSection = () => {
         {steps.map((step, i) => (
           <motion.div
             key={i}
-            whileHover={{ backgroundColor: 'rgba(23,225,255,0.02)' }}
+            whileHover={{ backgroundColor: "rgba(23,225,255,0.02)" }}
             className="bg-[#0B0E11] p-12 group transition-colors duration-500"
           >
             <div className="text-[#17E1FF] font-mono text-xs mb-10 opacity-30 group-hover:opacity-100 transition-opacity">
@@ -325,18 +342,26 @@ const ProcessSection = () => {
 const OnboardingSection = () => {
   const tracks = [
     {
-      id: 'A',
-      title: 'Already Have a Team?',
-      desc: 'Use your existing team name and password to jump straight into your workspace.',
-      steps: ['Go to Login', 'Enter team name + password', 'Sync and start collaborating'],
-      accent: 'text-[#17E1FF]',
+      id: "A",
+      title: "Already Have a Team?",
+      desc: "Use your existing team name and password to jump straight into your workspace.",
+      steps: [
+        "Go to Login",
+        "Enter team name + password",
+        "Sync and start collaborating",
+      ],
+      accent: "text-[#17E1FF]",
     },
     {
-      id: 'B',
-      title: 'Starting Fresh?',
-      desc: 'Create a new team, set secure credentials, and invite members in minutes.',
-      steps: ['Create team name', 'Set team password', 'Invite members and share credentials'],
-      accent: 'text-[#FFB020]',
+      id: "B",
+      title: "Starting Fresh?",
+      desc: "Create a new team, set secure credentials, and invite members in minutes.",
+      steps: [
+        "Create team name",
+        "Set team password",
+        "Invite members and share credentials",
+      ],
+      accent: "text-[#FFB020]",
     },
   ];
 
@@ -349,13 +374,16 @@ const OnboardingSection = () => {
 
       <div className="max-w-[1440px] mx-auto relative z-10">
         <div className="text-center mb-20">
-          <HUDLabel className="text-[#17E1FF] mb-4 block">First-Time Guidance</HUDLabel>
+          <HUDLabel className="text-[#17E1FF] mb-4 block">
+            First-Time Guidance
+          </HUDLabel>
           <h2 className="text-4xl md:text-7xl font-black uppercase tracking-tighter mb-4">
             Choose Your Path.
           </h2>
           <p className="text-white/50 max-w-2xl mx-auto font-light">
-            If you already have a team, sign in with your team name and password. If not, create a
-            new team and generate credentials for your members.
+            If you already have a team, sign in with your team name and
+            password. If not, create a new team and generate credentials for
+            your members.
           </p>
         </div>
 
@@ -367,15 +395,21 @@ const OnboardingSection = () => {
               className="flex flex-col gap-6 bg-[#0B0E11]/70 border-white/10 shadow-[0_0_60px_rgba(23,225,255,0.05)]"
             >
               <div className="flex items-center justify-between">
-                <HUDLabel className={`opacity-70 ${track.accent}`}>Path {track.id}</HUDLabel>
+                <HUDLabel className={`opacity-70 ${track.accent}`}>
+                  Path {track.id}
+                </HUDLabel>
                 <span className="text-[10px] uppercase tracking-[0.4em] text-white/30 font-mono">
                   TEAM_FLOW
                 </span>
               </div>
 
               <div>
-                <h3 className="text-3xl font-black uppercase tracking-tight mb-3">{track.title}</h3>
-                <p className="text-white/50 font-light leading-relaxed">{track.desc}</p>
+                <h3 className="text-3xl font-black uppercase tracking-tight mb-3">
+                  {track.title}
+                </h3>
+                <p className="text-white/50 font-light leading-relaxed">
+                  {track.desc}
+                </p>
               </div>
 
               <div className="space-y-3">
@@ -385,7 +419,11 @@ const OnboardingSection = () => {
                     initial={{ opacity: 0, y: 12 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ duration: 0.5, delay: 0.1 + idx * 0.12, ease: EASE }}
+                    transition={{
+                      duration: 0.5,
+                      delay: 0.1 + idx * 0.12,
+                      ease: EASE,
+                    }}
                     className="flex items-center gap-3 text-sm text-white/70"
                   >
                     <div className="w-6 h-6 rounded-full border border-white/15 flex items-center justify-center text-[10px] font-mono text-white/70">
@@ -415,17 +453,19 @@ const Footer = () => {
                   src="/logo.png"
                   alt="Logo"
                   className="w-5 h-5 object-contain"
-                  onError={e => {
+                  onError={(e) => {
                     e.target.onerror = null;
-                    e.target.src = '';
+                    e.target.src = "";
                   }}
                 />
               </div>
-              <span className="text-xl font-bold uppercase tracking-tight">CodeX</span>
+              <span className="text-xl font-bold uppercase tracking-tight">
+                CodeX
+              </span>
             </div>
             <p className="text-white/30 text-sm max-w-sm font-light leading-relaxed mb-10">
-              The high-fidelity workspace for distributed engineering teams. Built with speed and
-              security at its core.
+              The high-fidelity workspace for distributed engineering teams.
+              Built with speed and security at its core.
             </p>
             <div className="flex gap-4">
               <a
@@ -482,30 +522,44 @@ const Footer = () => {
           <div>
             <HUDLabel className="mb-8 block">PLATFORM</HUDLabel>
             <ul className="space-y-4 text-sm text-white/40 font-light">
-              <li className="hover:text-[#17E1FF] cursor-pointer transition-colors">Workspace</li>
-              <li className="hover:text-[#17E1FF] cursor-pointer transition-colors">AI Analysis</li>
+              <li className="hover:text-[#17E1FF] cursor-pointer transition-colors">
+                Workspace
+              </li>
+              <li className="hover:text-[#17E1FF] cursor-pointer transition-colors">
+                AI Analysis
+              </li>
               <li className="hover:text-[#17E1FF] cursor-pointer transition-colors">
                 Security Core
               </li>
-              <li className="hover:text-[#17E1FF] cursor-pointer transition-colors">Changelog</li>
+              <li className="hover:text-[#17E1FF] cursor-pointer transition-colors">
+                Changelog
+              </li>
             </ul>
           </div>
 
           <div>
             <HUDLabel className="mb-8 block">RESOURCES</HUDLabel>
             <ul className="space-y-4 text-sm text-white/40 font-light">
-              <li className="hover:text-[#17E1FF] cursor-pointer transition-colors">Docs</li>
+              <li className="hover:text-[#17E1FF] cursor-pointer transition-colors">
+                Docs
+              </li>
               <li className="hover:text-[#17E1FF] cursor-pointer transition-colors">
                 API References
               </li>
-              <li className="hover:text-[#17E1FF] cursor-pointer transition-colors">Community</li>
-              <li className="hover:text-[#17E1FF] cursor-pointer transition-colors">Support</li>
+              <li className="hover:text-[#17E1FF] cursor-pointer transition-colors">
+                Community
+              </li>
+              <li className="hover:text-[#17E1FF] cursor-pointer transition-colors">
+                Support
+              </li>
             </ul>
           </div>
         </div>
 
         <div className="flex flex-col md:flex-row justify-between items-center pt-12 border-t border-white/5 gap-6">
-          <HUDLabel className="opacity-20">© 2025 CODEX AEROSPACE. ALL RIGHTS RESERVED.</HUDLabel>
+          <HUDLabel className="opacity-20">
+            © 2025 CODEX AEROSPACE. ALL RIGHTS RESERVED.
+          </HUDLabel>
           <div className="flex gap-10">
             <HUDLabel className="hover:opacity-100 cursor-pointer transition-opacity">
               Privacy
@@ -529,10 +583,13 @@ const Landing = () => {
       {/* Noise Texture Overlay */}
       <div
         className="fixed inset-0 pointer-events-none opacity-[0.03] z-[9999]"
-        style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }}
+        style={{
+          backgroundImage:
+            'url("https://grainy-gradients.vercel.app/noise.svg")',
+        }}
       />
       <main>
-        <Hero onInitialize={() => navigate('/login')} />
+        <Hero onInitialize={() => navigate("/login")} />
         <StatsSection />
         <BentoGrid />
 
@@ -561,7 +618,7 @@ const Landing = () => {
             </h2>
             <button
               type="button"
-              onClick={() => navigate('/register')}
+              onClick={() => navigate("/register")}
               className="px-16 py-7 bg-white text-black font-black uppercase tracking-widest rounded-full hover:bg-[#17E1FF] transition-all transform hover:scale-105 active:scale-95 shadow-[0_0_80px_rgba(255,255,255,0.2)]"
             >
               Launch Free Instance

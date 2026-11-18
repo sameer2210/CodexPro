@@ -1,7 +1,7 @@
-import { Server as SocketIO } from 'socket.io';
-import jwt from 'jsonwebtoken';
-import User from '../models/user.js';
-import config from './config.js';
+import { Server as SocketIO } from "socket.io";
+import jwt from "jsonwebtoken";
+import User from "../models/user.js";
+import config from "./config.js";
 
 let io;
 
@@ -14,7 +14,7 @@ export const initializeSocket = (server) => {
     io = new SocketIO(server, {
       cors: {
         origin: config.FRONTEND_URLS,
-        methods: ['GET', 'POST'],
+        methods: ["GET", "POST"],
         credentials: true,
       },
     });
@@ -25,7 +25,7 @@ export const initializeSocket = (server) => {
 
 export const getIO = () => {
   if (!io) {
-    throw new Error('Socket.IO not initialized');
+    throw new Error("Socket.IO not initialized");
   }
   return io;
 };

@@ -1,9 +1,7 @@
-import React from 'react'
+import React from "react";
 
 const SubmitCard = () => {
-  return (
-    <div>SubmitCard</div>
-  )
-}
+  return <div>SubmitCard</div>;
+};
 
-export default SubmitCard
+export default SubmitCard;

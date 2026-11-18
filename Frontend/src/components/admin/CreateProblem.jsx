@@ -82,7 +82,7 @@ const problemSchema = z.object({
         input: z.string().min(1, "Input is required"),
         output: z.string().min(1, "Output is required"),
         explanation: z.string().min(1, "Explanation is required"),
-      })
+      }),
     )
     .min(1, "At least one visible test case required"),
   hiddenTestCases: z
@@ -90,7 +90,7 @@ const problemSchema = z.object({
       z.object({
         input: z.string().min(1, "Input is required"),
         output: z.string().min(1, "Output is required"),
-      })
+      }),
     )
     .min(1, "At least one hidden test case required"),
   startCode: z
@@ -98,7 +98,7 @@ const problemSchema = z.object({
       z.object({
         language: z.enum(["cpp", "java", "javascript"]),
         initialCode: z.string().min(1, "Initial code is required"),
-      })
+      }),
     )
     .length(3, "All three languages required"),
   referenceSolution: z
@@ -106,7 +106,7 @@ const problemSchema = z.object({
       z.object({
         language: z.enum(["cpp", "java", "javascript"]),
         completeCode: z.string().min(1, "Complete code is required"),
-      })
+      }),
     )
     .length(3, "All three languages required"),
 });
@@ -201,7 +201,7 @@ function CreateProblem() {
 
   const watchedValues = watch();
 
- const onSubmit = async (data) => {
+  const onSubmit = async (data) => {
     setIsSubmitting(true);
     try {
       await axiosClient.post("/problem/create", data);
@@ -515,8 +515,8 @@ function ProblemDetailsStep({ register, errors, watchedValues }) {
                 {watchedValues.tags === "linkedList"
                   ? "LINKED LIST"
                   : watchedValues.tags === "dp"
-                  ? "DYNAMIC PROGRAMMING"
-                  : watchedValues.tags.toUpperCase()}
+                    ? "DYNAMIC PROGRAMMING"
+                    : watchedValues.tags.toUpperCase()}
               </span>
             </div>
           )}

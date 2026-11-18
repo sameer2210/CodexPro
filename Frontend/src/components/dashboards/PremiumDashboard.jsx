@@ -1,14 +1,12 @@
-import React, { useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import { Link } from 'react-router-dom';
-import { Crown, Key, Zap, Shield, ArrowLeft } from 'lucide-react';
-import PaymentHistory from '../common/PaymentHistory';
+import React, { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { Link } from "react-router-dom";
+import { Crown, Key, Zap, Shield, ArrowLeft } from "lucide-react";
+import PaymentHistory from "../common/PaymentHistory";
 
 const PremiumDashboard = () => {
   const dispatch = useDispatch();
   const { user, profile, profileLoading } = useSelector((state) => state.auth);
-
-
 
   if (profileLoading) {
     return (
@@ -28,7 +26,10 @@ const PremiumDashboard = () => {
               Premium Dashboard
             </h1>
           </div>
-          <Link to="/" className="flex items-center space-x-2 text-slate-300 hover:text-white transition-colors duration-200">
+          <Link
+            to="/"
+            className="flex items-center space-x-2 text-slate-300 hover:text-white transition-colors duration-200"
+          >
             <ArrowLeft className="w-5 h-5" />
             <span>Back to Home</span>
           </Link>
@@ -43,13 +44,16 @@ const PremiumDashboard = () => {
                 <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-500 rounded-xl">
                   <Key className="w-6 h-6 text-white" />
                 </div>
-                <h2 className="text-2xl font-semibold text-white">API Access</h2>
+                <h2 className="text-2xl font-semibold text-white">
+                  API Access
+                </h2>
               </div>
               <p className="text-slate-400 mb-4">
-                Use your personal API token to integrate CodeWay with your applications.
+                Use your personal API token to integrate CodeWay with your
+                applications.
               </p>
               <div className="mt-4 p-4 bg-slate-900 rounded-lg font-mono text-sm text-green-400 break-all border border-slate-700">
-                {profile?.apiToken || 'No API token found.'}
+                {profile?.apiToken || "No API token found."}
               </div>
               <button className="mt-6 bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-bold py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl">
                 Generate New Token
@@ -62,18 +66,28 @@ const PremiumDashboard = () => {
                 <div className="p-3 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-xl">
                   <Zap className="w-6 h-6 text-white" />
                 </div>
-                <h2 className="text-2xl font-semibold text-white">Usage Statistics</h2>
+                <h2 className="text-2xl font-semibold text-white">
+                  Usage Statistics
+                </h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-slate-900 p-6 rounded-lg border border-slate-700">
                   <p className="text-slate-400 text-sm">AI Doubt Tokens</p>
-                  <p className="text-3xl font-bold text-blue-400">{profile?.tokensLeft}</p>
-                  <p className="text-slate-500 text-xs mt-1">tokens remaining</p>
+                  <p className="text-3xl font-bold text-blue-400">
+                    {profile?.tokensLeft}
+                  </p>
+                  <p className="text-slate-500 text-xs mt-1">
+                    tokens remaining
+                  </p>
                 </div>
                 <div className="bg-slate-900 p-6 rounded-lg border border-slate-700">
-                  <p className="text-slate-400 text-sm">AI Interview Sessions</p>
+                  <p className="text-slate-400 text-sm">
+                    AI Interview Sessions
+                  </p>
                   <p className="text-3xl font-bold text-blue-400">Unlimited</p>
-                  <p className="text-slate-500 text-xs mt-1">for premium members</p>
+                  <p className="text-slate-500 text-xs mt-1">
+                    for premium members
+                  </p>
                 </div>
               </div>
             </div>
@@ -90,7 +104,9 @@ const PremiumDashboard = () => {
                 </div>
                 <h2 className="text-2xl font-semibold text-white">Your Plan</h2>
               </div>
-              <p className="text-yellow-300 text-lg font-semibold">Premium Member</p>
+              <p className="text-yellow-300 text-lg font-semibold">
+                Premium Member
+              </p>
               <p className="text-slate-400 mt-2">
                 You have access to all exclusive features.
               </p>
@@ -105,7 +121,9 @@ const PremiumDashboard = () => {
                 <div className="p-3 bg-gradient-to-br from-purple-500 to-fuchsia-500 rounded-xl">
                   <Shield className="w-6 h-6 text-white" />
                 </div>
-                <h2 className="text-2xl font-semibold text-white">Exclusive Features</h2>
+                <h2 className="text-2xl font-semibold text-white">
+                  Exclusive Features
+                </h2>
               </div>
               <ul className="space-y-3 text-slate-300">
                 <li className="flex items-center space-x-3">

@@ -1,37 +1,46 @@
-import { useEffect } from 'react';
+import { useEffect } from "react";
+import { motion } from "framer-motion";
 
 const PageNotFound = () => {
   useEffect(() => {
-    const link = document.createElement('link');
+    const link = document.createElement("link");
     link.href =
-      'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Roboto:wght@300;400;500&display=swap';
-    link.rel = 'stylesheet';
+      "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Roboto:wght@300;400;500&display=swap";
+    link.rel = "stylesheet";
     document.head.appendChild(link);
     return () => document.head.removeChild(link);
   }, []);
 
-  const handleReturnHome = () => (window.location.href = '/');
-  const handleExploreCollections = () => (window.location.href = '/collections');
+  const handleReturnHome = () => (window.location.href = "/");
+  const handleExploreCollections = () =>
+    (window.location.href = "/collections");
 
   const containerVariants = {
     hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { duration: 0.8, staggerChildren: 0.3 } },
+    visible: {
+      opacity: 1,
+      transition: { duration: 0.8, staggerChildren: 0.3 },
+    },
   };
 
   const itemVariants = {
     hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: 'easeOut' } },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: "easeOut" },
+    },
   };
 
   const floatingVariants = {
     y: [-10, 10, -10],
-    transition: { duration: 4, repeat: Infinity, ease: 'easeInOut' },
+    transition: { duration: 4, repeat: Infinity, ease: "easeInOut" },
   };
 
   const pulseVariants = {
     scale: [1, 1.05, 1],
     opacity: [0.7, 1, 0.7],
-    transition: { duration: 3, repeat: Infinity, ease: 'easeInOut' },
+    transition: { duration: 3, repeat: Infinity, ease: "easeInOut" },
   };
 
   return (
@@ -39,7 +48,7 @@ const PageNotFound = () => {
       className="min-h-screen flex items-center justify-center relative overflow-hidden"
       style={{
         fontFamily: "'Roboto', sans-serif",
-        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+        background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
       }}
     >
       {/* Decorative Background Elements */}
@@ -84,8 +93,9 @@ const PageNotFound = () => {
 
         <motion.div className="mb-12" variants={itemVariants}>
           <p className="text-lg md:text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed font-light">
-            It seems you've wandered into uncharted luxury territory. The page you're looking for
-            couldn't be found. Let's guide you back to elegance.
+            It seems you've wandered into uncharted luxury territory. The page
+            you're looking for couldn't be found. Let's guide you back to
+            elegance.
           </p>
         </motion.div>
 
@@ -96,7 +106,10 @@ const PageNotFound = () => {
           <motion.button
             onClick={handleReturnHome}
             className="px-8 py-4 bg-gradient-to-r from-gray-800 to-gray-900 text-white font-medium rounded-full shadow-lg hover:shadow-xl transition-all duration-300 min-w-48"
-            whileHover={{ scale: 1.05, boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}
+            whileHover={{
+              scale: 1.05,
+              boxShadow: "0 20px 40px rgba(0,0,0,0.2)",
+            }}
             whileTap={{ scale: 0.98 }}
           >
             Return Home
@@ -105,7 +118,7 @@ const PageNotFound = () => {
           <motion.button
             onClick={handleExploreCollections}
             className="px-8 py-4 bg-transparent border-2 border-gray-300 text-gray-700 font-medium rounded-full hover:bg-gray-50 hover:border-gray-400 transition-all duration-300 min-w-48"
-            whileHover={{ scale: 1.05, borderColor: '#6b7280' }}
+            whileHover={{ scale: 1.05, borderColor: "#6b7280" }}
             whileTap={{ scale: 0.98 }}
           >
             Explore Collections
@@ -114,8 +127,8 @@ const PageNotFound = () => {
 
         <motion.div className="mt-16" variants={itemVariants}>
           <p className="text-sm text-gray-500 font-light">
-            Need assistance? Our luxury concierge is here to help you find exactly what you're
-            looking for.
+            Need assistance? Our luxury concierge is here to help you find
+            exactly what you're looking for.
           </p>
         </motion.div>
       </motion.div>
@@ -126,7 +139,7 @@ const PageNotFound = () => {
           className="w-full h-full"
           style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23000000' fill-opacity='0.1'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
-            backgroundSize: '60px 60px',
+            backgroundSize: "60px 60px",
           }}
         />
       </div>

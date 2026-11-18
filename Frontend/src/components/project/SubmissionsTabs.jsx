@@ -1,10 +1,30 @@
 import React, { useState } from "react";
 
 const tabList = [
-  { key: "recent", label: "Recent AC", icon: "✅", description: "Recently accepted submissions" },
-  { key: "list", label: "All Submissions", icon: "📋", description: "Complete submission history" },
-  { key: "solutions", label: "Solutions", icon: "💡", description: "View solution code" },
-  { key: "discuss", label: "Discuss", icon: "💬", description: "Community discussions" },
+  {
+    key: "recent",
+    label: "Recent AC",
+    icon: "✅",
+    description: "Recently accepted submissions",
+  },
+  {
+    key: "list",
+    label: "All Submissions",
+    icon: "📋",
+    description: "Complete submission history",
+  },
+  {
+    key: "solutions",
+    label: "Solutions",
+    icon: "💡",
+    description: "View solution code",
+  },
+  {
+    key: "discuss",
+    label: "Discuss",
+    icon: "💬",
+    description: "Community discussions",
+  },
 ];
 
 const SubmissionsTabs = ({ submissions, loading }) => {
@@ -15,17 +35,11 @@ const SubmissionsTabs = ({ submissions, loading }) => {
       <div className="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-2xl shadow-2xl p-6 animate-pulse">
         <div className="flex gap-3 mb-6">
           {tabList.map((tab) => (
-            <div
-              key={tab.key}
-              className="h-10 w-32 bg-gray-700 rounded-xl"
-            />
+            <div key={tab.key} className="h-10 w-32 bg-gray-700 rounded-xl" />
           ))}
         </div>
         {[...Array(3)].map((_, i) => (
-          <div
-            key={i}
-            className="h-16 w-full bg-gray-700 rounded-lg mb-3"
-          />
+          <div key={i} className="h-16 w-full bg-gray-700 rounded-lg mb-3" />
         ))}
       </div>
     );
@@ -49,7 +63,7 @@ const SubmissionsTabs = ({ submissions, loading }) => {
     const date = new Date(dateStr);
     const now = new Date();
     const diffInHours = (now - date) / (1000 * 60 * 60);
-    
+
     if (diffInHours < 24) {
       return `${Math.floor(diffInHours)}h ago`;
     } else if (diffInHours < 24 * 7) {
@@ -81,7 +95,7 @@ const SubmissionsTabs = ({ submissions, loading }) => {
               </button>
             ))}
           </div>
-          
+
           <button className="text-orange-400 hover:text-orange-300 font-semibold text-sm transition-colors duration-200 hover:underline">
             View all →
           </button>
@@ -92,8 +106,12 @@ const SubmissionsTabs = ({ submissions, loading }) => {
           {data.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <div className="text-6xl mb-4 opacity-50">📝</div>
-              <div className="text-gray-400 text-lg mb-2">No submissions yet</div>
-              <div className="text-gray-500 text-sm">Start solving problems to see your progress here!</div>
+              <div className="text-gray-400 text-lg mb-2">
+                No submissions yet
+              </div>
+              <div className="text-gray-500 text-sm">
+                Start solving problems to see your progress here!
+              </div>
             </div>
           ) : (
             <>
@@ -111,13 +129,17 @@ const SubmissionsTabs = ({ submissions, loading }) => {
                         </div>
                         <div>
                           <div className="font-semibold text-white group-hover:text-orange-400 transition-colors duration-200">
-                            {item.title || item.problemTitle || "Unknown Problem"}
+                            {item.title ||
+                              item.problemTitle ||
+                              "Unknown Problem"}
                           </div>
                           <div className="flex items-center space-x-3 text-sm text-gray-400">
                             <span className="bg-blue-500/20 text-blue-400 px-2 py-1 rounded-full text-xs font-medium">
                               {getSubmissionLanguage(item)}
                             </span>
-                            <span>{formatDate(item.solvedAt || item.time)}</span>
+                            <span>
+                              {formatDate(item.solvedAt || item.time)}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -176,7 +198,9 @@ const SubmissionsTabs = ({ submissions, loading }) => {
                         <div className="p-4 border-b border-gray-700 bg-gray-700/30">
                           <div className="flex items-center justify-between">
                             <h3 className="font-semibold text-lg text-orange-400">
-                              {item.title || item.problemTitle || "Unknown Problem"}
+                              {item.title ||
+                                item.problemTitle ||
+                                "Unknown Problem"}
                             </h3>
                             <div className="flex items-center space-x-2">
                               <span className="bg-blue-500/20 text-blue-400 px-3 py-1 rounded-full text-xs font-medium">
@@ -190,7 +214,10 @@ const SubmissionsTabs = ({ submissions, loading }) => {
                         </div>
                         <div className="p-4">
                           <pre className="bg-gray-900 p-4 rounded-lg text-sm overflow-x-auto border border-gray-600 text-gray-300 leading-relaxed">
-                            <code>{item.solution || "// Solution code not available"}</code>
+                            <code>
+                              {item.solution ||
+                                "// Solution code not available"}
+                            </code>
                           </pre>
                         </div>
                       </div>
@@ -198,8 +225,12 @@ const SubmissionsTabs = ({ submissions, loading }) => {
                   ) : (
                     <div className="flex flex-col items-center justify-center py-12 text-center">
                       <div className="text-6xl mb-4 opacity-50">💡</div>
-                      <div className="text-gray-400 text-lg mb-2">No solutions available</div>
-                      <div className="text-gray-500 text-sm">Solutions will appear here when you submit code</div>
+                      <div className="text-gray-400 text-lg mb-2">
+                        No solutions available
+                      </div>
+                      <div className="text-gray-500 text-sm">
+                        Solutions will appear here when you submit code
+                      </div>
                     </div>
                   )}
                 </div>
@@ -209,8 +240,12 @@ const SubmissionsTabs = ({ submissions, loading }) => {
               {activeTab === "discuss" && (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <div className="text-6xl mb-4 opacity-50">💬</div>
-                  <div className="text-gray-400 text-lg mb-2">Discussion feature coming soon</div>
-                  <div className="text-gray-500 text-sm">Connect with other developers and share insights</div>
+                  <div className="text-gray-400 text-lg mb-2">
+                    Discussion feature coming soon
+                  </div>
+                  <div className="text-gray-500 text-sm">
+                    Connect with other developers and share insights
+                  </div>
                   <button className="mt-4 px-6 py-2 bg-orange-500/20 text-orange-400 rounded-lg border border-orange-500/30 hover:bg-orange-500/30 transition-all duration-200">
                     Stay tuned!
                   </button>

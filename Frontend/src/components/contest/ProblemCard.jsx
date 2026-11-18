@@ -1,11 +1,14 @@
-import React from 'react'
-import { NavLink } from 'react-router-dom'
+import React from "react";
+import { NavLink } from "react-router-dom";
 
 const ProblemCard = ({ problem }) => {
   return (
     <div className="bg-gray-800 rounded-md p-4 mt-2 hover:bg-gray-700 transition-colors duration-300 shadow-md">
       <div className="flex items-center justify-between">
-        <NavLink to={`/problem/${problem._id}`} className="hover:text-orange-400 text-2xl font-semibold">
+        <NavLink
+          to={`/problem/${problem._id}`}
+          className="hover:text-orange-400 text-2xl font-semibold"
+        >
           {problem?.title}
         </NavLink>
         <span
@@ -13,8 +16,8 @@ const ProblemCard = ({ problem }) => {
             problem.difficulty === "easy"
               ? "bg-green-400 text-white"
               : problem.difficulty === "medium"
-              ? "bg-yellow-400 text-white"
-              : "bg-red-500 text-white"
+                ? "bg-yellow-400 text-white"
+                : "bg-red-500 text-white"
           }`}
         >
           {problem.difficulty}
@@ -44,7 +47,7 @@ const ProblemCard = ({ problem }) => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default ProblemCard
+export default ProblemCard;

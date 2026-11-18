@@ -9,8 +9,8 @@ const AiAssistant = () => {
   const [messages, setMessages] = useState([
     {
       text: "👋 Hi! I'm CodeWay AI Assistant! I can help you navigate the platform and answer questions about coding. What would you like to do?",
-      sender: "ai"
-    }
+      sender: "ai",
+    },
   ]);
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -37,10 +37,19 @@ const AiAssistant = () => {
   };
 
   const quickActions = [
-    { text: "🏠 Go to Dashboard", action: () => handleQuickAction("take me to dashboard") },
-    { text: "🏆 View Contests", action: () => handleQuickAction("show me contests") },
-    { text: "💎 Premium Features", action: () => handleQuickAction("what are premium features") },
-    { text: "📊 Problems", action: () => handleQuickAction("show problems") }
+    {
+      text: "🏠 Go to Dashboard",
+      action: () => handleQuickAction("take me to dashboard"),
+    },
+    {
+      text: "🏆 View Contests",
+      action: () => handleQuickAction("show me contests"),
+    },
+    {
+      text: "💎 Premium Features",
+      action: () => handleQuickAction("what are premium features"),
+    },
+    { text: "📊 Problems", action: () => handleQuickAction("show problems") },
   ];
 
   const handleQuickAction = (message) => {
@@ -86,31 +95,38 @@ const AiAssistant = () => {
         return;
       }
 
-      const baseURL = import.meta.env.VITE_API_URL || "http://localhost:3000/api";
-      const response = await fetch(`${baseURL}/ai/assistant?query=${encodeURIComponent(messageText)}`,{
-       method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}`
+      const baseURL =
+        import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+      const response = await fetch(
+        `${baseURL}/ai/assistant?query=${encodeURIComponent(messageText)}`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${authToken}`,
+          },
         },
-      });
-      console.log("hhhh",response)
+      );
+      console.log("hhhh", response);
       if (!response.body) {
         throw new Error("Streaming not supported or response body is empty.");
       }
-      
+
       let fullResponse = "";
       let aiMessageIndex = -1;
 
-      setMessages(prev => {
-        const newMessages = [...prev, {text: "", sender: "ai", isTyping: true}];
+      setMessages((prev) => {
+        const newMessages = [
+          ...prev,
+          { text: "", sender: "ai", isTyping: true },
+        ];
         aiMessageIndex = newMessages.length - 1;
         return newMessages;
       });
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
-      let buffer = '';
+      let buffer = "";
 
       const processStream = async () => {
         while (true) {
@@ -118,7 +134,7 @@ const AiAssistant = () => {
           if (done) {
             setIsLoading(false);
             setIsTyping(false);
-            setMessages(prev => {
+            setMessages((prev) => {
               const newMessages = [...prev];
               if (newMessages[aiMessageIndex]) {
                 newMessages[aiMessageIndex].isTyping = false;
@@ -151,7 +167,8 @@ const AiAssistant = () => {
                 setTimeout(() => navigate("/login"), 2000);
               } else if (
                 (parsedRoute === "/doubt" || parsedRoute === "/premium") &&
-                user && !user.isPremium
+                user &&
+                !user.isPremium
               ) {
                 setMessages((prevMessages) => [
                   ...prevMessages,
@@ -175,18 +192,18 @@ const AiAssistant = () => {
           }
 
           buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop(); 
+          const lines = buffer.split("\n");
+          buffer = lines.pop();
 
           for (const line of lines) {
-            if (line.startsWith('data: ')) {
+            if (line.startsWith("data: ")) {
               const jsonString = line.substring(6).trim();
               if (jsonString) {
                 try {
                   const data = JSON.parse(jsonString);
                   if (data.text) {
                     fullResponse += data.text;
-                    setMessages(prev => {
+                    setMessages((prev) => {
                       const newMessages = [...prev];
                       if (newMessages[aiMessageIndex]) {
                         newMessages[aiMessageIndex].text = fullResponse;
@@ -196,16 +213,19 @@ const AiAssistant = () => {
                     });
                   }
                 } catch (e) {
-                  console.error("Error parsing JSON from stream:", e, jsonString);
+                  console.error(
+                    "Error parsing JSON from stream:",
+                    e,
+                    jsonString,
+                  );
                 }
               }
             }
           }
         }
       };
-      
-      await processStream();
 
+      await processStream();
     } catch (error) {
       console.error("Error sending message:", error);
       if (error.response && error.response.status === 401) {
@@ -254,15 +274,15 @@ const AiAssistant = () => {
           </>
         )}
       </button>
-      
+
       {isOpen && (
         <div className="chat-window">
           <div className="chat-header">
             <div className="ai-avatar">🤖</div>
             <div className="ai-info">
               <h3>The CodeWay Assistant</h3>
-              <span className={`status ${isTyping ? 'typing' : 'online'}`}>
-                {isTyping ? '✍️ Typing...' : '🟢 Online'}
+              <span className={`status ${isTyping ? "typing" : "online"}`}>
+                {isTyping ? "✍️ Typing..." : "🟢 Online"}
               </span>
             </div>
           </div>
@@ -271,7 +291,7 @@ const AiAssistant = () => {
             {messages.map((msg, index) => (
               <div key={index} className={`message ${msg.sender}`}>
                 <div className="message-avatar">
-                  {msg.sender === 'user' ? '👤' : '🤖'}
+                  {msg.sender === "user" ? "👤" : "🤖"}
                 </div>
                 <div className="message-content">
                   <div className="message-text">
@@ -285,7 +305,10 @@ const AiAssistant = () => {
                     )}
                   </div>
                   <div className="message-time">
-                    {new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                    {new Date().toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
                   </div>
                 </div>
               </div>
@@ -322,16 +345,17 @@ const AiAssistant = () => {
                 disabled={isLoading}
                 className="message-input"
               />
-              <button 
-                onClick={() => handleSendMessage()} 
+              <button
+                onClick={() => handleSendMessage()}
                 disabled={isLoading || !inputValue.trim()}
                 className="send-button"
               >
-                {isLoading ? '⏳' : '📤'}
+                {isLoading ? "⏳" : "📤"}
               </button>
             </div>
             <div className="input-hint">
-              💡 Try: "Show me contests", "Take me to dashboard", "What's premium?"
+              💡 Try: "Show me contests", "Take me to dashboard", "What's
+              premium?"
             </div>
           </div>
         </div>

@@ -1,23 +1,26 @@
 let sharedAudioCtx = null;
 
 const getAudioCtx = () => {
-  if (typeof window === 'undefined') return null;
+  if (typeof window === "undefined") return null;
   const AudioCtx = window.AudioContext || window.webkitAudioContext;
   if (!AudioCtx) return null;
-  if (!sharedAudioCtx || sharedAudioCtx.state === 'closed') {
+  if (!sharedAudioCtx || sharedAudioCtx.state === "closed") {
     sharedAudioCtx = new AudioCtx();
   }
   return sharedAudioCtx;
 };
 
-const resumeAudio = ctx => {
+const resumeAudio = (ctx) => {
   if (!ctx) return;
-  if (ctx.state === 'suspended') {
+  if (ctx.state === "suspended") {
     ctx.resume().catch(() => {});
   }
 };
 
-const createPulse = (ctx, { type, frequency, sweepTo, duration, gain, detune = 0, startAt }) => {
+const createPulse = (
+  ctx,
+  { type, frequency, sweepTo, duration, gain, detune = 0, startAt },
+) => {
   const osc = ctx.createOscillator();
   const gainNode = ctx.createGain();
   const startTime = ctx.currentTime + startAt;
@@ -49,7 +52,7 @@ export const playHorn = () => {
 
   // Modified to a modern, short electronic beep (like a notification ping)
   createPulse(ctx, {
-    type: 'sine', // Changed to sine for smoother, modern tone
+    type: "sine", // Changed to sine for smoother, modern tone
     frequency: 800, // Higher frequency for a modern feel
     sweepTo: 600, // Gentle sweep down
     duration: 0.15, // Shorter duration
@@ -58,7 +61,7 @@ export const playHorn = () => {
   });
 
   createPulse(ctx, {
-    type: 'sine',
+    type: "sine",
     frequency: 800,
     sweepTo: 600,
     duration: 0.15,
@@ -80,9 +83,9 @@ const playRingtonePulse = () => {
     { frequency: 554, sweepTo: 534, startAt: 0.7 }, // Back to C#
   ];
 
-  base.forEach(tone => {
+  base.forEach((tone) => {
     createPulse(ctx, {
-      type: 'triangle', // Changed to triangle for a softer, modern electronic vibe (less harsh than sine or sawtooth)
+      type: "triangle", // Changed to triangle for a softer, modern electronic vibe (less harsh than sine or sawtooth)
       frequency: tone.frequency,
       sweepTo: tone.sweepTo,
       duration: 0.15, // Shorter pulses for crispness

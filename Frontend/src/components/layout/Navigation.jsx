@@ -1,7 +1,7 @@
-import { motion, useMotionValueEvent, useScroll } from 'framer-motion';
-import { Terminal } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { motion, useMotionValueEvent, useScroll } from "framer-motion";
+import { Terminal } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const Navigation = () => {
   const navigate = useNavigate();
@@ -10,22 +10,22 @@ const Navigation = () => {
   const [logoFailed, setLogoFailed] = useState(false);
 
   const { scrollY } = useScroll();
-  const logoSrc = '/logo.png';
+  const logoSrc = "/logo.png";
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useMotionValueEvent(scrollY, 'change', latest => {
+  useMotionValueEvent(scrollY, "change", (latest) => {
     setIsScrolled(latest > 20);
   });
 
   const navItems = [
-    { label: 'Home', path: '/' },
-    { label: 'Login', path: '/login' },
-    { label: 'Register', path: '/register' },
+    { label: "Home", path: "/" },
+    { label: "Login", path: "/login" },
+    { label: "Register", path: "/register" },
   ];
 
   const navbarVariants = {
@@ -44,14 +44,14 @@ const Navigation = () => {
       animate="visible"
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-in-out px-8 sm:px-22 py-3.5 ${
         isScrolled
-          ? 'bg-[#10120F]/80 backdrop-blur-md border-b border-[#C2CABB]/10'
-          : 'bg-transparent'
+          ? "bg-[#10120F]/80 backdrop-blur-md border-b border-[#C2CABB]/10"
+          : "bg-transparent"
       }`}
     >
       <div className="max-w-7xl mx-auto flex items-center gap-4">
         <motion.button
           className="flex items-center gap-3 cursor-pointer group"
-          onClick={() => navigate('/')}
+          onClick={() => navigate("/")}
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
           type="button"
@@ -73,7 +73,7 @@ const Navigation = () => {
         </motion.button>
 
         <nav className="ml-auto flex items-center gap-8 sm:gap-16">
-          {navItems.map(item => {
+          {navItems.map((item) => {
             const isActive = location.pathname === item.path;
             return (
               <motion.button
@@ -84,7 +84,9 @@ const Navigation = () => {
               >
                 <span
                   className={`text-[10px] sm:text-xs md:text-sm font-semibold uppercase tracking-[0.22em] transition-colors duration-300 ${
-                    isActive ? 'text-white' : 'text-[#C2CABB] group-hover:text-white'
+                    isActive
+                      ? "text-white"
+                      : "text-[#C2CABB] group-hover:text-white"
                   }`}
                 >
                   {item.label}

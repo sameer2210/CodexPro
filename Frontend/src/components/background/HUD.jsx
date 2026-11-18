@@ -1,12 +1,12 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React from "react";
+import { motion } from "framer-motion";
 
 export const HUDLabel = ({
   label,
   value,
-  className = '',
-  labelClassName = '',
-  valueClassName = '',
+  className = "",
+  labelClassName = "",
+  valueClassName = "",
   color,
 }) => (
   <div className={`flex flex-col gap-1 ${className}`}>
@@ -29,7 +29,7 @@ export const HUDLabel = ({
 export const LEDIndicator = ({ active = true }) => (
   <motion.div
     animate={{ opacity: active ? [0.4, 1, 0.4] : 0.2 }}
-    transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
-    className={`w-1.5 h-1.5 rounded-full ${active ? 'bg-[#17E1FF] shadow-[0_0_8px_#17E1FF]' : 'bg-white/20'}`}
+    transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+    className={`w-1.5 h-1.5 rounded-full ${active ? "bg-[#17E1FF] shadow-[0_0_8px_#17E1FF]" : "bg-white/20"}`}
   />
 );

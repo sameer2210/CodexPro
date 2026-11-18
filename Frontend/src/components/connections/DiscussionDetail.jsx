@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React, { useState, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import {
   ThumbsUp,
   ThumbsDown,
@@ -12,19 +12,25 @@ import {
   Send,
   Hash,
   AlertCircle,
-} from 'lucide-react';
-import axiosClient from '../../utils/axiosClient.js';
-import { useToast } from '../../hooks/useToast.js';
-import { useSelector } from 'react-redux';
-import Comment from "../discuss/Comment.jsx"
-import Loader from '../../components/common/LoadingSpinner.jsx';
-import { getSocket, joinDiscussion, leaveDiscussion, emitTyping, emitStopTyping } from '../../utils/socket.js';
+} from "lucide-react";
+import axiosClient from "../../utils/axiosClient.js";
+import { useToast } from "../../hooks/useToast.js";
+import { useSelector } from "react-redux";
+import Comment from "../discuss/Comment.jsx";
+import Loader from "../ui/LoadingSpinner";
+import {
+  getSocket,
+  joinDiscussion,
+  leaveDiscussion,
+  emitTyping,
+  emitStopTyping,
+} from "../../utils/socket.js";
 
 const DiscussionDetail = () => {
   const { discussionId } = useParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const { user, isAuthenticated } = useSelector(state => state.auth);
+  const { user, isAuthenticated } = useSelector((state) => state.auth);
 
   // State for discussion data
   const [discussion, setDiscussion] = useState(null);
@@ -38,65 +44,89 @@ const DiscussionDetail = () => {
   const typingTimeoutRef = useRef(null);
 
   // State for comment form
-  const [commentText, setCommentText] = useState('');
+  const [commentText, setCommentText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
 
   // State for editing
   const [isEditing, setIsEditing] = useState(false);
   const [editForm, setEditForm] = useState({
-    title: '',
-    content: '',
-    tags: ''
+    title: "",
+    content: "",
+    tags: "",
   });
 
   // Socket event handlers moved outside useEffect and memoized
-  const handleNewComment = React.useCallback((newComment) => {
-    if (newComment.discussionId === discussionId) {
-      setComments(prev => {
-        if (prev.some(comment => comment._id === newComment._id)) {
-          return prev;
-        }
-        return [...prev, newComment];
-      });
-    }
-  }, [discussionId]);
+  const handleNewComment = React.useCallback(
+    (newComment) => {
+      if (newComment.discussionId === discussionId) {
+        setComments((prev) => {
+          if (prev.some((comment) => comment._id === newComment._id)) {
+            return prev;
+          }
+          return [...prev, newComment];
+        });
+      }
+    },
+    [discussionId],
+  );
 
-  const handleUpdateComment = React.useCallback((updatedComment) => {
-    if (updatedComment.discussionId === discussionId) {
-      setComments(prev =>
-        prev.map(comment =>
-          comment._id === updatedComment._id ? updatedComment : comment
-        )
+  const handleUpdateComment = React.useCallback(
+    (updatedComment) => {
+      if (updatedComment.discussionId === discussionId) {
+        setComments((prev) =>
+          prev.map((comment) =>
+            comment._id === updatedComment._id ? updatedComment : comment,
+          ),
+        );
+      }
+    },
+    [discussionId],
+  );
+
+  const handleDeleteComment = React.useCallback(
+    ({ commentId, discussionId: deletedFromDiscussion }) => {
+      if (deletedFromDiscussion === discussionId) {
+        setComments((prev) =>
+          prev.filter((comment) => comment._id !== commentId),
+        );
+      }
+    },
+    [discussionId],
+  );
+
+  const handleDiscussionUpdateFromSocket = React.useCallback(
+    (updatedDiscussion) => {
+      if (updatedDiscussion._id === discussionId) {
+        setDiscussion(updatedDiscussion);
+      }
+    },
+    [discussionId],
+  );
+
+  const handleDiscussionVoted = React.useCallback(
+    ({ discussionId: votedDiscussionId, upvotes, downvotes }) => {
+      if (votedDiscussionId === discussionId) {
+        setDiscussion((prev) =>
+          prev ? { ...prev, upvotes, downvotes } : prev,
+        );
+      }
+    },
+    [discussionId],
+  );
+
+  const handleCommentVoted = React.useCallback(
+    ({ commentId, upvotes, downvotes }) => {
+      setComments((prev) =>
+        prev.map((comment) =>
+          comment._id === commentId
+            ? { ...comment, upvotes, downvotes }
+            : comment,
+        ),
       );
-    }
-  }, [discussionId]);
-
-  const handleDeleteComment = React.useCallback(({ commentId, discussionId: deletedFromDiscussion }) => {
-    if (deletedFromDiscussion === discussionId) {
-      setComments(prev => prev.filter(comment => comment._id !== commentId));
-    }
-  }, [discussionId]);
-
-  const handleDiscussionUpdateFromSocket = React.useCallback((updatedDiscussion) => {
-    if (updatedDiscussion._id === discussionId) {
-      setDiscussion(updatedDiscussion);
-    }
-  }, [discussionId]);
-
-  const handleDiscussionVoted = React.useCallback(({ discussionId: votedDiscussionId, upvotes, downvotes }) => {
-    if (votedDiscussionId === discussionId) {
-      setDiscussion(prev => prev ? { ...prev, upvotes, downvotes } : prev);
-    }
-  }, [discussionId]);
-
-  const handleCommentVoted = React.useCallback(({ commentId, upvotes, downvotes }) => {
-    setComments(prev =>
-      prev.map(comment =>
-        comment._id === commentId ? { ...comment, upvotes, downvotes } : comment
-      )
-    );
-  }, []);
+    },
+    [],
+  );
 
   // Fetch discussion and comments
   React.useEffect(() => {
@@ -106,25 +136,31 @@ const DiscussionDetail = () => {
 
       try {
         // Fetch discussion details
-        const discussionResponse = await axiosClient.get(`/discussions/${discussionId}`);
-        const discussionData = discussionResponse.data.discussion || discussionResponse.data;
+        const discussionResponse = await axiosClient.get(
+          `/discussions/${discussionId}`,
+        );
+        const discussionData =
+          discussionResponse.data.discussion || discussionResponse.data;
         setDiscussion(discussionData);
 
         // Initialize edit form with current values
         setEditForm({
           title: discussionData.title,
           content: discussionData.content,
-          tags: discussionData.tags?.join(', ') || ''
+          tags: discussionData.tags?.join(", ") || "",
         });
 
         // Fetch comments separately
-        const commentsResponse = await axiosClient.get(`/discussions/${discussionId}/comments`);
+        const commentsResponse = await axiosClient.get(
+          `/discussions/${discussionId}/comments`,
+        );
         setComments(commentsResponse.data || []);
       } catch (error) {
-        console.error('Error fetching discussion details:', error);
-        const errorMessage = error.response?.data?.message || 'Failed to load discussion';
+        console.error("Error fetching discussion details:", error);
+        const errorMessage =
+          error.response?.data?.message || "Failed to load discussion";
         setError(errorMessage);
-        showToast(errorMessage, 'error');
+        showToast(errorMessage, "error");
       } finally {
         setLoading(false);
       }
@@ -138,35 +174,44 @@ const DiscussionDetail = () => {
       joinDiscussion(discussionId);
 
       // Attach event listeners
-      socket.on('new-comment', handleNewComment);
-      socket.on('update-comment', handleUpdateComment);
-      socket.on('delete-comment', handleDeleteComment);
-      socket.on('update-discussion', handleDiscussionUpdateFromSocket);
-      socket.on('discussion-voted', handleDiscussionVoted);
-      socket.on('comment-voted', handleCommentVoted);
+      socket.on("new-comment", handleNewComment);
+      socket.on("update-comment", handleUpdateComment);
+      socket.on("delete-comment", handleDeleteComment);
+      socket.on("update-discussion", handleDiscussionUpdateFromSocket);
+      socket.on("discussion-voted", handleDiscussionVoted);
+      socket.on("comment-voted", handleCommentVoted);
 
       // Listen for typing indicators
-      socket.on('user-typing', ({ discussionId: typingDiscussionId, user: typingUser }) => {
-        if (typingDiscussionId === discussionId && typingUser._id !== user?._id) {
-          setTypingUsers(prev => {
-            if (!prev.some(u => u._id === typingUser._id)) {
-              return [...prev, typingUser];
-            }
-            return prev;
-          });
-        }
-      });
+      socket.on(
+        "user-typing",
+        ({ discussionId: typingDiscussionId, user: typingUser }) => {
+          if (
+            typingDiscussionId === discussionId &&
+            typingUser._id !== user?._id
+          ) {
+            setTypingUsers((prev) => {
+              if (!prev.some((u) => u._id === typingUser._id)) {
+                return [...prev, typingUser];
+              }
+              return prev;
+            });
+          }
+        },
+      );
 
       // Listen for stop typing indicators
-      socket.on('user-stop-typing', ({ discussionId: typingDiscussionId, userId }) => {
-        if (typingDiscussionId === discussionId) {
-          setTypingUsers(prev => prev.filter(u => u._id !== userId));
-        }
-      });
+      socket.on(
+        "user-stop-typing",
+        ({ discussionId: typingDiscussionId, userId }) => {
+          if (typingDiscussionId === discussionId) {
+            setTypingUsers((prev) => prev.filter((u) => u._id !== userId));
+          }
+        },
+      );
 
       // Listen for connection status
-      socket.on('connect', () => setIsOnline(true));
-      socket.on('disconnect', () => setIsOnline(false));
+      socket.on("connect", () => setIsOnline(true));
+      socket.on("disconnect", () => setIsOnline(false));
     }
 
     // Clean up socket listeners when component unmounts
@@ -174,16 +219,16 @@ const DiscussionDetail = () => {
       const socket = getSocket();
       if (socket) {
         leaveDiscussion(discussionId);
-        socket.off('new-comment', handleNewComment);
-        socket.off('update-comment', handleUpdateComment);
-        socket.off('delete-comment', handleDeleteComment);
-        socket.off('update-discussion', handleDiscussionUpdateFromSocket);
-        socket.off('discussion-voted', handleDiscussionVoted);
-        socket.off('comment-voted', handleCommentVoted);
-        socket.off('user-typing');
-        socket.off('user-stop-typing');
-        socket.off('connect');
-        socket.off('disconnect');
+        socket.off("new-comment", handleNewComment);
+        socket.off("update-comment", handleUpdateComment);
+        socket.off("delete-comment", handleDeleteComment);
+        socket.off("update-discussion", handleDiscussionUpdateFromSocket);
+        socket.off("discussion-voted", handleDiscussionVoted);
+        socket.off("comment-voted", handleCommentVoted);
+        socket.off("user-typing");
+        socket.off("user-stop-typing");
+        socket.off("connect");
+        socket.off("disconnect");
       }
 
       // Clear typing timeout
@@ -191,17 +236,26 @@ const DiscussionDetail = () => {
         clearTimeout(typingTimeoutRef.current);
       }
     };
-  }, [discussionId, user, handleNewComment, handleUpdateComment, handleDeleteComment, handleDiscussionUpdateFromSocket, handleDiscussionVoted, handleCommentVoted]);
+  }, [
+    discussionId,
+    user,
+    handleNewComment,
+    handleUpdateComment,
+    handleDeleteComment,
+    handleDiscussionUpdateFromSocket,
+    handleDiscussionVoted,
+    handleCommentVoted,
+  ]);
 
   // Format date for display
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -223,27 +277,31 @@ const DiscussionDetail = () => {
   // Handle discussion vote
   const handleVote = async (type) => {
     if (!user) {
-      showToast('Please log in to vote', 'warning');
+      showToast("Please log in to vote", "warning");
       return;
     }
 
     try {
-      const response = await axiosClient.post(`/discussions/${discussionId}/vote`, {
-        voteType: type
-      });
+      const response = await axiosClient.post(
+        `/discussions/${discussionId}/vote`,
+        {
+          voteType: type,
+        },
+      );
 
       // Update discussion with new vote arrays (not counts)
       if (response.data.success) {
-        setDiscussion(prev => ({
+        setDiscussion((prev) => ({
           ...prev,
           upvotes: response.data.upvotes,
-          downvotes: response.data.downvotes
+          downvotes: response.data.downvotes,
         }));
       }
     } catch (error) {
-      console.error('Error voting on discussion:', error);
-      const errorMessage = error.response?.data?.message || 'Failed to register vote';
-      showToast(errorMessage, 'error');
+      console.error("Error voting on discussion:", error);
+      const errorMessage =
+        error.response?.data?.message || "Failed to register vote";
+      showToast(errorMessage, "error");
     }
   };
 
@@ -275,35 +333,39 @@ const DiscussionDetail = () => {
 
     if (!commentText.trim()) return;
     if (!isAuthenticated) {
-      showToast('Please log in to comment', 'warning');
-      navigate('/login');
+      showToast("Please log in to comment", "warning");
+      navigate("/login");
       return;
     }
 
     setIsSubmitting(true);
 
     try {
-      const response = await axiosClient.post(`/discussions/${discussionId}/comments`, {
-        content: commentText
-      });
+      const response = await axiosClient.post(
+        `/discussions/${discussionId}/comments`,
+        {
+          content: commentText,
+        },
+      );
 
       // The backend now returns the comment directly, not wrapped in a success object
       const newComment = response.data;
 
       // Add new comment to the list (avoid duplicates in case socket event also fires)
-      setComments(prev => {
-        if (prev.some(comment => comment._id === newComment._id)) {
+      setComments((prev) => {
+        if (prev.some((comment) => comment._id === newComment._id)) {
           return prev;
         }
         return [...prev, newComment];
       });
 
-      setCommentText('');
-      showToast('Comment added successfully', 'success');
+      setCommentText("");
+      showToast("Comment added successfully", "success");
     } catch (error) {
-      console.error('Error adding comment:', error);
-      const errorMessage = error.response?.data?.message || 'Failed to add comment';
-      showToast(errorMessage, 'error');
+      console.error("Error adding comment:", error);
+      const errorMessage =
+        error.response?.data?.message || "Failed to add comment";
+      showToast(errorMessage, "error");
     } finally {
       setIsSubmitting(false);
     }
@@ -311,24 +373,24 @@ const DiscussionDetail = () => {
 
   // Handle comment update
   const handleCommentUpdate = (updatedComment) => {
-    setComments(prev =>
-      prev.map(comment =>
-        comment._id === updatedComment._id ? updatedComment : comment
-      )
+    setComments((prev) =>
+      prev.map((comment) =>
+        comment._id === updatedComment._id ? updatedComment : comment,
+      ),
     );
   };
 
   // Handle comment delete
   const handleCommentDelete = (commentId) => {
-    setComments(prev => prev.filter(comment => comment._id !== commentId));
+    setComments((prev) => prev.filter((comment) => comment._id !== commentId));
   };
 
   // Handle discussion edit form changes
   const handleEditChange = (e) => {
     const { name, value } = e.target;
-    setEditForm(prev => ({
+    setEditForm((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -337,49 +399,56 @@ const DiscussionDetail = () => {
     e.preventDefault();
 
     if (!editForm.title.trim() || !editForm.content.trim()) {
-      showToast('Title and content are required', 'error');
+      showToast("Title and content are required", "error");
       return;
     }
 
     try {
       // Process tags from comma-separated string to array
       const tagsArray = editForm.tags
-        ? editForm.tags.split(',').map(tag => tag.trim()).filter(tag => tag)
+        ? editForm.tags
+            .split(",")
+            .map((tag) => tag.trim())
+            .filter((tag) => tag)
         : [];
 
       const response = await axiosClient.put(`/discussions/${discussionId}`, {
         title: editForm.title,
         content: editForm.content,
-        tags: tagsArray
+        tags: tagsArray,
       });
 
       // Update discussion with edited values
       setDiscussion(response.data);
       setIsEditing(false);
-      showToast('Discussion updated successfully', 'success');
+      showToast("Discussion updated successfully", "success");
     } catch (error) {
-      console.error('Error updating discussion:', error);
-      showToast('Failed to update discussion', 'error');
+      console.error("Error updating discussion:", error);
+      showToast("Failed to update discussion", "error");
     }
   };
 
   if (!discussion) {
-  return <div>Loading...</div>;
-}
+    return <div>Loading...</div>;
+  }
 
   // Handle discussion delete
   const handleDeleteDiscussion = async () => {
-    if (!window.confirm('Are you sure you want to delete this discussion? This action cannot be undone.')) {
+    if (
+      !window.confirm(
+        "Are you sure you want to delete this discussion? This action cannot be undone.",
+      )
+    ) {
       return;
     }
 
     try {
       await axiosClient.delete(`/discussions/${discussionId}`);
-      showToast('Discussion deleted successfully', 'success');
-      navigate('/discuss');
+      showToast("Discussion deleted successfully", "success");
+      navigate("/discuss");
     } catch (error) {
-      console.error('Error deleting discussion:', error);
-      showToast('Failed to delete discussion', 'error');
+      console.error("Error deleting discussion:", error);
+      showToast("Failed to delete discussion", "error");
     }
   };
 
@@ -396,7 +465,7 @@ const DiscussionDetail = () => {
       <div className="min-h-screen bg-gray-900 text-white p-8">
         <div className="max-w-4xl mx-auto">
           <button
-            onClick={() => navigate('/discuss')}
+            onClick={() => navigate("/discuss")}
             className="flex items-center text-gray-400 hover:text-white mb-6"
           >
             <ArrowLeft className="w-5 h-5 mr-2" />
@@ -416,7 +485,7 @@ const DiscussionDetail = () => {
     <div className="min-h-screen bg-gray-900 text-white p-4 md:p-8">
       <div className="max-w-4xl mx-auto">
         <button
-          onClick={() => navigate('/discuss')}
+          onClick={() => navigate("/discuss")}
           className="flex items-center text-gray-400 hover:text-white mb-6"
         >
           <ArrowLeft className="w-5 h-5 mr-2" />
@@ -430,7 +499,10 @@ const DiscussionDetail = () => {
 
             <form onSubmit={handleUpdateDiscussion}>
               <div className="mb-4">
-                <label htmlFor="title" className="block text-sm font-medium text-gray-300 mb-1">
+                <label
+                  htmlFor="title"
+                  className="block text-sm font-medium text-gray-300 mb-1"
+                >
                   Title
                 </label>
                 <input
@@ -445,7 +517,10 @@ const DiscussionDetail = () => {
               </div>
 
               <div className="mb-4">
-                <label htmlFor="content" className="block text-sm font-medium text-gray-300 mb-1">
+                <label
+                  htmlFor="content"
+                  className="block text-sm font-medium text-gray-300 mb-1"
+                >
                   Content
                 </label>
                 <textarea
@@ -460,7 +535,10 @@ const DiscussionDetail = () => {
               </div>
 
               <div className="mb-4">
-                <label htmlFor="tags" className="block text-sm font-medium text-gray-300 mb-1">
+                <label
+                  htmlFor="tags"
+                  className="block text-sm font-medium text-gray-300 mb-1"
+                >
                   Tags (comma separated)
                 </label>
                 <input
@@ -504,13 +582,13 @@ const DiscussionDetail = () => {
                     />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center bg-orange-500 text-white text-sm font-bold">
-                      {discussion.author?.name?.charAt(0) || '?'}
+                      {discussion.author?.name?.charAt(0) || "?"}
                     </div>
                   )}
                 </div>
                 <div>
                   <div className="font-medium text-white">
-                    {discussion.author?.name || 'Anonymous'}
+                    {discussion.author?.name || "Anonymous"}
                   </div>
                   <div className="text-sm text-gray-400">
                     {formatDate(discussion.createdAt)}
@@ -544,9 +622,12 @@ const DiscussionDetail = () => {
             </div>
 
             <div className="mb-2 flex items-center justify-between">
-              <h1 className="text-2xl font-bold text-white">{discussion.title}</h1>
+              <h1 className="text-2xl font-bold text-white">
+                {discussion.title}
+              </h1>
               <div className="px-3 py-1 bg-gray-700/50 rounded-md text-sm font-medium text-gray-300">
-                {discussion.community.charAt(0).toUpperCase() + discussion.community.slice(1)}
+                {discussion.community.charAt(0).toUpperCase() +
+                  discussion.community.slice(1)}
               </div>
             </div>
 
@@ -557,7 +638,10 @@ const DiscussionDetail = () => {
             {discussion.tags && discussion.tags.length > 0 && (
               <div className="flex flex-wrap gap-2 mb-6">
                 {discussion.tags.map((tag, index) => (
-                  <div key={index} className="px-2 py-1 bg-gray-700/50 rounded-md text-xs font-medium text-gray-300 flex items-center">
+                  <div
+                    key={index}
+                    className="px-2 py-1 bg-gray-700/50 rounded-md text-xs font-medium text-gray-300 flex items-center"
+                  >
                     <Hash className="w-3 h-3 mr-1" />
                     {tag}
                   </div>
@@ -567,16 +651,16 @@ const DiscussionDetail = () => {
 
             <div className="flex items-center text-sm border-t border-gray-700/50 pt-4">
               <button
-                onClick={() => handleVote('upvote')}
-                className={`flex items-center mr-4 ${hasUpvoted() ? 'text-orange-400' : 'text-gray-400 hover:text-white'}`}
+                onClick={() => handleVote("upvote")}
+                className={`flex items-center mr-4 ${hasUpvoted() ? "text-orange-400" : "text-gray-400 hover:text-white"}`}
               >
                 <ThumbsUp className="w-5 h-5 mr-1" />
                 <span>{discussion.upvotes?.length || 0}</span>
               </button>
 
               <button
-                onClick={() => handleVote('downvote')}
-                className={`flex items-center mr-4 ${hasDownvoted() ? 'text-orange-400' : 'text-gray-400 hover:text-white'}`}
+                onClick={() => handleVote("downvote")}
+                className={`flex items-center mr-4 ${hasDownvoted() ? "text-orange-400" : "text-gray-400 hover:text-white"}`}
               >
                 <ThumbsDown className="w-5 h-5 mr-1" />
                 <span>{discussion.downvotes?.length || 0}</span>
@@ -603,13 +687,17 @@ const DiscussionDetail = () => {
 
         {/* Comments Section */}
         <div className="mb-6">
-          <h2 className="text-xl font-semibold mb-4">Comments ({comments.length})</h2>
+          <h2 className="text-xl font-semibold mb-4">
+            Comments ({comments.length})
+          </h2>
 
           {/* Connection Status */}
           {!isOnline && (
             <div className="mb-4 p-3 bg-red-500/20 border border-red-500/50 rounded-md flex items-center text-red-300">
               <AlertCircle className="w-5 h-5 mr-2" />
-              <span>You are currently offline. Some features may be unavailable.</span>
+              <span>
+                You are currently offline. Some features may be unavailable.
+              </span>
             </div>
           )}
 
@@ -642,7 +730,9 @@ const DiscussionDetail = () => {
               {typingUsers.length === 1 ? (
                 <span>{typingUsers[0].name} is typing...</span>
               ) : typingUsers.length === 2 ? (
-                <span>{typingUsers[0].name} and {typingUsers[1].name} are typing...</span>
+                <span>
+                  {typingUsers[0].name} and {typingUsers[1].name} are typing...
+                </span>
               ) : (
                 <span>Multiple people are typing...</span>
               )}
@@ -653,7 +743,9 @@ const DiscussionDetail = () => {
           {comments.length === 0 ? (
             <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6 text-center">
               <MessageSquare className="w-12 h-12 text-gray-600 mx-auto mb-3" />
-              <h3 className="text-lg font-semibold text-gray-300 mb-2">No comments yet</h3>
+              <h3 className="text-lg font-semibold text-gray-300 mb-2">
+                No comments yet
+              </h3>
               <p className="text-gray-400">
                 Be the first to share your thoughts on this discussion!
               </p>
@@ -661,8 +753,8 @@ const DiscussionDetail = () => {
           ) : (
             <div className="space-y-4">
               {comments
-                .filter(comment => !comment.parentComment) // Only show top-level comments
-                .map(comment => (
+                .filter((comment) => !comment.parentComment) // Only show top-level comments
+                .map((comment) => (
                   <Comment
                     key={comment._id}
                     comment={comment}

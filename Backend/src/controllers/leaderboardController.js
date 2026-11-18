@@ -1,8 +1,9 @@
-import { getIO } from '../config/socket.js';
-import Contest from '../models/contest.js';
-import ContestSubmission from '../models/contestSubmission.js';
-import Leaderboard from '../models/leaderboard.js';
-import User from '../models/user.js';
+import mongoose from "mongoose";
+import { getIO } from "../config/socket.js";
+import Contest from "../models/contest.js";
+import ContestSubmission from "../models/contestSubmission.js";
+import Leaderboard from "../models/leaderboard.js";
+import User from "../models/user.js";
 
 const generateRankings = (submissions) => {
   const userSubmissions = {};
@@ -22,8 +23,9 @@ const generateRankings = (submissions) => {
 
     if (
       !existingSubmission ||
-      (submission.status === 'Accepted' &&
-        (existingSubmission.status !== 'Accepted' || submission.runtime < existingSubmission.runtime))
+      (submission.status === "Accepted" &&
+        (existingSubmission.status !== "Accepted" ||
+          submission.runtime < existingSubmission.runtime))
     ) {
       userSubmissions[userId].problems[problemId] = {
         problem: submission.problemId,
@@ -41,7 +43,7 @@ const generateRankings = (submissions) => {
     let totalRuntime = 0;
 
     Object.values(userData.problems).forEach((problem) => {
-      if (problem.status === 'Accepted') {
+      if (problem.status === "Accepted") {
         problemsSolved++;
         totalScore += problem.score || 0;
         totalRuntime += problem.runtime || 0;
@@ -66,7 +68,8 @@ const generateRankings = (submissions) => {
   return rankedUsers
     .sort((a, b) => {
       if (b.score !== a.score) return b.score - a.score;
-      if (b.problemsSolved !== a.problemsSolved) return b.problemsSolved - a.problemsSolved;
+      if (b.problemsSolved !== a.problemsSolved)
+        return b.problemsSolved - a.problemsSolved;
       return a.totalRuntime - b.totalRuntime;
     })
     .map((user, index) => ({
@@ -80,7 +83,7 @@ const updateUserContestStats = async (rankings, contestId) => {
     const user = await User.findById(rank.userId);
     if (user) {
       const contestIndex = user.contestHistory.findIndex(
-        (history) => history.contestId.toString() === contestId.toString()
+        (history) => history.contestId.toString() === contestId.toString(),
       );
 
       if (contestIndex > -1) {
@@ -111,7 +114,11 @@ const updateUserContestStats = async (rankings, contestId) => {
         user.lastContestCompletion = new Date();
       }
 
-      if (!user.contestsCompleted.some((c) => c.toString() === contestId.toString())) {
+      if (
+        !user.contestsCompleted.some(
+          (c) => c.toString() === contestId.toString(),
+        )
+      ) {
         user.contestsCompleted.push(contestId);
       }
 
@@ -120,7 +127,7 @@ const updateUserContestStats = async (rankings, contestId) => {
       try {
         const io = getIO();
         if (io) {
-          io.to(user._id.toString()).emit('userStatsUpdate', {
+          io.to(user._id.toString()).emit("userStatsUpdate", {
             points: user.points,
             streak: user.streak,
           });
@@ -133,6 +140,7 @@ const updateUserContestStats = async (rankings, contestId) => {
 };
 
 export const autoFinalizeContestRankings = async () => {
+  if (mongoose.connection.readyState !== 1) return;
   try {
     const now = new Date();
     const contestsToFinalize = await Contest.find({
@@ -140,14 +148,19 @@ export const autoFinalizeContestRankings = async () => {
     });
 
     for (const contest of contestsToFinalize) {
-      const existingLeaderboard = await Leaderboard.findOne({ contestId: contest._id, isFinalized: true });
+      const existingLeaderboard = await Leaderboard.findOne({
+        contestId: contest._id,
+        isFinalized: true,
+      });
       if (existingLeaderboard) {
         continue;
       }
 
-      const submissions = await ContestSubmission.find({ contestId: contest._id })
-        .populate('userId', 'name email profileImage')
-        .populate('problemId', 'title difficulty');
+      const submissions = await ContestSubmission.find({
+        contestId: contest._id,
+      })
+        .populate("userId", "name email profileImage")
+        .populate("problemId", "title difficulty");
 
       const rankings = generateRankings(submissions);
 
@@ -163,7 +176,7 @@ export const autoFinalizeContestRankings = async () => {
 
       try {
         const io = getIO();
-        io.emit('leaderboardUpdate', {
+        io.emit("leaderboardUpdate", {
           contestId: contest._id,
           leaderboard: leaderboard,
         });
@@ -172,14 +185,14 @@ export const autoFinalizeContestRankings = async () => {
       }
     }
   } catch (error) {
-    console.error('❌ Error auto-finalizing contest rankings:', error);
+    console.error("❌ Error auto-finalizing contest rankings:", error);
   }
 };
 
 const getRealtimeLeaderboard = async (contestId) => {
   const submissions = await ContestSubmission.find({ contestId })
-    .populate('userId', 'name email profileImage')
-    .populate('problemId', 'title difficulty');
+    .populate("userId", "name email profileImage")
+    .populate("problemId", "title difficulty");
 
   const rankings = generateRankings(submissions);
 
@@ -196,10 +209,13 @@ export const updateAndEmitLeaderboard = async (contestId) => {
     const io = getIO();
     if (io) {
       const leaderboard = await getRealtimeLeaderboard(contestId);
-      io.emit('leaderboardUpdate', { contestId, leaderboard });
+      io.emit("leaderboardUpdate", { contestId, leaderboard });
     }
   } catch (error) {
-    console.error(`Error updating and emitting leaderboard for contest ${contestId}:`, error);
+    console.error(
+      `Error updating and emitting leaderboard for contest ${contestId}:`,
+      error,
+    );
   }
 };
 
@@ -209,12 +225,17 @@ export const getContestLeaderboard = async (req, res) => {
 
     const contest = await Contest.findById(contestId);
     if (!contest) {
-      return res.status(404).json({ success: false, message: 'Contest not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Contest not found" });
     }
 
-    const existingLeaderboard = await Leaderboard.findOne({ contestId, isFinalized: true }).populate({
-      path: 'rankings.userId',
-      select: 'name email profileImage',
+    const existingLeaderboard = await Leaderboard.findOne({
+      contestId,
+      isFinalized: true,
+    }).populate({
+      path: "rankings.userId",
+      select: "name email profileImage",
     });
 
     if (existingLeaderboard) {
@@ -225,14 +246,18 @@ export const getContestLeaderboard = async (req, res) => {
           name: contest.name,
           startTime: contest.startTime,
           endTime: contest.endTime,
-          isActive: new Date() >= new Date(contest.startTime) && new Date() <= new Date(contest.endTime),
+          isActive:
+            new Date() >= new Date(contest.startTime) &&
+            new Date() <= new Date(contest.endTime),
         },
       });
     }
 
     const leaderboard = await getRealtimeLeaderboard(contestId);
 
-    const isActive = new Date() >= new Date(contest.startTime) && new Date() <= new Date(contest.endTime);
+    const isActive =
+      new Date() >= new Date(contest.startTime) &&
+      new Date() <= new Date(contest.endTime);
     if (isActive) {
       updateAndEmitLeaderboard(contestId);
     }
@@ -248,7 +273,7 @@ export const getContestLeaderboard = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('❌ Error getting contest leaderboard:', error);
+    console.error("❌ Error getting contest leaderboard:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -259,27 +284,32 @@ export const finalizeContestRankings = async (req, res) => {
 
     const contest = await Contest.findById(contestId);
     if (!contest) {
-      return res.status(404).json({ success: false, message: 'Contest not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "Contest not found" });
     }
 
     if (new Date() < new Date(contest.endTime)) {
       return res.status(400).json({
         success: false,
-        message: 'Cannot finalize leaderboard before contest ends',
+        message: "Cannot finalize leaderboard before contest ends",
       });
     }
 
-    const existingLeaderboard = await Leaderboard.findOne({ contestId, isFinalized: true });
+    const existingLeaderboard = await Leaderboard.findOne({
+      contestId,
+      isFinalized: true,
+    });
     if (existingLeaderboard) {
       return res.status(400).json({
         success: false,
-        message: 'Leaderboard is already finalized',
+        message: "Leaderboard is already finalized",
       });
     }
 
     const submissions = await ContestSubmission.find({ contestId })
-      .populate('userId', 'name email profileImage')
-      .populate('problemId', 'title difficulty');
+      .populate("userId", "name email profileImage")
+      .populate("problemId", "title difficulty");
 
     const userSubmissions = {};
     submissions.forEach((submission) => {
@@ -297,33 +327,36 @@ export const finalizeContestRankings = async (req, res) => {
       const problemId = submission.problemId._id.toString();
       if (
         !userSubmissions[userId].problems[problemId] ||
-        (submission.status === 'Accepted' &&
-          (userSubmissions[userId].problems[problemId].status !== 'Accepted' ||
-            submission.runtime < userSubmissions[userId].problems[problemId].runtime))
+        (submission.status === "Accepted" &&
+          (userSubmissions[userId].problems[problemId].status !== "Accepted" ||
+            submission.runtime <
+              userSubmissions[userId].problems[problemId].runtime))
       ) {
         userSubmissions[userId].problems[problemId] = {
           problem: submission.problemId,
           status: submission.status,
           score: submission.score,
           runtime: submission.runtime,
-          attempts: (userSubmissions[userId].problems[problemId]?.attempts || 0) + 1,
+          attempts:
+            (userSubmissions[userId].problems[problemId]?.attempts || 0) + 1,
           submissionTime: submission.submissionTime || submission.createdAt,
         };
 
-        if (submission.status === 'Accepted') {
+        if (submission.status === "Accepted") {
           if (!userSubmissions[userId].problems[problemId].counted) {
             userSubmissions[userId].problemsSolved++;
             userSubmissions[userId].problems[problemId].counted = true;
           }
         }
 
-        userSubmissions[userId].totalScore = Object.values(userSubmissions[userId].problems).reduce(
-          (sum, p) => sum + (p.score || 0),
-          0
-        );
+        userSubmissions[userId].totalScore = Object.values(
+          userSubmissions[userId].problems,
+        ).reduce((sum, p) => sum + (p.score || 0), 0);
 
-        userSubmissions[userId].totalRuntime = Object.values(userSubmissions[userId].problems)
-          .filter((p) => p.status === 'Accepted')
+        userSubmissions[userId].totalRuntime = Object.values(
+          userSubmissions[userId].problems,
+        )
+          .filter((p) => p.status === "Accepted")
           .reduce((sum, p) => sum + (p.runtime || 0), 0);
       } else {
         userSubmissions[userId].problems[problemId].attempts =
@@ -348,7 +381,8 @@ export const finalizeContestRankings = async (req, res) => {
       }))
       .sort((a, b) => {
         if (b.score !== a.score) return b.score - a.score;
-        if (b.problemsSolved !== a.problemsSolved) return b.problemsSolved - a.problemsSolved;
+        if (b.problemsSolved !== a.problemsSolved)
+          return b.problemsSolved - a.problemsSolved;
         return a.totalRuntime - b.totalRuntime;
       })
       .map((user, index) => ({
@@ -368,18 +402,18 @@ export const finalizeContestRankings = async (req, res) => {
 
     try {
       const io = getIO();
-      io.emit('leaderboardUpdate', { contestId, leaderboard });
+      io.emit("leaderboardUpdate", { contestId, leaderboard });
     } catch (socketError) {
       // Continue
     }
 
     return res.status(200).json({
       success: true,
-      message: 'Contest leaderboard finalized successfully',
+      message: "Contest leaderboard finalized successfully",
       leaderboard,
     });
   } catch (error) {
-    console.error('❌ Error finalizing contest rankings:', error);
+    console.error("❌ Error finalizing contest rankings:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };
@@ -389,12 +423,14 @@ export const getUserContestHistory = async (req, res) => {
     const userId = req.result._id;
 
     const user = await User.findById(userId).populate({
-      path: 'contestHistory.contestId',
-      select: 'name startTime',
+      path: "contestHistory.contestId",
+      select: "name startTime",
     });
 
     if (!user) {
-      return res.status(404).json({ success: false, message: 'User not found' });
+      return res
+        .status(404)
+        .json({ success: false, message: "User not found" });
     }
 
     const contestHistory = user.contestHistory
@@ -414,7 +450,7 @@ export const getUserContestHistory = async (req, res) => {
       contestHistory,
     });
   } catch (error) {
-    console.error('❌ Error getting user contest history:', error);
+    console.error("❌ Error getting user contest history:", error);
     res.status(500).json({ success: false, message: error.message });
   }
 };

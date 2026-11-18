@@ -1,7 +1,7 @@
-import { v2 as cloudinary } from 'cloudinary';
-import Problem from '../models/problem.js';
-import SolutionVideo from '../models/solutionVideo.js';
-import User from '../models/user.js';
+import { v2 as cloudinary } from "cloudinary";
+import Problem from "../models/problem.js";
+import SolutionVideo from "../models/solutionVideo.js";
+import User from "../models/user.js";
 
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -16,7 +16,7 @@ export const generateUploadSignature = async (req, res) => {
 
     const problem = await Problem.findById(problemId);
     if (!problem) {
-      return res.status(404).json({ error: 'Problem not found' });
+      return res.status(404).json({ error: "Problem not found" });
     }
 
     const timestamp = Math.round(Date.now() / 1000);
@@ -27,7 +27,10 @@ export const generateUploadSignature = async (req, res) => {
       public_id: publicId,
     };
 
-    const signature = cloudinary.utils.api_sign_request(uploadParams, process.env.CLOUDINARY_API_SECRET);
+    const signature = cloudinary.utils.api_sign_request(
+      uploadParams,
+      process.env.CLOUDINARY_API_SECRET,
+    );
 
     res.json({
       signature,
@@ -38,22 +41,33 @@ export const generateUploadSignature = async (req, res) => {
       upload_url: `https://api.cloudinary.com/v1_1/${process.env.CLOUDINARY_CLOUD_NAME}/video/upload`,
     });
   } catch (error) {
-    console.error('Error generating upload signature:', error);
-    res.status(500).json({ error: 'Failed to generate upload credentials' });
+    console.error("Error generating upload signature:", error);
+    res.status(500).json({ error: "Failed to generate upload credentials" });
   }
 };
 
 export const saveVideoMetadata = async (req, res) => {
   try {
-    const { problemId, cloudinaryPublicId, secureUrl, duration, title, description, tags } = req.body;
+    const {
+      problemId,
+      cloudinaryPublicId,
+      secureUrl,
+      duration,
+      title,
+      description,
+      tags,
+    } = req.body;
     const userId = req.result._id;
 
-    const cloudinaryResource = await cloudinary.api.resource(cloudinaryPublicId, {
-      resource_type: 'video',
-    });
+    const cloudinaryResource = await cloudinary.api.resource(
+      cloudinaryPublicId,
+      {
+        resource_type: "video",
+      },
+    );
 
     if (!cloudinaryResource) {
-      return res.status(400).json({ error: 'Video not found on Cloudinary' });
+      return res.status(400).json({ error: "Video not found on Cloudinary" });
     }
 
     const existingVideo = await SolutionVideo.findOne({
@@ -63,17 +77,17 @@ export const saveVideoMetadata = async (req, res) => {
     });
 
     if (existingVideo) {
-      return res.status(409).json({ error: 'Video already exists' });
+      return res.status(409).json({ error: "Video already exists" });
     }
 
     const thumbnailUrl = cloudinary.url(cloudinaryPublicId, {
-      resource_type: 'video',
+      resource_type: "video",
       transformation: [
-        { width: 400, height: 225, crop: 'fill' },
-        { quality: 'auto' },
+        { width: 400, height: 225, crop: "fill" },
+        { quality: "auto" },
         { start_offset: 1 },
       ],
-      fetch_format: 'jpg',
+      fetch_format: "jpg",
     });
 
     const videoSolution = await SolutionVideo.create({
@@ -95,7 +109,7 @@ export const saveVideoMetadata = async (req, res) => {
     });
 
     res.status(201).json({
-      message: 'Video solution saved successfully',
+      message: "Video solution saved successfully",
       videoSolution: {
         id: videoSolution._id,
         thumbnailUrl: videoSolution.thumbnailUrl,
@@ -104,8 +118,8 @@ export const saveVideoMetadata = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Error saving video metadata:', error);
-    res.status(500).json({ error: 'Failed to save video metadata' });
+    console.error("Error saving video metadata:", error);
+    res.status(500).json({ error: "Failed to save video metadata" });
   }
 };
 
@@ -116,18 +130,18 @@ export const deleteVideo = async (req, res) => {
 
     const video = await SolutionVideo.findOneAndDelete({ problemId, userId });
     if (!video) {
-      return res.status(404).json({ error: 'Video not found' });
+      return res.status(404).json({ error: "Video not found" });
     }
 
     await cloudinary.uploader.destroy(video.cloudinaryPublicId, {
-      resource_type: 'video',
+      resource_type: "video",
       invalidate: true,
     });
 
-    res.json({ message: 'Video deleted successfully' });
+    res.json({ message: "Video deleted successfully" });
   } catch (error) {
-    console.error('Error deleting video:', error);
-    res.status(500).json({ error: 'Failed to delete video' });
+    console.error("Error deleting video:", error);
+    res.status(500).json({ error: "Failed to delete video" });
   }
 };
 
@@ -153,8 +167,8 @@ export const checkIfVideoExists = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Error checking video existence:', error);
-    res.status(500).json({ error: 'Failed to check video status' });
+    console.error("Error checking video existence:", error);
+    res.status(500).json({ error: "Failed to check video status" });
   }
 };
 

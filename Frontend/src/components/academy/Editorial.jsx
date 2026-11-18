@@ -1,8 +1,19 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { 
-  Pause, Play, Volume2, VolumeX, Maximize, SkipBack, SkipForward, 
-  Settings, Download, Share2, MoreVertical, Minimize, RotateCcw
-} from 'lucide-react';
+import { useState, useRef, useEffect, useCallback } from "react";
+import {
+  Pause,
+  Play,
+  Volume2,
+  VolumeX,
+  Maximize,
+  SkipBack,
+  SkipForward,
+  Settings,
+  Download,
+  Share2,
+  MoreVertical,
+  Minimize,
+  RotateCcw,
+} from "lucide-react";
 
 const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
   const videoRef = useRef(null);
@@ -16,7 +27,7 @@ const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [showSettings, setShowSettings] = useState(false);
   const [playbackRate, setPlaybackRate] = useState(1);
-  const [quality, setQuality] = useState('auto');
+  const [quality, setQuality] = useState("auto");
   const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [buffered, setBuffered] = useState(0);
@@ -26,11 +37,11 @@ const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
     const hrs = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = Math.floor(seconds % 60);
-    
+
     if (hrs > 0) {
-      return `${hrs}:${mins < 10 ? '0' : ''}${mins}:${secs < 10 ? '0' : ''}${secs}`;
+      return `${hrs}:${mins < 10 ? "0" : ""}${mins}:${secs < 10 ? "0" : ""}${secs}`;
     }
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
   const togglePlayPause = useCallback(async () => {
@@ -44,10 +55,10 @@ const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
           setIsPlaying(true);
         }
       } catch (error) {
-        console.error('Error playing video:', error);
+        console.error("Error playing video:", error);
         // Handle autoplay restrictions
-        if (error.name === 'NotAllowedError') {
-          console.log('Autoplay blocked. User interaction required.');
+        if (error.name === "NotAllowedError") {
+          console.log("Autoplay blocked. User interaction required.");
         }
       }
     }
@@ -71,7 +82,10 @@ const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
 
   const skip = (seconds) => {
     if (videoRef.current) {
-      videoRef.current.currentTime = Math.max(0, Math.min(videoRef.current.currentTime + seconds, duration));
+      videoRef.current.currentTime = Math.max(
+        0,
+        Math.min(videoRef.current.currentTime + seconds, duration),
+      );
     }
   };
 
@@ -104,50 +118,50 @@ const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
   // Keyboard controls
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (e.target.tagName === 'INPUT') return;
-      
+      if (e.target.tagName === "INPUT") return;
+
       switch (e.key) {
-        case ' ':
+        case " ":
           e.preventDefault();
           togglePlayPause();
           break;
-        case 'ArrowLeft':
+        case "ArrowLeft":
           e.preventDefault();
           skip(-10);
           break;
-        case 'ArrowRight':
+        case "ArrowRight":
           e.preventDefault();
           skip(10);
           break;
-        case 'f':
+        case "f":
           e.preventDefault();
           toggleFullscreen();
           break;
-        case 'm':
+        case "m":
           e.preventDefault();
           toggleMute();
           break;
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [togglePlayPause]);
 
   // Video event listeners
   useEffect(() => {
     const video = videoRef.current;
-    
+
     const handleTimeUpdate = () => {
       if (video && !isDragging) {
         setCurrentTime(video.currentTime);
       }
     };
-    
+
     const handleLoadedData = () => {
       setIsLoading(false);
     };
-    
+
     const handleProgress = () => {
       if (video && video.buffered.length > 0) {
         const bufferedEnd = video.buffered.end(video.buffered.length - 1);
@@ -173,29 +187,29 @@ const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
     };
 
     const handleError = (e) => {
-      console.error('Video error:', e);
+      console.error("Video error:", e);
       setIsLoading(false);
     };
-    
+
     if (video) {
-      video.addEventListener('timeupdate', handleTimeUpdate);
-      video.addEventListener('loadeddata', handleLoadedData);
-      video.addEventListener('progress', handleProgress);
-      video.addEventListener('play', handlePlay);
-      video.addEventListener('pause', handlePause);
-      video.addEventListener('loadstart', handleLoadStart);
-      video.addEventListener('canplay', handleCanPlay);
-      video.addEventListener('error', handleError);
-      
+      video.addEventListener("timeupdate", handleTimeUpdate);
+      video.addEventListener("loadeddata", handleLoadedData);
+      video.addEventListener("progress", handleProgress);
+      video.addEventListener("play", handlePlay);
+      video.addEventListener("pause", handlePause);
+      video.addEventListener("loadstart", handleLoadStart);
+      video.addEventListener("canplay", handleCanPlay);
+      video.addEventListener("error", handleError);
+
       return () => {
-        video.removeEventListener('timeupdate', handleTimeUpdate);
-        video.removeEventListener('loadeddata', handleLoadedData);
-        video.removeEventListener('progress', handleProgress);
-        video.removeEventListener('play', handlePlay);
-        video.removeEventListener('pause', handlePause);
-        video.removeEventListener('loadstart', handleLoadStart);
-        video.removeEventListener('canplay', handleCanPlay);
-        video.removeEventListener('error', handleError);
+        video.removeEventListener("timeupdate", handleTimeUpdate);
+        video.removeEventListener("loadeddata", handleLoadedData);
+        video.removeEventListener("progress", handleProgress);
+        video.removeEventListener("play", handlePlay);
+        video.removeEventListener("pause", handlePause);
+        video.removeEventListener("loadstart", handleLoadStart);
+        video.removeEventListener("canplay", handleCanPlay);
+        video.removeEventListener("error", handleError);
       };
     }
   }, [isDragging]);
@@ -203,7 +217,7 @@ const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
   const progressPercentage = (currentTime / duration) * 100;
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className="relative w-full max-w-5xl mx-auto group bg-black rounded-xl overflow-hidden shadow-2xl"
       onMouseEnter={() => setIsHovering(true)}
@@ -222,7 +236,7 @@ const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
           playsInline
           controls={false}
         />
-        
+
         {/* Loading Spinner */}
         {isLoading && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50">
@@ -231,9 +245,11 @@ const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
         )}
 
         {/* Center Play Button */}
-        <div 
+        <div
           className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${
-            !isPlaying && !isLoading ? 'opacity-100' : 'opacity-0 pointer-events-none'
+            !isPlaying && !isLoading
+              ? "opacity-100"
+              : "opacity-0 pointer-events-none"
           }`}
         >
           <button
@@ -245,32 +261,35 @@ const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
         </div>
 
         {/* Controls Overlay */}
-        <div 
+        <div
           className={`absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent transition-all duration-300 ${
-            isHovering || !isPlaying ? 'opacity-100' : 'opacity-0'
+            isHovering || !isPlaying ? "opacity-100" : "opacity-0"
           }`}
         >
           {/* Progress Bar Container */}
           <div className="px-4 pb-2">
             <div className="relative h-2 bg-white/20 rounded-full overflow-hidden group/progress">
               {/* Buffer Bar */}
-              <div 
+              <div
                 className="absolute top-0 left-0 h-full bg-white/30 transition-all duration-300"
                 style={{ width: `${buffered}%` }}
               />
-              
+
               {/* Progress Bar */}
-              <div 
+              <div
                 className="absolute top-0 left-0 h-full bg-gradient-to-r from-red-500 to-red-600 transition-all duration-150"
                 style={{ width: `${progressPercentage}%` }}
               />
-              
+
               {/* Progress Handle */}
-              <div 
+              <div
                 className="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-red-500 rounded-full shadow-lg opacity-0 group-hover/progress:opacity-100 transition-opacity duration-200"
-                style={{ left: `${progressPercentage}%`, transform: 'translateX(-50%) translateY(-50%)' }}
+                style={{
+                  left: `${progressPercentage}%`,
+                  transform: "translateX(-50%) translateY(-50%)",
+                }}
               />
-              
+
               <input
                 type="range"
                 min="0"
@@ -298,14 +317,14 @@ const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
                   <Play className="w-6 h-6 text-white ml-0.5" />
                 )}
               </button>
-              
+
               <button
                 onClick={() => skip(-10)}
                 className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-200"
               >
                 <RotateCcw className="w-5 h-5 text-white" />
               </button>
-              
+
               <button
                 onClick={() => skip(10)}
                 className="p-2 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-200"
@@ -314,7 +333,7 @@ const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
               </button>
 
               {/* Volume Control */}
-              <div 
+              <div
                 className="flex items-center space-x-2 relative"
                 onMouseEnter={() => setShowVolumeSlider(true)}
                 onMouseLeave={() => setShowVolumeSlider(false)}
@@ -329,10 +348,14 @@ const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
                     <Volume2 className="w-5 h-5 text-white" />
                   )}
                 </button>
-                
-                <div className={`absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-black/90 backdrop-blur-sm rounded-lg p-2 transition-all duration-200 ${
-                  showVolumeSlider ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none'
-                }`}>
+
+                <div
+                  className={`absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 bg-black/90 backdrop-blur-sm rounded-lg p-2 transition-all duration-200 ${
+                    showVolumeSlider
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 translate-y-2 pointer-events-none"
+                  }`}
+                >
                   <input
                     type="range"
                     min="0"
@@ -342,7 +365,7 @@ const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
                     onChange={handleVolumeChange}
                     className="w-20 h-1 bg-white/20 rounded-lg appearance-none cursor-pointer"
                     style={{
-                      background: `linear-gradient(to right, #ef4444 0%, #ef4444 ${volume * 100}%, rgba(255,255,255,0.2) ${volume * 100}%, rgba(255,255,255,0.2) 100%)`
+                      background: `linear-gradient(to right, #ef4444 0%, #ef4444 ${volume * 100}%, rgba(255,255,255,0.2) ${volume * 100}%, rgba(255,255,255,0.2) 100%)`,
                     }}
                   />
                 </div>
@@ -364,21 +387,23 @@ const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
                 >
                   <Settings className="w-5 h-5 text-white" />
                 </button>
-                
+
                 {showSettings && (
                   <div className="absolute bottom-full right-0 mb-2 bg-black/90 backdrop-blur-sm rounded-lg p-3 min-w-48 border border-white/20">
                     <div className="space-y-3">
                       <div>
-                        <label className="text-white text-sm font-medium mb-2 block">Playback Speed</label>
+                        <label className="text-white text-sm font-medium mb-2 block">
+                          Playback Speed
+                        </label>
                         <div className="grid grid-cols-3 gap-1">
                           {[0.5, 0.75, 1, 1.25, 1.5, 2].map((rate) => (
                             <button
                               key={rate}
                               onClick={() => handlePlaybackRateChange(rate)}
                               className={`px-2 py-1 rounded text-xs transition-all ${
-                                playbackRate === rate 
-                                  ? 'bg-red-500 text-white' 
-                                  : 'bg-white/10 text-white/80 hover:bg-white/20'
+                                playbackRate === rate
+                                  ? "bg-red-500 text-white"
+                                  : "bg-white/10 text-white/80 hover:bg-white/20"
                               }`}
                             >
                               {rate}x
@@ -386,10 +411,12 @@ const Editorial = ({ secureUrl, thumbnailUrl, duration }) => {
                           ))}
                         </div>
                       </div>
-                      
+
                       <div>
-                        <label className="text-white text-sm font-medium mb-2 block">Quality</label>
-                        <select 
+                        <label className="text-white text-sm font-medium mb-2 block">
+                          Quality
+                        </label>
+                        <select
                           value={quality}
                           onChange={(e) => setQuality(e.target.value)}
                           className="w-full bg-white/10 text-white text-sm rounded px-2 py-1 border border-white/20"

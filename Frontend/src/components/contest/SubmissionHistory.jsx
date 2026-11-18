@@ -1,24 +1,40 @@
-import { useState, useEffect } from 'react';
-import { Code, Clock, Cpu, HardDrive, CheckCircle, XCircle, AlertCircle, Loader, ChevronDown, ExternalLink } from 'lucide-react';
-import axiosClient from '../../utils/axiosClient';
+import { useState, useEffect } from "react";
+import {
+  Code,
+  Clock,
+  Cpu,
+  HardDrive,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Loader,
+  ChevronDown,
+  ExternalLink,
+} from "lucide-react";
+import axiosClient from "../../utils/axiosClient";
 
 const SubmissionHistory = ({ problemId }) => {
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedSubmission, setSelectedSubmission] = useState(null);
-  const [sortConfig, setSortConfig] = useState({ key: 'createdAt', direction: 'desc' });
+  const [sortConfig, setSortConfig] = useState({
+    key: "createdAt",
+    direction: "desc",
+  });
   const [expandedRows, setExpandedRows] = useState({});
 
   useEffect(() => {
     const fetchSubmissions = async () => {
       try {
         setLoading(true);
-        const response = await axiosClient.get(`/problem/submittedProblem/${problemId}`);
+        const response = await axiosClient.get(
+          `/problem/submittedProblem/${problemId}`,
+        );
         setSubmissions(response.data);
         setError(null);
       } catch (err) {
-        setError('Failed to fetch submission history');
+        setError("Failed to fetch submission history");
         console.error(err);
       } finally {
         setLoading(false);
@@ -29,73 +45,95 @@ const SubmissionHistory = ({ problemId }) => {
   }, [problemId]);
 
   const getLanguageIcon = (language) => {
-    const lang = language ? language.toLowerCase() : '';
+    const lang = language ? language.toLowerCase() : "";
     switch (lang) {
-      case 'java': return <Code className="w-4 h-4 text-orange-400" />;
-      case 'python': return <Code className="w-4 h-4 text-blue-400" />;
-      case 'javascript': return <Code className="w-4 h-4 text-yellow-400" />;
-      case 'c++': return <Code className="w-4 h-4 text-blue-500" />;
-      case 'ruby': return <Code className="w-4 h-4 text-red-400" />;
-      case 'swift': return <Code className="w-4 h-4 text-orange-300" />;
-      default: return <Code className="w-4 h-4 text-gray-400" />;
+      case "java":
+        return <Code className="w-4 h-4 text-orange-400" />;
+      case "python":
+        return <Code className="w-4 h-4 text-blue-400" />;
+      case "javascript":
+        return <Code className="w-4 h-4 text-yellow-400" />;
+      case "c++":
+        return <Code className="w-4 h-4 text-blue-500" />;
+      case "ruby":
+        return <Code className="w-4 h-4 text-red-400" />;
+      case "swift":
+        return <Code className="w-4 h-4 text-orange-300" />;
+      default:
+        return <Code className="w-4 h-4 text-gray-400" />;
     }
   };
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'Accepted': return <CheckCircle className="w-4 h-4 text-green-400" />;
-      case 'Wrong': return <XCircle className="w-4 h-4 text-red-400" />;
-      case 'Error': return <AlertCircle className="w-4 h-4 text-yellow-400" />;
-      case 'Pending': return <Loader className="w-4 h-4 text-blue-400 animate-spin" />;
-      default: return <AlertCircle className="w-4 h-4 text-gray-400" />;
+      case "Accepted":
+        return <CheckCircle className="w-4 h-4 text-green-400" />;
+      case "Wrong":
+        return <XCircle className="w-4 h-4 text-red-400" />;
+      case "Error":
+        return <AlertCircle className="w-4 h-4 text-yellow-400" />;
+      case "Pending":
+        return <Loader className="w-4 h-4 text-blue-400 animate-spin" />;
+      default:
+        return <AlertCircle className="w-4 h-4 text-gray-400" />;
     }
   };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'Accepted': return 'bg-green-900/20 text-green-400';
-      case 'Wrong': return 'bg-red-900/20 text-red-400';
-      case 'Error': return 'bg-yellow-900/20 text-yellow-400';
-      case 'Pending': return 'bg-blue-900/20 text-blue-400';
-      default: return 'bg-gray-900/20 text-gray-400';
+      case "Accepted":
+        return "bg-green-900/20 text-green-400";
+      case "Wrong":
+        return "bg-red-900/20 text-red-400";
+      case "Error":
+        return "bg-yellow-900/20 text-yellow-400";
+      case "Pending":
+        return "bg-blue-900/20 text-blue-400";
+      default:
+        return "bg-gray-900/20 text-gray-400";
     }
   };
 
   const getStatusBorderColor = (status) => {
     switch (status) {
-      case 'Accepted': return 'border-green-400/30';
-      case 'Wrong': return 'border-red-400/30';
-      case 'Error': return 'border-yellow-400/30';
-      case 'Pending': return 'border-blue-400/30';
-      default: return 'border-gray-400/30';
+      case "Accepted":
+        return "border-green-400/30";
+      case "Wrong":
+        return "border-red-400/30";
+      case "Error":
+        return "border-yellow-400/30";
+      case "Pending":
+        return "border-blue-400/30";
+      default:
+        return "border-gray-400/30";
     }
   };
 
   const formatMemory = (memory) => {
-    if (!memory) return 'N/A';
+    if (!memory) return "N/A";
     if (memory < 1024) return `${memory} kB`;
     return `${(memory / 1024).toFixed(2)} MB`;
   };
 
   const formatRuntime = (runtime) => {
-    if (!runtime) return 'N/A';
+    if (!runtime) return "N/A";
     return `${runtime} ms`;
   };
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return new Intl.DateTimeFormat('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Intl.DateTimeFormat("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     }).format(date);
   };
 
   const toggleRowExpand = (id) => {
-    setExpandedRows(prev => ({
+    setExpandedRows((prev) => ({
       ...prev,
-      [id]: !prev[id]
+      [id]: !prev[id],
     }));
   };
 
@@ -107,11 +145,14 @@ const SubmissionHistory = ({ problemId }) => {
           {passed}/{total}
         </span>
         <div className="flex-1 bg-gray-700 rounded-full h-1.5">
-          <div 
+          <div
             className={`h-1.5 rounded-full ${
-              percentage === 100 ? 'bg-green-500' : 
-              percentage > 50 ? 'bg-yellow-500' : 'bg-red-500'
-            }`} 
+              percentage === 100
+                ? "bg-green-500"
+                : percentage > 50
+                  ? "bg-yellow-500"
+                  : "bg-red-500"
+            }`}
             style={{ width: `${percentage}%` }}
           ></div>
         </div>
@@ -143,7 +184,9 @@ const SubmissionHistory = ({ problemId }) => {
       <div className="px-6 py-4 border-b border-gray-700 bg-gray-800">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-bold text-orange-400">Submission History</h2>
+            <h2 className="text-xl font-bold text-orange-400">
+              Submission History
+            </h2>
             <p className="mt-1 text-sm text-gray-400">
               All your submissions for this problem
             </p>
@@ -155,13 +198,15 @@ const SubmissionHistory = ({ problemId }) => {
           </div>
         </div>
       </div>
-      
+
       {submissions.length === 0 ? (
         <div className="p-8 text-center">
           <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-gray-800 text-gray-500 border border-gray-700">
             <FiCode className="h-6 w-6" />
           </div>
-          <h3 className="mt-4 text-lg font-medium text-gray-300">No submissions yet</h3>
+          <h3 className="mt-4 text-lg font-medium text-gray-300">
+            No submissions yet
+          </h3>
           <p className="mt-2 text-sm text-gray-500">
             Submit your solution to see it appear here.
           </p>
@@ -172,34 +217,58 @@ const SubmissionHistory = ({ problemId }) => {
             <table className="min-w-full divide-y divide-gray-700">
               <thead className="bg-gray-800">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"
+                  >
                     #
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"
+                  >
                     Language
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"
+                  >
                     Status
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"
+                  >
                     <div className="flex items-center">
                       <FiClock className="mr-1" />
                       Runtime
                     </div>
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"
+                  >
                     <div className="flex items-center">
                       <FiHardDrive className="mr-1" />
                       Memory
                     </div>
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"
+                  >
                     Test Cases
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider"
+                  >
                     Submitted
                   </th>
-                  <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider">
+                  <th
+                    scope="col"
+                    className="px-6 py-3 text-right text-xs font-medium text-gray-400 uppercase tracking-wider"
+                  >
                     Actions
                   </th>
                 </tr>
@@ -207,9 +276,9 @@ const SubmissionHistory = ({ problemId }) => {
               <tbody className="divide-y divide-gray-700">
                 {submissions.map((sub, index) => (
                   <>
-                    <tr 
-                      key={sub._id} 
-                      className={`hover:bg-gray-800/50 transition-colors ${expandedRows[sub._id] ? 'bg-gray-800/50' : ''}`}
+                    <tr
+                      key={sub._id}
+                      className={`hover:bg-gray-800/50 transition-colors ${expandedRows[sub._id] ? "bg-gray-800/50" : ""}`}
                     >
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300">
                         {index + 1}
@@ -226,38 +295,49 @@ const SubmissionHistory = ({ problemId }) => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(sub.status)} ${getStatusBorderColor(sub.status)} border`}>
+                          <span
+                            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(sub.status)} ${getStatusBorderColor(sub.status)} border`}
+                          >
                             {getStatusIcon(sub.status)}
                             <span className="ml-1.5">
-                              {sub.status.charAt(0).toUpperCase() + sub.status.slice(1)}
+                              {sub.status.charAt(0).toUpperCase() +
+                                sub.status.slice(1)}
                             </span>
                           </span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                         <div className="flex items-center">
-                          <span className="font-mono">{formatRuntime(sub.runtime)}</span>
+                          <span className="font-mono">
+                            {formatRuntime(sub.runtime)}
+                          </span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                         <div className="flex items-center">
-                          <span className="font-mono">{formatMemory(sub.memory)}</span>
+                          <span className="font-mono">
+                            {formatMemory(sub.memory)}
+                          </span>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        {getTestCasesProgress(sub.testCasesPassed, sub.testCasesTotal)}
+                        {getTestCasesProgress(
+                          sub.testCasesPassed,
+                          sub.testCasesTotal,
+                        )}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                         {formatDate(sub.createdAt)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex justify-end space-x-2">
-                
                           <button
                             onClick={() => toggleRowExpand(sub._id)}
                             className="text-gray-400 hover:text-gray-300 p-1.5 rounded-md hover:bg-gray-700 transition-colors"
                           >
-                            <FiChevronDown className={`transition-transform duration-200 ${expandedRows[sub._id] ? 'rotate-180' : ''}`} />
+                            <FiChevronDown
+                              className={`transition-transform duration-200 ${expandedRows[sub._id] ? "rotate-180" : ""}`}
+                            />
                           </button>
                         </div>
                       </td>
@@ -273,11 +353,15 @@ const SubmissionHistory = ({ problemId }) => {
                               </h4>
                               <div className="bg-gray-800 p-4 rounded-lg border border-gray-700 h-64 overflow-auto">
                                 <pre className="text-gray-300 text-sm font-mono whitespace-pre-wrap">
-                                  <code>{sub.code.substring(0, 500)}{sub.code.length > 500 ? '...' : ''}</code>
+                                  <code>
+                                    {sub.code.substring(0, 500)}
+                                    {sub.code.length > 500 ? "..." : ""}
+                                  </code>
                                 </pre>
                                 {sub.code.length > 500 && (
                                   <div className="mt-2 text-xs text-gray-500">
-                                    Showing first 500 characters. Click "View" to see full code.
+                                    Showing first 500 characters. Click "View"
+                                    to see full code.
                                   </div>
                                 )}
                               </div>
@@ -290,26 +374,39 @@ const SubmissionHistory = ({ problemId }) => {
                               <div className="bg-gray-800 p-4 rounded-lg border border-gray-700 h-64 overflow-auto">
                                 <div className="space-y-4">
                                   <div className="flex justify-between items-center pb-2 border-b border-gray-700">
-                                    <span className="text-gray-400">Language:</span>
+                                    <span className="text-gray-400">
+                                      Language:
+                                    </span>
                                     <span className="font-medium text-gray-200 flex items-center">
                                       {getLanguageIcon(sub.language)}
-                                      <span className="ml-2">{sub.language}</span>
+                                      <span className="ml-2">
+                                        {sub.language}
+                                      </span>
                                     </span>
                                   </div>
                                   <div className="flex justify-between items-center pb-2 border-b border-gray-700">
-                                    <span className="text-gray-400">Status:</span>
-                                    <span className={`${getStatusColor(sub.status)} px-2.5 py-0.5 rounded-full text-xs`}>
-                                      {sub.status.charAt(0).toUpperCase() + sub.status.slice(1)}
+                                    <span className="text-gray-400">
+                                      Status:
+                                    </span>
+                                    <span
+                                      className={`${getStatusColor(sub.status)} px-2.5 py-0.5 rounded-full text-xs`}
+                                    >
+                                      {sub.status.charAt(0).toUpperCase() +
+                                        sub.status.slice(1)}
                                     </span>
                                   </div>
                                   <div className="flex justify-between items-center pb-2 border-b border-gray-700">
-                                    <span className="text-gray-400">Runtime:</span>
+                                    <span className="text-gray-400">
+                                      Runtime:
+                                    </span>
                                     <span className="font-medium text-gray-200">
                                       {formatRuntime(sub.runtime)}
                                     </span>
                                   </div>
                                   <div className="flex justify-between items-center pb-2 border-b border-gray-700">
-                                    <span className="text-gray-400">Memory:</span>
+                                    <span className="text-gray-400">
+                                      Memory:
+                                    </span>
                                     <span className="font-medium text-gray-200">
                                       {formatMemory(sub.memory)}
                                     </span>
@@ -318,7 +415,9 @@ const SubmissionHistory = ({ problemId }) => {
                                     <div className="mt-2 bg-red-900/20 border-l-4 border-red-500 p-3 rounded-r">
                                       <div className="flex">
                                         <FiAlertCircle className="h-4 w-4 text-red-400 mt-0.5 mr-2" />
-                                        <span className="text-xs text-red-200">{sub.errorMessage}</span>
+                                        <span className="text-xs text-red-200">
+                                          {sub.errorMessage}
+                                        </span>
                                       </div>
                                     </div>
                                   )}
@@ -341,8 +440,14 @@ const SubmissionHistory = ({ problemId }) => {
       {selectedSubmission && (
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div className="fixed inset-0 transition-opacity" aria-hidden="true">
-              <div className="absolute inset-0 bg-gray-900/90 backdrop-blur-sm" onClick={() => setSelectedSubmission(null)}></div>
+            <div
+              className="fixed inset-0 transition-opacity"
+              aria-hidden="true"
+            >
+              <div
+                className="absolute inset-0 bg-gray-900/90 backdrop-blur-sm"
+                onClick={() => setSelectedSubmission(null)}
+              ></div>
             </div>
 
             <div className="inline-block align-bottom bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-6xl sm:w-full border border-gray-700">
@@ -353,10 +458,13 @@ const SubmissionHistory = ({ problemId }) => {
                       Submission Details
                     </h3>
                     <div className="flex items-center space-x-4 mt-2">
-                      <span className={`${getStatusColor(selectedSubmission.status)} px-3 py-1 rounded-full text-sm flex items-center`}>
+                      <span
+                        className={`${getStatusColor(selectedSubmission.status)} px-3 py-1 rounded-full text-sm flex items-center`}
+                      >
                         {getStatusIcon(selectedSubmission.status)}
                         <span className="ml-2">
-                          {selectedSubmission.status.charAt(0).toUpperCase() + selectedSubmission.status.slice(1)}
+                          {selectedSubmission.status.charAt(0).toUpperCase() +
+                            selectedSubmission.status.slice(1)}
                         </span>
                       </span>
                       <span className="text-sm text-gray-400">
@@ -368,8 +476,18 @@ const SubmissionHistory = ({ problemId }) => {
                     onClick={() => setSelectedSubmission(null)}
                     className="text-gray-400 hover:text-gray-300"
                   >
-                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    <svg
+                      className="h-6 w-6"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -382,7 +500,9 @@ const SubmissionHistory = ({ problemId }) => {
                       <FiCode className="text-orange-400 mr-3" />
                       <div>
                         <p className="text-xs text-gray-400">Language</p>
-                        <p className="text-gray-200 font-medium">{selectedSubmission.language}</p>
+                        <p className="text-gray-200 font-medium">
+                          {selectedSubmission.language}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -391,7 +511,9 @@ const SubmissionHistory = ({ problemId }) => {
                       <FiClock className="text-orange-400 mr-3" />
                       <div>
                         <p className="text-xs text-gray-400">Runtime</p>
-                        <p className="text-gray-200 font-medium">{formatRuntime(selectedSubmission.runtime)}</p>
+                        <p className="text-gray-200 font-medium">
+                          {formatRuntime(selectedSubmission.runtime)}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -400,7 +522,9 @@ const SubmissionHistory = ({ problemId }) => {
                       <FiHardDrive className="text-orange-400 mr-3" />
                       <div>
                         <p className="text-xs text-gray-400">Memory</p>
-                        <p className="text-gray-200 font-medium">{formatMemory(selectedSubmission.memory)}</p>
+                        <p className="text-gray-200 font-medium">
+                          {formatMemory(selectedSubmission.memory)}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -413,7 +537,8 @@ const SubmissionHistory = ({ problemId }) => {
                       <div>
                         <p className="text-xs text-gray-400">Test Cases</p>
                         <p className="text-gray-200 font-medium">
-                          {selectedSubmission.testCasesPassed}/{selectedSubmission.testCasesTotal}
+                          {selectedSubmission.testCasesPassed}/
+                          {selectedSubmission.testCasesTotal}
                         </p>
                       </div>
                     </div>
@@ -422,8 +547,13 @@ const SubmissionHistory = ({ problemId }) => {
                     <div className="flex items-center">
                       <FiCpu className="text-orange-400 mr-3" />
                       <div className="w-full">
-                        <p className="text-xs text-gray-400 mb-2">Test Case Progress</p>
-                        {getTestCasesProgress(selectedSubmission.testCasesPassed, selectedSubmission.testCasesTotal)}
+                        <p className="text-xs text-gray-400 mb-2">
+                          Test Case Progress
+                        </p>
+                        {getTestCasesProgress(
+                          selectedSubmission.testCasesPassed,
+                          selectedSubmission.testCasesTotal,
+                        )}
                       </div>
                     </div>
                   </div>
@@ -434,7 +564,9 @@ const SubmissionHistory = ({ problemId }) => {
                     <div className="flex">
                       <FiAlertCircle className="h-5 w-5 text-red-400 mt-0.5 mr-3" />
                       <div>
-                        <h4 className="text-sm font-medium text-red-200">Error Details</h4>
+                        <h4 className="text-sm font-medium text-red-200">
+                          Error Details
+                        </h4>
                         <p className="mt-1 text-sm text-red-300">
                           {selectedSubmission.errorMessage}
                         </p>

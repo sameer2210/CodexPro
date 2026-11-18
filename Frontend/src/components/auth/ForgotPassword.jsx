@@ -24,11 +24,12 @@ const ForgotPassword = () => {
   const onSubmit = async (data) => {
     try {
       setLoading(true);
-      await axiosClient.post("/user/forgot-password", { emailId: data.emailId });
+      await axiosClient.post("/user/forgot-password", { email: data.emailId });
       toast.success("Password reset link sent to your email.");
       setIsSubmitted(true);
     } catch (err) {
-      const errorMsg = err.response?.data?.message || "Failed to send reset link.";
+      const errorMsg =
+        err.response?.data?.message || "Failed to send reset link.";
       toast.error(errorMsg);
     } finally {
       setLoading(false);

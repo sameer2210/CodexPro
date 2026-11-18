@@ -18,7 +18,7 @@ import axiosClient from "../../utils/axiosClient";
 
 function AdminPage() {
   const [hoveredCard, setHoveredCard] = useState(null);
-  const [userCount , setUserCount] = useState(0);
+  const [userCount, setUserCount] = useState(0);
 
   const adminOptions = [
     {
@@ -47,7 +47,6 @@ function AdminPage() {
       color: "from-red-500 to-rose-600",
       hoverColor: "hover:from-red-600 hover:to-rose-700",
       route: "/admin/delete",
-
     },
     {
       id: "video",
@@ -66,7 +65,6 @@ function AdminPage() {
       color: "from-blue-500 to-cyan-600",
       hoverColor: "hover:from-blue-600 hover:to-cyan-700",
       route: "/admin/users",
-
     },
     {
       id: "analytics",
@@ -76,7 +74,6 @@ function AdminPage() {
       color: "from-pink-500 to-rose-600",
       hoverColor: "hover:from-pink-600 hover:to-rose-700",
       route: "/admin/analytics",
-
     },
     {
       id: "analytics",
@@ -86,11 +83,10 @@ function AdminPage() {
       color: "from-purple-500 to-rose-600",
       hoverColor: "hover:from-pink-600 hover:to-rose-700",
       route: "/admin/contest",
-
     },
   ];
 
- useEffect(() => {
+  useEffect(() => {
     const userCounting = async () => {
       try {
         const response = await axiosClient.get("/user/activeuser");
@@ -124,11 +120,11 @@ function AdminPage() {
       <div className="relative z-10 container mx-auto px-6 py-12">
         {/* Header Section */}
         <NavLink to="/">
-              <button className="flex items-center gap-2 text-gray-400 hover:text-orange-500 transition-colors">
-                <ArrowLeft size={20} />
-                Back to Home
-              </button>
-            </NavLink>
+          <button className="flex items-center gap-2 text-gray-400 hover:text-orange-500 transition-colors">
+            <ArrowLeft size={20} />
+            Back to Home
+          </button>
+        </NavLink>
         <div className="text-center mb-16">
           <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl mb-6 shadow-xl">
             <Settings className="w-10 h-10 text-white" />

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { Button } from "../ui/button";
+import { Button } from "../ui/Button";
 import { Input } from "../ui/input";
 import {
   Select,
@@ -198,7 +198,7 @@ export const ArrayVisualizer = () => {
         array: [...workingArray],
         activeIndices: Array.from(
           { length: right - left + 1 },
-          (_, idx) => left + idx
+          (_, idx) => left + idx,
         ),
         comparingIndices: [],
         description: `Merging subarrays [${left}..${mid}] and [${
@@ -325,7 +325,7 @@ export const ArrayVisualizer = () => {
   const generateRandomArray = () => {
     const newArray = Array.from(
       { length: 8 },
-      () => Math.floor(Math.random() * 50) + 1
+      () => Math.floor(Math.random() * 50) + 1,
     );
     setArray(newArray);
     reset();
@@ -449,8 +449,8 @@ export const ArrayVisualizer = () => {
                     activeIndices.includes(index)
                       ? "bg-[#F9A825] text-slate-900 border-2 border-[#F9A825] shadow-lg transform scale-110"
                       : comparingIndices.includes(index)
-                      ? "bg-[#475569] text-white border-2 border-[#F9A825]"
-                      : "bg-[#334155] text-gray-300 border-2 border-[#475569] hover:border-[#F9A825]/50"
+                        ? "bg-[#475569] text-white border-2 border-[#F9A825]"
+                        : "bg-[#334155] text-gray-300 border-2 border-[#475569] hover:border-[#F9A825]/50"
                   }
                 `}
               >

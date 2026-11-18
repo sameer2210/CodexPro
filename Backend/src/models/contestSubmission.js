@@ -1,21 +1,21 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const ContestSubmissionSchema = new Schema(
   {
     userId: {
       type: Schema.Types.ObjectId,
-      ref: 'user',
+      ref: "user",
       required: true,
     },
     contestId: {
       type: Schema.Types.ObjectId,
-      ref: 'contest',
+      ref: "contest",
       required: true,
     },
     problemId: {
       type: Schema.Types.ObjectId,
-      ref: 'problem',
+      ref: "problem",
       required: true,
     },
     code: {
@@ -25,12 +25,22 @@ const ContestSubmissionSchema = new Schema(
     language: {
       type: String,
       required: true,
-      enum: ['cpp', 'c++', 'java', 'javascript'],
+      enum: ["cpp", "c++", "java", "javascript"],
     },
     status: {
       type: String,
-      enum: ['Pending', 'Processing', 'Accepted', 'Wrong Answer', 'Compiler Error', 'Processing'],
-      default: 'Pending',
+      enum: [
+        "Pending",
+        "Processing",
+        "Accepted",
+        "Wrong Answer",
+        "Compiler Error",
+        "Compilation Error",
+        "Time Limit Exceeded",
+        "Runtime Error",
+        "Error",
+      ],
+      default: "Pending",
     },
     runtime: {
       type: Number,
@@ -42,7 +52,7 @@ const ContestSubmissionSchema = new Schema(
     },
     errorMessage: {
       type: String,
-      default: ' ',
+      default: " ",
     },
     testCasesPassed: {
       type: Number,
@@ -61,12 +71,13 @@ const ContestSubmissionSchema = new Schema(
       default: Date.now,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 ContestSubmissionSchema.index({ contestId: 1, userId: 1, problemId: 1 });
 ContestSubmissionSchema.index({ contestId: 1, score: -1, runtime: 1 });
 
 const ContestSubmission =
-  mongoose.models.contestSubmission || mongoose.model('contestSubmission', ContestSubmissionSchema);
+  mongoose.models.contestSubmission ||
+  mongoose.model("contestSubmission", ContestSubmissionSchema);
 export default ContestSubmission;

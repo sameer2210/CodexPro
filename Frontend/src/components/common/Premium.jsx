@@ -19,7 +19,7 @@ import { useSelector, useDispatch } from "react-redux";
 import axiosClient from "../../utils/axiosClient";
 import { useNavigate } from "react-router-dom";
 import { NavLink } from "react-router-dom";
-import Success from '../contest/Success';
+import Success from "../contest/Success";
 
 const Premium = () => {
   const [isLoading, setIsLoading] = useState(null);
@@ -144,10 +144,9 @@ const Premium = () => {
 
       console.log("Razorpay Key:", razorpayKey);
 
-      const { data: order } = await axiosClient.post(
-        "/payments/create-order",
-        { plan: planId }
-      );
+      const { data: order } = await axiosClient.post("/payments/create-order", {
+        plan: planId,
+      });
 
       console.log("Order created:", order);
 
@@ -161,23 +160,20 @@ const Premium = () => {
         handler: async (response) => {
           console.log("Payment response:", response);
           try {
-            const verifyResponse = await axiosClient.post(
-              "/payments/verify",
-              {
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                plan: planId,
-                userId: user._id,
-              }
-            );
+            const verifyResponse = await axiosClient.post("/payments/verify", {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              plan: planId,
+              userId: user._id,
+            });
 
             console.log("Verification response:", verifyResponse.data);
 
             if (verifyResponse.data.success) {
               const selectedPlan = plans.find((plan) => plan.id === planId);
-              console.log("Selected plan:", selectedPlan); 
-              
+              console.log("Selected plan:", selectedPlan);
+
               if (selectedPlan) {
                 setPurchasedPlan(selectedPlan);
                 setShowSuccess(true);
@@ -187,7 +183,7 @@ const Premium = () => {
               }
             } else {
               alert(
-                "⚠️ Payment verified but activation failed. Please contact support."
+                "⚠️ Payment verified but activation failed. Please contact support.",
               );
             }
           } catch (error) {
@@ -195,7 +191,7 @@ const Premium = () => {
             alert(
               `❌ Payment verification failed: ${
                 error.response?.data?.message || error.message
-              }`
+              }`,
             );
           }
           setIsLoading(null);
@@ -264,10 +260,9 @@ const Premium = () => {
         setIsLoading(null);
         return;
       }
-      const { data: order } = await axiosClient.post(
-        "/payments/create-order",
-        { plan: "buy_tokens" }
-      );
+      const { data: order } = await axiosClient.post("/payments/create-order", {
+        plan: "buy_tokens",
+      });
       const options = {
         key: razorpayKey,
         amount: order.amount,
@@ -277,22 +272,19 @@ const Premium = () => {
         order_id: order.id,
         handler: async (response) => {
           try {
-            const verifyResponse = await axiosClient.post(
-              "/payments/verify",
-              {
-                razorpay_order_id: response.razorpay_order_id,
-                razorpay_payment_id: response.razorpay_payment_id,
-                razorpay_signature: response.razorpay_signature,
-                plan: "buy_tokens",
-                userId: user._id,
-              }
-            );
+            const verifyResponse = await axiosClient.post("/payments/verify", {
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_signature: response.razorpay_signature,
+              plan: "buy_tokens",
+              userId: user._id,
+            });
             if (verifyResponse.data.success) {
               setPurchasedPlan({ name: "Tokens" });
               setShowSuccess(true);
             } else {
               alert(
-                "⚠️ Payment verified but activation failed. Please contact support."
+                "⚠️ Payment verified but activation failed. Please contact support.",
               );
             }
           } catch (error) {
@@ -300,7 +292,7 @@ const Premium = () => {
             alert(
               `❌ Payment verification failed: ${
                 error.response?.data?.message || error.message
-              }`
+              }`,
             );
           }
           setIsLoading(null);
@@ -346,11 +338,11 @@ const Premium = () => {
 
   if (showSuccess && purchasedPlan) {
     return (
-      <Success 
-        showSuccess={showSuccess} 
-        purchasedPlan={purchasedPlan} 
-        redirectCount={redirectCount}  
-        handleGoHome={handleGoHome} 
+      <Success
+        showSuccess={showSuccess}
+        purchasedPlan={purchasedPlan}
+        redirectCount={redirectCount}
+        handleGoHome={handleGoHome}
       />
     );
   }

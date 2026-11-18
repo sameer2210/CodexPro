@@ -1,0 +1,166 @@
+Frontend/src/
+├── api
+│   └── config.jsx
+├── components
+│   ├── academy
+│   │   ├── DSAVisualizer.jsx
+│   │   ├── Editorial.jsx
+│   │   ├── Explore.jsx
+│   │   ├── Interview.jsx
+│   │   ├── PlaylistCreate.jsx
+│   │   ├── PlaylistDetail.jsx
+│   │   ├── Problem.jsx
+│   │   └── ProblemSolve.jsx
+│   ├── admin
+│   │   ├── contest
+│   │   │   ├── AdminContest.jsx
+│   │   │   ├── ContestDetail.jsx
+│   │   │   └── CreateContestForm.jsx
+│   │   ├── CreateProblem.jsx
+│   │   ├── DeleteProblem.jsx
+│   │   ├── ManageVideo.jsx
+│   │   ├── PlatformAnalytics.jsx
+│   │   ├── UpdateProblem.jsx
+│   │   ├── UploadVideo.jsx
+│   │   ├── UserAnalytics.jsx
+│   │   └── UserManagement.jsx
+│   ├── Ai
+│   │   ├── AiAssistant.css
+│   │   ├── AiAssistant.jsx
+│   │   ├── AudioPlayer.jsx
+│   │   ├── DoubtAi.jsx
+│   │   ├── MicInput.jsx
+│   │   └── ResumeUpload.jsx
+│   ├── auth
+│   │   ├── EmailVerification.jsx
+│   │   ├── EmailVerificationPopup.jsx
+│   │   ├── ForgotPassword.jsx
+│   │   └── ResetPassword.jsx
+│   ├── background
+│   │   ├── AnimatedBackground.jsx
+│   │   └── HUD.jsx
+│   ├── common
+│   │   ├── Heatmap.jsx
+│   │   ├── HeatmapCalendar.jsx
+│   │   ├── PaymentHistory.jsx
+│   │   ├── Premium.jsx
+│   │   └── SidebarProfileCard.jsx
+│   ├── connections
+│   │   ├── CallingPage.jsx
+│   │   ├── ChatSection.jsx
+│   │   ├── DiscussionDetail.jsx
+│   │   ├── DiscussPage.jsx
+│   │   └── Meeting.jsx
+│   ├── contest
+│   │   ├── ContestDetails.jsx
+│   │   ├── ContestLeaderboard.jsx
+│   │   ├── ContestProblemSolve.jsx
+│   │   ├── ProblemCard.jsx
+│   │   ├── SubmissionHistory.jsx
+│   │   ├── SubmitCard.jsx
+│   │   └── Success.jsx
+│   ├── dashboards
+│   │   ├── DashboardPage.jsx
+│   │   └── PremiumDashboard.jsx
+│   ├── discuss
+│   │   ├── Chat.jsx
+│   │   ├── Comment.jsx
+│   │   ├── CreateDiscussionModal.jsx
+│   │   ├── DiscussHeader.jsx
+│   │   ├── DiscussionCard.jsx
+│   │   └── DiscussSidebar.jsx
+│   ├── layout
+│   │   ├── Layout.jsx
+│   │   ├── Navbar.jsx
+│   │   ├── Navigation.jsx
+│   │   └── Sidebar.jsx
+│   ├── page
+│   │   ├── Help.jsx
+│   │   ├── Notification.jsx
+│   │   └── Settings.jsx
+│   ├── project
+│   │   ├── CodeEditor.jsx
+│   │   ├── CreateProject.jsx
+│   │   ├── OutputPanel.jsx
+│   │   ├── Project.jsx
+│   │   ├── RecentSubmissions.jsx
+│   │   ├── ReviewPanel.jsx
+│   │   ├── StatsOverview.jsx
+│   │   ├── StatsPieChart.jsx
+│   │   └── SubmissionsTabs.jsx
+│   ├── ui
+│   │   ├── Button.jsx
+│   │   ├── ErrorBoundary.jsx
+│   │   ├── input.jsx
+│   │   ├── Loader.jsx
+│   │   ├── LoadingSpinner.jsx
+│   │   ├── NotFound.jsx
+│   │   ├── ResizableContainer.jsx
+│   │   └── select.jsx
+│   ├── user
+│   │   ├── ActiveMember.jsx
+│   │   ├── ActiveMemberPage.jsx
+│   │   ├── ProfileCard.jsx
+│   │   └── UserProfile.jsx
+│   └── visualizers
+│       ├── ArrayVisualizer.jsx
+│       ├── GraphVisualizer.jsx
+│       ├── LinkedListVisualizer.jsx
+│       ├── QueueVisualizer.jsx
+│       ├── StackVisualizer.jsx
+│       └── TreeVisualizer.jsx
+├── context
+│   ├── AuthContext.jsx
+│   ├── ContestContext.jsx
+│   └── ThemeContext.jsx
+├── hooks
+│   └── useToast.js
+├── lib
+│   ├── notify.js
+│   └── sounds.js
+├── routes
+│   └── Routes.jsx
+├── services
+│   └── dashboardService.js
+├── store
+│   ├── slices
+│   │   ├── authSlice.js
+│   │   ├── callSlice.js
+│   │   ├── problemSlice.js
+│   │   ├── projectSlice.js
+│   │   └── socketSlice.js
+│   ├── hooks.js
+│   └── store.js
+├── utils
+│   ├── Ai
+│   │   ├── speakText.js
+│   │   └── speechToText.js
+│   ├── apis
+│   │   ├── contestApi
+│   │   │   └── contest.js
+│   │   ├── adminApi.js
+│   │   ├── dashboardApi.js
+│   │   └── userApi.js
+│   ├── axiosClient.js
+│   ├── interviewAPI.js
+│   ├── project.api.js
+│   ├── socket.js
+│   └── socketMiddleware.js
+├── views
+│   ├── Admin
+│   │   └── AdminPage.jsx
+│   ├── Arena
+│   │   └── ContestPage.jsx
+│   ├── Auth
+│   │   ├── Login.jsx
+│   │   └── Register.jsx
+│   ├── Dashboard.jsx
+│   ├── Homepage.jsx
+│   └── Landing.jsx
+├── webrtc
+│   ├── callManager.js
+│   ├── media.js
+│   └── peer.js
+├── App.jsx
+├── index.css
+└── main.jsx

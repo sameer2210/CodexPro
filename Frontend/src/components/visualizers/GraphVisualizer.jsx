@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Button } from "../ui/button";
+import { Button } from "../ui/Button";
 import { Input } from "../ui/input";
 import {
   Select,
@@ -65,7 +65,8 @@ export const GraphVisualizer = () => {
       setGraph((prev) => ({
         nodes: prev.nodes.filter((node) => node.id !== nodeToRemove.id),
         edges: prev.edges.filter(
-          (edge) => edge.from !== nodeToRemove.id && edge.to !== nodeToRemove.id
+          (edge) =>
+            edge.from !== nodeToRemove.id && edge.to !== nodeToRemove.id,
         ),
       }));
 
@@ -98,7 +99,7 @@ export const GraphVisualizer = () => {
         (edge.from === fromNodeObj.id && edge.to === toNodeObj.id) ||
         (graphType === "undirected" &&
           edge.from === toNodeObj.id &&
-          edge.to === fromNodeObj.id)
+          edge.to === fromNodeObj.id),
     );
 
     if (edgeExists) {
@@ -162,7 +163,7 @@ export const GraphVisualizer = () => {
               (e.from === path[i] && e.to === path[i + 1]) ||
               (graphType === "undirected" &&
                 e.from === path[i + 1] &&
-                e.to === path[i])
+                e.to === path[i]),
           );
           if (edge) {
             visitedEdges.add(`${edge.from}-${edge.to}`);
@@ -175,7 +176,7 @@ export const GraphVisualizer = () => {
         toast.success(
           `Path found: ${path
             .map((id) => graph.nodes.find((n) => n.id === id)?.value)
-            .join(" → ")}`
+            .join(" → ")}`,
         );
         setTimeout(() => {
           setHighlightedNodes(new Set());
@@ -248,7 +249,7 @@ export const GraphVisualizer = () => {
       toast.success(
         `Path found: ${path
           .map((id) => graph.nodes.find((n) => n.id === id)?.value)
-          .join(" → ")}`
+          .join(" → ")}`,
       );
       setTimeout(() => {
         setHighlightedNodes(new Set());
@@ -316,7 +317,6 @@ export const GraphVisualizer = () => {
       <div className="bg-[#1E293B] rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-gray-300 flex items-center gap-2">
-        
             Graph Operations
           </h2>
           <Select
@@ -352,7 +352,6 @@ export const GraphVisualizer = () => {
                 className="bg-[#F9A825] hover:bg-[#F9A825]/90 text-slate-900"
                 disabled={isNaN(parseInt(nodeValue))}
               >
-              
                 Add Node
               </Button>
               <Button
@@ -361,7 +360,6 @@ export const GraphVisualizer = () => {
                 className="bg-[#334155] border-[#475569] hover:bg-[#475569] text-gray-300"
                 disabled={isNaN(parseInt(nodeValue))}
               >
-             
                 Remove
               </Button>
             </div>
@@ -400,7 +398,6 @@ export const GraphVisualizer = () => {
               className="bg-[#F9A825] hover:bg-[#F9A825]/90 text-slate-900 w-full"
               disabled={isNaN(parseInt(fromNode)) || isNaN(parseInt(toNode))}
             >
-             
               Add Edge
             </Button>
           </div>
@@ -435,7 +432,6 @@ export const GraphVisualizer = () => {
                   isNaN(parseInt(searchStart)) || isNaN(parseInt(searchEnd))
                 }
               >
-               
                 BFS
               </Button>
               <Button
@@ -446,7 +442,6 @@ export const GraphVisualizer = () => {
                   isNaN(parseInt(searchStart)) || isNaN(parseInt(searchEnd))
                 }
               >
-              
                 DFS
               </Button>
             </div>
@@ -458,7 +453,6 @@ export const GraphVisualizer = () => {
               variant="outline"
               className="bg-[#334155] border-[#475569] hover:bg-[#475569] text-gray-300"
             >
-           
               Sample
             </Button>
             <Button
@@ -466,29 +460,22 @@ export const GraphVisualizer = () => {
               variant="outline"
               className="bg-[#334155] border-[#475569] hover:bg-[#475569] text-gray-300"
             >
-             
               Clear
             </Button>
           </div>
 
           <div className="bg-[#0F172A] rounded-lg p-4 font-mono text-sm text-gray-300">
-            <div className="text-gray-500 mb-2">
-              // Graph Implementation
-            </div>
+            <div className="text-gray-500 mb-2">// Graph Implementation</div>
             <div>
               <span className="text-purple-400">class</span>
               <span className="text-white"> Graph {"{"}</span>
             </div>
             <div className="ml-4">
               <div>
-                <span className="text-white">
-                  nodes: {graph.nodes.length}
-                </span>
+                <span className="text-white">nodes: {graph.nodes.length}</span>
               </div>
               <div>
-                <span className="text-white">
-                  edges: {graph.edges.length}
-                </span>
+                <span className="text-white">edges: {graph.edges.length}</span>
               </div>
               <div>
                 <span className="text-white">type: {graphType}</span>
@@ -535,7 +522,7 @@ export const GraphVisualizer = () => {
 
                   const angle = Math.atan2(
                     toNode.y - fromNode.y,
-                    toNode.x - fromNode.x
+                    toNode.x - fromNode.x,
                   );
                   const nodeRadius = 15;
 
@@ -653,8 +640,8 @@ export const GraphVisualizer = () => {
               level (shortest path)
             </div>
             <div>
-              <strong className="text-[#F9A825]">DFS:</strong> Explores as far as
-              possible before backtracking
+              <strong className="text-[#F9A825]">DFS:</strong> Explores as far
+              as possible before backtracking
             </div>
             <div>
               <strong className="text-[#F9A825]">Directed:</strong> Edges have

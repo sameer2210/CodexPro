@@ -1,23 +1,23 @@
-import authService from '../services/auth.service.js';
+import authService from "../services/auth.service.js";
 
 // Middleware to verify JWT token
 export const verifyToken = async (req, res, next) => {
   try {
     const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(401).json({
         success: false,
-        message: 'No token provided or invalid format',
+        message: "No token provided or invalid format",
       });
     }
 
-    const token = authHeader.split(' ')[1];
+    const token = authHeader.split(" ")[1];
 
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: 'No token provided',
+        message: "No token provided",
       });
     }
 
@@ -25,12 +25,15 @@ export const verifyToken = async (req, res, next) => {
     const decoded = authService.verifyToken(token);
 
     // Validate team access (optional additional security)
-    const hasAccess = await authService.validateTeamAccess(decoded.teamName, decoded.username);
+    const hasAccess = await authService.validateTeamAccess(
+      decoded.teamName,
+      decoded.username,
+    );
 
     if (!hasAccess) {
       return res.status(401).json({
         success: false,
-        message: 'Access denied - invalid team membership',
+        message: "Access denied - invalid team membership",
       });
     }
 
@@ -44,10 +47,10 @@ export const verifyToken = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error('Token verification error:', error.message);
+    console.error("Token verification error:", error.message);
     return res.status(401).json({
       success: false,
-      message: 'Invalid or expired token',
+      message: "Invalid or expired token",
     });
   }
 };
@@ -57,7 +60,7 @@ export const requireAdmin = (req, res, next) => {
   if (!req.user || !req.user.isAdmin) {
     return res.status(403).json({
       success: false,
-      message: 'Admin access required',
+      message: "Admin access required",
     });
   }
   next();
@@ -70,7 +73,7 @@ export const checkTeamAccess = (req, res, next) => {
   if (!req.user || req.user.teamName.toLowerCase() !== teamName.toLowerCase()) {
     return res.status(403).json({
       success: false,
-      message: 'Access denied - not a member of this team',
+      message: "Access denied - not a member of this team",
     });
   }
   next();
@@ -82,7 +85,9 @@ const RATE_LIMIT_WINDOW = 15 * 60 * 1000; // 15 minutes
 const MAX_REQUESTS = 50; // Max requests per window
 export const rateLimiter = (req, res, next) => {
   const clientIP =
-    req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for']?.split(',')[0]?.trim();
+    req.ip ||
+    req.connection.remoteAddress ||
+    req.headers["x-forwarded-for"]?.split(",")[0]?.trim();
   const now = Date.now();
   const windowStart = now - RATE_LIMIT_WINDOW;
 
@@ -92,13 +97,15 @@ export const rateLimiter = (req, res, next) => {
   const requests = requestCounts.get(clientIP);
 
   // Remove old requests
-  const recentRequests = requests.filter(timestamp => timestamp > windowStart);
+  const recentRequests = requests.filter(
+    (timestamp) => timestamp > windowStart,
+  );
   requestCounts.set(clientIP, recentRequests);
 
   if (recentRequests.length >= MAX_REQUESTS) {
     return res.status(429).json({
       success: false,
-      message: 'Too many requests. Please try again later.',
+      message: "Too many requests. Please try again later.",
       retryAfter: Math.ceil(RATE_LIMIT_WINDOW / 1000),
     });
   }
@@ -115,7 +122,9 @@ setInterval(
     const windowStart = now - RATE_LIMIT_WINDOW;
 
     for (const [clientIP, requests] of requestCounts.entries()) {
-      const recentRequests = requests.filter(timestamp => timestamp > windowStart);
+      const recentRequests = requests.filter(
+        (timestamp) => timestamp > windowStart,
+      );
       if (recentRequests.length === 0) {
         requestCounts.delete(clientIP);
       } else {
@@ -123,5 +132,5 @@ setInterval(
       }
     }
   },
-  5 * 60 * 1000
+  5 * 60 * 1000,
 ); // Clean up every 5 minutes

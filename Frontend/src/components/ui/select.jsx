@@ -1,9 +1,17 @@
-import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useRef,
+  useEffect,
+} from "react";
 
 const SelectContext = createContext(null);
 
 const Select = ({ children, value, onValueChange, defaultValue }) => {
-  const [selected, setSelected] = useState(value !== undefined ? value : defaultValue);
+  const [selected, setSelected] = useState(
+    value !== undefined ? value : defaultValue,
+  );
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
 
@@ -19,16 +27,21 @@ const Select = ({ children, value, onValueChange, defaultValue }) => {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (containerRef.current && !containerRef.current.contains(event.target)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(event.target)
+      ) {
         setIsOpen(false);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
-    <SelectContext.Provider value={{ selected: currentValue, handleChange, isOpen, setIsOpen }}>
+    <SelectContext.Provider
+      value={{ selected: currentValue, handleChange, isOpen, setIsOpen }}
+    >
       <div ref={containerRef} className="relative w-full">
         {children}
       </div>
@@ -36,7 +49,7 @@ const Select = ({ children, value, onValueChange, defaultValue }) => {
   );
 };
 
-const SelectTrigger = ({ children, className = '', ...props }) => {
+const SelectTrigger = ({ children, className = "", ...props }) => {
   const { isOpen, setIsOpen } = useContext(SelectContext);
   return (
     <button
@@ -51,7 +64,7 @@ const SelectTrigger = ({ children, className = '', ...props }) => {
   );
 };
 
-const SelectContent = ({ children, className = '', ...props }) => {
+const SelectContent = ({ children, className = "", ...props }) => {
   const { isOpen } = useContext(SelectContext);
   if (!isOpen) return null;
 
@@ -65,7 +78,7 @@ const SelectContent = ({ children, className = '', ...props }) => {
   );
 };
 
-const SelectItem = ({ children, value, className = '', ...props }) => {
+const SelectItem = ({ children, value, className = "", ...props }) => {
   const { selected, handleChange } = useContext(SelectContext);
   const isSelected = selected === value;
 
@@ -73,7 +86,9 @@ const SelectItem = ({ children, value, className = '', ...props }) => {
     <div
       onClick={() => handleChange(value)}
       className={`px-4 py-2.5 cursor-pointer transition-colors text-sm hover:bg-slate-700/80 ${
-        isSelected ? 'font-semibold text-orange-400 bg-slate-700/40' : 'text-slate-200'
+        isSelected
+          ? "font-semibold text-orange-400 bg-slate-700/40"
+          : "text-slate-200"
       } ${className}`}
       {...props}
     >
@@ -84,7 +99,7 @@ const SelectItem = ({ children, value, className = '', ...props }) => {
 
 const SelectValue = ({ placeholder }) => {
   const { selected } = useContext(SelectContext);
-  return <>{selected || placeholder || 'Select option...'}</>;
+  return <>{selected || placeholder || "Select option..."}</>;
 };
 
 export { Select, SelectTrigger, SelectContent, SelectItem, SelectValue };

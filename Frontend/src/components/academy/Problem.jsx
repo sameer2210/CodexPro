@@ -55,7 +55,7 @@ const Problem = () => {
   const dispatch = useDispatch();
   const { user } = useSelector((state) => state.auth);
   const solvedProblems = useSelector((state) => state.problems);
-  console.log("solve rpoll..",solvedProblems)
+  console.log("solve rpoll..", solvedProblems);
   const [problems, setProblems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
@@ -69,7 +69,7 @@ const Problem = () => {
   const [showFilters, setShowFilters] = useState(false);
   const [stats, setStats] = useState({
     total: 0,
-    solved:0,
+    solved: 0,
     easy: 0,
     medium: 0,
     hard: 0,
@@ -95,8 +95,8 @@ const Problem = () => {
         const tags = Array.isArray(problem.tags)
           ? problem.tags
           : typeof problem.tags === "string"
-          ? [problem.tags]
-          : [];
+            ? [problem.tags]
+            : [];
         tags.forEach((tag) => tagSet.add(tag));
       });
     }
@@ -125,7 +125,7 @@ const Problem = () => {
         console.log("user", initialLoad);
         if (user && initialLoad) {
           setPlaylists(playlistsRes.data?.data || playlistsRes.data || []);
-          console.log("playlist,",playlists)
+          console.log("playlist,", playlists);
           // Fetch solved problems only if they haven't been fetched yet
           if (solvedProblems.length === 0) {
             try {
@@ -180,13 +180,13 @@ const Problem = () => {
     if (problems.length > 0) {
       const newStats = {
         total: problems.length,
-        solved: user?solvedProblems.length:0,
+        solved: user ? solvedProblems.length : 0,
         easy: problems.filter((p) => p.difficulty === "easy").length,
         medium: problems.filter((p) => p.difficulty === "medium").length,
         hard: problems.filter((p) => p.difficulty === "hard").length,
       };
       setStats(newStats);
-      console.log("this is stats",stats)
+      console.log("this is stats", stats);
     }
   }, [problems, solvedProblems, user]);
 
@@ -197,8 +197,8 @@ const Problem = () => {
     const problemTags = Array.isArray(problem.tags)
       ? problem.tags
       : typeof problem.tags === "string"
-      ? [problem.tags]
-      : [];
+        ? [problem.tags]
+        : [];
     const tagMatch = filters.tag === "all" || problemTags.includes(filters.tag);
 
     const statusMatch =
@@ -319,15 +319,12 @@ const Problem = () => {
   const handleAddToPlaylist = async (playlistId) => {
     try {
       setAddingToPlaylist(true);
-      await axiosClient.post(
-        `/playlists/${playlistId}/problems`,
-        {
-          problemId: selectedProblemForPlaylist,
-        }
-      );
+      await axiosClient.post(`/playlists/${playlistId}/problems`, {
+        problemId: selectedProblemForPlaylist,
+      });
 
       const problemToAdd = problems.find(
-        (p) => p._id === selectedProblemForPlaylist
+        (p) => p._id === selectedProblemForPlaylist,
       );
 
       if (!problemToAdd) {
@@ -350,8 +347,8 @@ const Problem = () => {
                   },
                 ],
               }
-            : playlist
-        )
+            : playlist,
+        ),
       );
 
       toast.success("Problem added to playlist successfully!");
@@ -359,7 +356,7 @@ const Problem = () => {
     } catch (err) {
       console.error("Error adding problem to playlist:", err);
       toast.error(
-        err.response?.data?.message || "Failed to add problem to playlist"
+        err.response?.data?.message || "Failed to add problem to playlist",
       );
     } finally {
       setAddingToPlaylist(false);
@@ -533,7 +530,7 @@ const Problem = () => {
                       {stats?.solved}
                     </div>
                     <div className="text-xs text-emerald-400 font-medium">
-                      {stats.total> 0
+                      {stats.total > 0
                         ? Math.round((stats.solved / stats.total) * 100)
                         : 0}
                       % Complete
@@ -643,8 +640,8 @@ const Problem = () => {
                                         problem.difficulty === "easy"
                                           ? "bg-emerald-400"
                                           : problem.difficulty === "medium"
-                                          ? "bg-amber-400"
-                                          : "bg-rose-400"
+                                            ? "bg-amber-400"
+                                            : "bg-rose-400"
                                       }`}
                                     />
                                   ))}
@@ -988,7 +985,7 @@ const Problem = () => {
                       <div className="flex items-center gap-3 mb-6">
                         <span
                           className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border shadow-lg ${getDifficultyColor(
-                            problem.difficulty
+                            problem.difficulty,
                           )}`}
                         >
                           {getDifficultyIcon(problem.difficulty)}
@@ -1017,8 +1014,8 @@ const Problem = () => {
                             const tags = Array.isArray(problem.tags)
                               ? problem.tags
                               : typeof problem.tags === "string"
-                              ? [problem.tags]
-                              : [];
+                                ? [problem.tags]
+                                : [];
                             return tags.slice(0, 3).map((tag, index) => (
                               <span
                                 key={index}
@@ -1033,8 +1030,8 @@ const Problem = () => {
                             const tags = Array.isArray(problem.tags)
                               ? problem.tags
                               : typeof problem.tags === "string"
-                              ? [problem.tags]
-                              : [];
+                                ? [problem.tags]
+                                : [];
                             return (
                               tags.length > 3 && (
                                 <span className="flex items-center gap-1 px-3 py-1.5 bg-slate-700/50 text-slate-400 text-xs rounded-lg border border-slate-600/30">
@@ -1123,7 +1120,7 @@ const Problem = () => {
                         <td className="px-8 py-6">
                           <span
                             className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold border shadow-lg w-fit ${getDifficultyColor(
-                              problem.difficulty
+                              problem.difficulty,
                             )}`}
                           >
                             {getDifficultyIcon(problem.difficulty)}
@@ -1137,8 +1134,8 @@ const Problem = () => {
                               const tags = Array.isArray(problem.tags)
                                 ? problem.tags
                                 : typeof problem.tags === "string"
-                                ? [problem.tags]
-                                : [];
+                                  ? [problem.tags]
+                                  : [];
                               return tags.slice(0, 2).map((tag, index) => (
                                 <span
                                   key={index}
@@ -1153,8 +1150,8 @@ const Problem = () => {
                               const tags = Array.isArray(problem.tags)
                                 ? problem.tags
                                 : typeof problem.tags === "string"
-                                ? [problem.tags]
-                                : [];
+                                  ? [problem.tags]
+                                  : [];
                               return (
                                 tags.length > 2 && (
                                   <span className="flex items-center gap-1 px-3 py-1.5 bg-slate-700/50 text-slate-400 text-xs rounded-lg border border-slate-600/30">
@@ -1440,8 +1437,6 @@ const Problem = () => {
           </button>
         </div>
       )}
-
-
 
       {/* Custom Styles */}
       <style jsx="true">{`

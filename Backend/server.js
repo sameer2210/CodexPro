@@ -1,16 +1,17 @@
-import http from 'http';
-import jwt from 'jsonwebtoken';
-import { Server as SocketServer } from 'socket.io';
-import cron from 'node-cron';
-import app from './src/app.js';
-import config from './src/config/config.js';
-import connectToDb from './src/db/db.js';
-import callService from './src/services/call.service.js';
-import authService from './src/services/auth.service.js';
-import messageService from './src/services/message.service.js';
-import { setIO } from './src/config/socket.js';
-import redisWrapper from './src/config/redis.js';
-import { autoFinalizeContestRankings } from './src/controllers/leaderboardController.js';
+import http from "http";
+import jwt from "jsonwebtoken";
+import { Server as SocketServer } from "socket.io";
+import cron from "node-cron";
+import app from "./src/app.js";
+import config from "./src/config/config.js";
+import connectToDb from "./src/db/db.js";
+import callService from "./src/services/call.service.js";
+import authService from "./src/services/auth.service.js";
+import messageService from "./src/services/message.service.js";
+import { getProjectById } from "./src/services/project.service.js";
+import { setIO } from "./src/config/socket.js";
+import redisWrapper from "./src/config/redis.js";
+import { autoFinalizeContestRankings } from "./src/controllers/leaderboardController.js";
 
 connectToDb();
 
@@ -22,7 +23,7 @@ const io = new SocketServer(server, {
     // origin: ['http://localhost:5173', 'https://codex-psi-murex.vercel.app/'],
     origin: config.FRONTEND_URLS,
     credentials: true,
-    methods: ['GET', 'POST'],
+    methods: ["GET", "POST"],
   },
   pingInterval: 25000,
   pingTimeout: 60000,
@@ -34,8 +35,10 @@ setIO(io);
 redisWrapper.connect().catch(() => {});
 
 // Schedule contest auto-finalization every 5 minutes
-cron.schedule('*/5 * * * *', () => {
-  autoFinalizeContestRankings().catch(err => console.error('Cron error:', err));
+cron.schedule("*/5 * * * *", () => {
+  autoFinalizeContestRankings().catch((err) =>
+    console.error("Cron error:", err),
+  );
 });
 
 /* -------------------- SOCKET ROOM MANAGER -------------------- */
@@ -111,7 +114,10 @@ class SocketRoomManager {
     const users = new Set();
 
     for (const [socketId, userData] of this.connections.entries()) {
-      if (userData.teamName === teamName && userData.currentProjectId === projectId) {
+      if (
+        userData.teamName === teamName &&
+        userData.currentProjectId === projectId
+      ) {
         users.add(userData.username);
       }
     }
@@ -129,7 +135,7 @@ io.use((socket, next) => {
     const token = socket.handshake.auth?.token;
 
     if (!token) {
-      return next(new Error('Authentication required'));
+      return next(new Error("Authentication required"));
     }
 
     const decoded = jwt.verify(token, config.JWT_SECRET);
@@ -139,24 +145,28 @@ io.use((socket, next) => {
       userId: decoded.userId,
     };
 
-    console.log(`User authenticated: ${decoded.username} (Team: ${decoded.teamName})`);
+    console.log(
+      `User authenticated: ${decoded.username} (Team: ${decoded.teamName})`,
+    );
     next();
   } catch (err) {
-    console.error('Socket auth failed:', err.message);
-    next(new Error('Invalid token'));
+    console.error("Socket auth failed:", err.message);
+    next(new Error("Invalid token"));
   }
 });
 
 /* -------------------- SOCKET EVENT HANDLERS -------------------- */
 
-io.on('connection', socket => {
+io.on("connection", (socket) => {
   const { username, teamName } = socket.user;
 
   console.log(`🔌 Client connected: ${username} from ${teamName}`);
 
-  void authService.updateMemberActivity(teamName, username, true).catch(error => {
-    console.error('Failed to mark member active:', error.message);
-  });
+  void authService
+    .updateMemberActivity(teamName, username, true)
+    .catch((error) => {
+      console.error("Failed to mark member active:", error.message);
+    });
 
   // Add connection to manager
   roomManager.addConnection(socket.id, {
@@ -169,18 +179,23 @@ io.on('connection', socket => {
   const teamRoom = roomManager.getTeamRoomId(teamName);
   socket.join(teamRoom);
 
+  const authorizeProject = async (projectId) => {
+    if (!projectId) return null;
+    return getProjectById(projectId, teamName);
+  };
+
   // Notify team about user joining
-  io.to(teamRoom).emit('user-online', {
+  io.to(teamRoom).emit("user-online", {
     username,
     timestamp: Date.now(),
   });
 
   // Send current online team presence to the connecting user
   const onlineUsers = Array.from(roomManager.connections.values())
-    .filter(connection => connection.teamName === teamName)
-    .map(connection => connection.username);
+    .filter((connection) => connection.teamName === teamName)
+    .map((connection) => connection.username);
   const uniqueOnlineUsers = Array.from(new Set(onlineUsers));
-  socket.emit('team-presence', {
+  socket.emit("team-presence", {
     teamName,
     users: uniqueOnlineUsers,
     timestamp: Date.now(),
@@ -188,23 +203,32 @@ io.on('connection', socket => {
 
   /* ========== PROJECT ROOM MANAGEMENT ========== */
 
-  socket.on('join-project', async ({ projectId }) => {
+  socket.on("join-project", async ({ projectId }) => {
     if (!projectId) {
-      socket.emit('error', { message: 'Project ID required' });
+      socket.emit("error", { message: "Project ID required" });
       return;
     }
 
     try {
+      const project = await authorizeProject(projectId);
+      if (!project) {
+        socket.emit("error", { message: "Project not found or access denied" });
+        return;
+      }
+
       const projectRoom = roomManager.getProjectRoomId(teamName, projectId);
 
       // Leave previous project room if any
       const currentConnection = roomManager.getConnection(socket.id);
       if (currentConnection?.currentProjectId) {
-        const oldRoom = roomManager.getProjectRoomId(teamName, currentConnection.currentProjectId);
+        const oldRoom = roomManager.getProjectRoomId(
+          teamName,
+          currentConnection.currentProjectId,
+        );
         socket.leave(oldRoom);
 
         // Notify old room about user leaving
-        socket.to(oldRoom).emit('user-left-project', {
+        socket.to(oldRoom).emit("user-left-project", {
           username,
           projectId: currentConnection.currentProjectId,
         });
@@ -217,17 +241,21 @@ io.on('connection', socket => {
       console.log(`${username} joined project: ${projectId}`);
 
       // Send chat history
-      const messages = await messageService.getProjectMessages(teamName, projectId, {
-        limit: 100,
-      });
+      const messages = await messageService.getProjectMessages(
+        teamName,
+        projectId,
+        {
+          limit: 100,
+        },
+      );
 
-      socket.emit('chat-history', {
+      socket.emit("chat-history", {
         projectId,
         messages: messages.reverse(),
       });
 
       // Notify others in the project room
-      socket.to(projectRoom).emit('user-joined-project', {
+      socket.to(projectRoom).emit("user-joined-project", {
         username,
         projectId,
         timestamp: Date.now(),
@@ -235,26 +263,26 @@ io.on('connection', socket => {
 
       // Send active users list
       const activeUsers = roomManager.getProjectUsers(teamName, projectId);
-      io.to(projectRoom).emit('active-users', {
+      io.to(projectRoom).emit("active-users", {
         projectId,
         users: activeUsers,
       });
 
       // Acknowledge join
-      socket.emit('project-joined', {
+      socket.emit("project-joined", {
         projectId,
         success: true,
       });
     } catch (error) {
-      console.error('Join project error:', error);
-      socket.emit('error', {
-        message: 'Failed to join project',
+      console.error("Join project error:", error);
+      socket.emit("error", {
+        message: "Failed to join project",
         error: error.message,
       });
     }
   });
 
-  socket.on('leave-project', ({ projectId }) => {
+  socket.on("leave-project", ({ projectId }) => {
     if (!projectId) return;
 
     const projectRoom = roomManager.getProjectRoomId(teamName, projectId);
@@ -262,14 +290,14 @@ io.on('connection', socket => {
     roomManager.updateCurrentProject(socket.id, null);
 
     // Notify project room
-    socket.to(projectRoom).emit('user-left-project', {
+    socket.to(projectRoom).emit("user-left-project", {
       username,
       projectId,
     });
 
     // Update active users
     const activeUsers = roomManager.getProjectUsers(teamName, projectId);
-    io.to(projectRoom).emit('active-users', {
+    io.to(projectRoom).emit("active-users", {
       projectId,
       users: activeUsers,
     });
@@ -279,26 +307,32 @@ io.on('connection', socket => {
 
   /* ========== CHAT MESSAGING ========== */
 
-  socket.on('chat-message', async ({ projectId, text }) => {
+  socket.on("chat-message", async ({ projectId, text }) => {
     if (!projectId || !text?.trim()) {
-      socket.emit('error', { message: 'Invalid message data' });
+      socket.emit("error", { message: "Invalid message data" });
       return;
     }
 
     try {
+      const project = await authorizeProject(projectId);
+      if (!project) {
+        socket.emit("error", { message: "Project not found or access denied" });
+        return;
+      }
+
       // Save message to database
       const message = await messageService.createMessage({
         projectId,
         teamName,
         username,
         message: text.trim(),
-        type: 'user',
+        type: "user",
       });
 
       const projectRoom = roomManager.getProjectRoomId(teamName, projectId);
 
       // Broadcast to all users in the project room (including sender)
-      io.to(projectRoom).emit('chat-message', {
+      io.to(projectRoom).emit("chat-message", {
         projectId,
         message: {
           _id: message._id,
@@ -309,32 +343,38 @@ io.on('connection', socket => {
         },
       });
 
-      console.log(`Message in project ${projectId}: ${username}: ${text.substring(0, 50)}`);
+      console.log(
+        `Message in project ${projectId}: ${username}: ${text.substring(0, 50)}`,
+      );
     } catch (error) {
-      console.error('Chat message error:', error);
-      socket.emit('error', {
-        message: 'Failed to send message',
+      console.error("Chat message error:", error);
+      socket.emit("error", {
+        message: "Failed to send message",
         error: error.message,
       });
     }
   });
 
-  socket.on('typing-start', ({ projectId }) => {
+  socket.on("typing-start", ({ projectId }) => {
     if (!projectId) return;
 
+    const connection = roomManager.getConnection(socket.id);
+    if (connection?.currentProjectId !== projectId) return;
     const projectRoom = roomManager.getProjectRoomId(teamName, projectId);
-    socket.to(projectRoom).emit('user-typing', {
+    socket.to(projectRoom).emit("user-typing", {
       projectId,
       username,
       isTyping: true,
     });
   });
 
-  socket.on('typing-stop', ({ projectId }) => {
+  socket.on("typing-stop", ({ projectId }) => {
     if (!projectId) return;
 
+    const connection = roomManager.getConnection(socket.id);
+    if (connection?.currentProjectId !== projectId) return;
     const projectRoom = roomManager.getProjectRoomId(teamName, projectId);
-    socket.to(projectRoom).emit('user-typing', {
+    socket.to(projectRoom).emit("user-typing", {
       projectId,
       username,
       isTyping: false,
@@ -343,12 +383,14 @@ io.on('connection', socket => {
 
   /* ========== CODE COLLABORATION ========== */
 
-  socket.on('code-change', ({ projectId, delta, code, cursorPos }) => {
+  socket.on("code-change", ({ projectId, delta, code, cursorPos }) => {
     if (!projectId) return;
 
+    const connection = roomManager.getConnection(socket.id);
+    if (connection?.currentProjectId !== projectId) return;
     const projectRoom = roomManager.getProjectRoomId(teamName, projectId);
 
-    socket.to(projectRoom).emit('code-change', {
+    socket.to(projectRoom).emit("code-change", {
       projectId,
       delta,
       code,
@@ -360,66 +402,89 @@ io.on('connection', socket => {
   /* ========== VIDEO CALL SIGNALING ========== */
 
   const emitToUser = (targetUsername, event, payload) => {
-    const targetSocketId = roomManager.getUserSocketId(teamName, targetUsername);
+    const targetSocketId = roomManager.getUserSocketId(
+      teamName,
+      targetUsername,
+    );
     if (!targetSocketId) return false;
     io.to(targetSocketId).emit(event, payload);
     return true;
   };
 
-  const scheduleCallCleanup = callId => {
+  const scheduleCallCleanup = (callId) => {
     setTimeout(() => callService.cleanup(callId), 2000);
   };
 
-  const handleCallTimeout = callId => {
+  const handleCallTimeout = (callId) => {
     const call = callService.getCall(callId);
-    if (!call || !['CALLING', 'RINGING'].includes(call.status)) return;
+    if (!call || !["CALLING", "RINGING"].includes(call.status)) return;
 
     console.log(
-      `📞 Call timeout: ${callId} (${call.caller} -> ${call.receivers?.join(', ') || call.receiver})`
+      `📞 Call timeout: ${callId} (${call.caller} -> ${call.receivers?.join(", ") || call.receiver})`,
     );
-    callService.setStatus(callId, 'CANCELLED', { reason: 'timeout' });
-    const receivers = call.receivers?.length ? call.receivers : call.receiver ? [call.receiver] : [];
-    receivers.forEach(receiverName => {
-      callService.releaseReceiver(callId, receiverName, 'CANCELLED');
-      emitToUser(receiverName, 'call:cancel', {
+    callService.setStatus(callId, "CANCELLED", { reason: "timeout" });
+    const receivers = call.receivers?.length
+      ? call.receivers
+      : call.receiver
+        ? [call.receiver]
+        : [];
+    receivers.forEach((receiverName) => {
+      callService.releaseReceiver(callId, receiverName, "CANCELLED");
+      emitToUser(receiverName, "call:cancel", {
         callId,
         from: call.caller,
-        reason: 'timeout',
+        reason: "timeout",
       });
-      emitToUser(receiverName, 'end-call', { from: call.caller });
+      emitToUser(receiverName, "end-call", { from: call.caller });
     });
-    emitToUser(call.caller, 'call:cancel', {
+    emitToUser(call.caller, "call:cancel", {
       callId,
-      from: receivers[0] || 'system',
-      reason: 'timeout',
+      from: receivers[0] || "system",
+      reason: "timeout",
     });
-    emitToUser(call.caller, 'end-call', { from: receivers[0] || 'system' });
+    emitToUser(call.caller, "end-call", { from: receivers[0] || "system" });
     scheduleCallCleanup(callId);
   };
 
-  const findLegacyCall = targetUsername => {
-    return callService.findActiveCallBetween(teamName, username, targetUsername);
+  const findLegacyCall = (targetUsername) => {
+    return callService.findActiveCallBetween(
+      teamName,
+      username,
+      targetUsername,
+    );
   };
 
-  const handleCallInitiate = ({ to, targets, offer, type = 'video', callId }) => {
+  const handleCallInitiate = ({
+    to,
+    targets,
+    offer,
+    type = "video",
+    callId,
+  }) => {
     const requestedTargets = Array.isArray(targets) ? targets : to ? [to] : [];
-    const uniqueTargets = Array.from(new Set(requestedTargets.filter(Boolean))).filter(
-      username => username !== socket.user.username
-    );
+    const uniqueTargets = Array.from(
+      new Set(requestedTargets.filter(Boolean)),
+    ).filter((username) => username !== socket.user.username);
 
     if (uniqueTargets.length === 0) {
-      socket.emit('call:failed', { reason: 'no-targets', message: 'No call targets' });
-      socket.emit('call-failed', { message: 'No call targets' });
+      socket.emit("call:failed", {
+        reason: "no-targets",
+        message: "No call targets",
+      });
+      socket.emit("call-failed", { message: "No call targets" });
       return;
     }
 
-    const onlineTargets = uniqueTargets.filter(user =>
-      roomManager.getUserSocketId(teamName, user)
+    const onlineTargets = uniqueTargets.filter((user) =>
+      roomManager.getUserSocketId(teamName, user),
     );
 
     if (onlineTargets.length === 0) {
-      socket.emit('call:failed', { reason: 'offline', message: 'User not available' });
-      socket.emit('call-failed', { message: 'User not available' });
+      socket.emit("call:failed", {
+        reason: "offline",
+        message: "User not available",
+      });
+      socket.emit("call-failed", { message: "User not available" });
       return;
     }
 
@@ -436,27 +501,27 @@ io.on('connection', socket => {
 
     if (error) {
       const message =
-        error === 'busy'
-          ? 'User is busy'
-          : error === 'no-targets'
-            ? 'No available targets'
-            : 'Call already exists';
-      socket.emit('call:failed', { reason: error, message });
-      socket.emit('call-failed', { message });
+        error === "busy"
+          ? "User is busy"
+          : error === "no-targets"
+            ? "No available targets"
+            : "Call already exists";
+      socket.emit("call:failed", { reason: error, message });
+      socket.emit("call-failed", { message });
       return;
     }
 
     if (skipped?.length) {
-      console.log(`📞 Call skipped busy users: ${skipped.join(', ')}`);
+      console.log(`📞 Call skipped busy users: ${skipped.join(", ")}`);
     }
 
     console.log(
-      `📞 Call initiated: ${call.callId} (${username} -> ${call.receivers.join(', ')}, ${type})`
+      `📞 Call initiated: ${call.callId} (${username} -> ${call.receivers.join(", ")}, ${type})`,
     );
-    callService.setStatus(call.callId, 'RINGING');
+    callService.setStatus(call.callId, "RINGING");
     callService.startTimeout(call.callId, handleCallTimeout);
 
-    socket.emit('call:initiated', {
+    socket.emit("call:initiated", {
       callId: call.callId,
       to: call.receivers.length === 1 ? call.receivers[0] : undefined,
       targets: call.receivers,
@@ -464,11 +529,11 @@ io.on('connection', socket => {
       skipped,
     });
 
-    call.receivers.forEach(targetUser => {
+    call.receivers.forEach((targetUser) => {
       const targetSocketId = roomManager.getUserSocketId(teamName, targetUser);
       if (!targetSocketId) return;
 
-      io.to(targetSocketId).emit('call:incoming', {
+      io.to(targetSocketId).emit("call:incoming", {
         callId: call.callId,
         from: username,
         type,
@@ -476,14 +541,14 @@ io.on('connection', socket => {
         startedAt: call.startedAt,
       });
 
-      io.to(targetSocketId).emit('call:offer', {
+      io.to(targetSocketId).emit("call:offer", {
         callId: call.callId,
         from: username,
         type,
         offer,
       });
 
-      io.to(targetSocketId).emit('incoming-call', {
+      io.to(targetSocketId).emit("incoming-call", {
         from: username,
         offer,
         type,
@@ -492,113 +557,143 @@ io.on('connection', socket => {
     });
   };
 
-  socket.on('call:initiate', handleCallInitiate);
+  socket.on("call:initiate", handleCallInitiate);
 
   const handleCallAccept = ({ callId, answer }) => {
     const call = callService.getCall(callId);
     if (!call) {
-      socket.emit('call:failed', { reason: 'not-found', message: 'Call not found' });
-      socket.emit('call-failed', { message: 'Call not found' });
+      socket.emit("call:failed", {
+        reason: "not-found",
+        message: "Call not found",
+      });
+      socket.emit("call-failed", { message: "Call not found" });
       return;
     }
     if (call.receiver !== username && !call.receivers?.includes(username)) {
-      socket.emit('call:failed', { reason: 'forbidden', message: 'Not authorized' });
-      socket.emit('call-failed', { message: 'Not authorized' });
+      socket.emit("call:failed", {
+        reason: "forbidden",
+        message: "Not authorized",
+      });
+      socket.emit("call-failed", { message: "Not authorized" });
       return;
     }
-    if (!['CALLING', 'RINGING'].includes(call.status)) {
-      socket.emit('call:failed', { reason: 'invalid-state', message: 'Call not ringable' });
+    if (!["CALLING", "RINGING"].includes(call.status)) {
+      socket.emit("call:failed", {
+        reason: "invalid-state",
+        message: "Call not ringable",
+      });
       return;
     }
 
     console.log(`📞 Call accepted: ${callId} by ${username}`);
     callService.clearTimeout(call);
-    callService.setStatus(callId, 'ACCEPTED', { answer, acceptedBy: username, receiver: username });
+    callService.setStatus(callId, "ACCEPTED", {
+      answer,
+      acceptedBy: username,
+      receiver: username,
+    });
     call.acceptedBy = username;
     call.receiver = username;
 
-    emitToUser(call.caller, 'call:accepted', { callId, from: username, type: call.type });
-    emitToUser(username, 'call:accepted', { callId, from: username, type: call.type });
-    emitToUser(call.caller, 'call:answer', { callId, from: username, answer });
-    emitToUser(call.caller, 'call-accepted', { answer, from: username });
+    emitToUser(call.caller, "call:accepted", {
+      callId,
+      from: username,
+      type: call.type,
+    });
+    emitToUser(username, "call:accepted", {
+      callId,
+      from: username,
+      type: call.type,
+    });
+    emitToUser(call.caller, "call:answer", { callId, from: username, answer });
+    emitToUser(call.caller, "call-accepted", { answer, from: username });
 
     if (Array.isArray(call.receivers)) {
-      call.receivers.forEach(receiverName => {
+      call.receivers.forEach((receiverName) => {
         if (receiverName === username) return;
-        callService.releaseReceiver(callId, receiverName, 'CANCELLED');
-        emitToUser(receiverName, 'call:cancel', {
+        callService.releaseReceiver(callId, receiverName, "CANCELLED");
+        emitToUser(receiverName, "call:cancel", {
           callId,
           from: username,
-          reason: 'answered-elsewhere',
+          reason: "answered-elsewhere",
         });
-        emitToUser(receiverName, 'end-call', { from: username });
+        emitToUser(receiverName, "end-call", { from: username });
       });
       call.receivers = [username];
     }
   };
 
-  socket.on('call:accept', handleCallAccept);
+  socket.on("call:accept", handleCallAccept);
 
   const handleCallReject = ({ callId, reason }) => {
     const call = callService.getCall(callId);
     if (!call) return;
-    if (call.receiver !== username && !call.receivers?.includes(username)) return;
-    if (call.status !== 'RINGING') return;
+    if (call.receiver !== username && !call.receivers?.includes(username))
+      return;
+    if (call.status !== "RINGING") return;
 
     console.log(`📞 Call rejected: ${callId} by ${username}`);
-    callService.releaseReceiver(callId, username, 'REJECTED');
+    callService.releaseReceiver(callId, username, "REJECTED");
 
     const remainingReceivers = (call.receivers || []).filter(
-      receiverName => receiverName !== username
+      (receiverName) => receiverName !== username,
     );
 
     call.receivers = remainingReceivers;
 
     if (!call.acceptedBy && remainingReceivers.length === 0) {
       callService.clearTimeout(call);
-      callService.setStatus(callId, 'REJECTED', { reason: reason || 'rejected' });
-      emitToUser(call.caller, 'call:reject', {
+      callService.setStatus(callId, "REJECTED", {
+        reason: reason || "rejected",
+      });
+      emitToUser(call.caller, "call:reject", {
         callId,
         from: username,
-        reason: reason || 'rejected',
+        reason: reason || "rejected",
       });
-      emitToUser(call.caller, 'call-rejected', { from: username });
+      emitToUser(call.caller, "call-rejected", { from: username });
       scheduleCallCleanup(callId);
     }
   };
 
-  socket.on('call:reject', handleCallReject);
+  socket.on("call:reject", handleCallReject);
 
   const handleCallCancel = ({ callId, reason }) => {
     const call = callService.getCall(callId);
     if (!call) return;
     if (call.caller !== username) return;
-    if (!['CALLING', 'RINGING'].includes(call.status)) return;
+    if (!["CALLING", "RINGING"].includes(call.status)) return;
 
     console.log(`📞 Call cancelled: ${callId} by ${username}`);
     callService.clearTimeout(call);
-    callService.setStatus(callId, 'CANCELLED', { reason: reason || 'cancelled' });
-
-    const receivers = call.receivers?.length ? call.receivers : call.receiver ? [call.receiver] : [];
-    receivers.forEach(receiverName => {
-      callService.releaseReceiver(callId, receiverName, 'CANCELLED');
-      emitToUser(receiverName, 'call:cancel', {
-        callId,
-        from: username,
-        reason: reason || 'cancelled',
-      });
-      emitToUser(receiverName, 'end-call', { from: username });
+    callService.setStatus(callId, "CANCELLED", {
+      reason: reason || "cancelled",
     });
 
-    emitToUser(call.caller, 'call:cancelled', {
+    const receivers = call.receivers?.length
+      ? call.receivers
+      : call.receiver
+        ? [call.receiver]
+        : [];
+    receivers.forEach((receiverName) => {
+      callService.releaseReceiver(callId, receiverName, "CANCELLED");
+      emitToUser(receiverName, "call:cancel", {
+        callId,
+        from: username,
+        reason: reason || "cancelled",
+      });
+      emitToUser(receiverName, "end-call", { from: username });
+    });
+
+    emitToUser(call.caller, "call:cancelled", {
       callId,
       from: username,
-      reason: reason || 'cancelled',
+      reason: reason || "cancelled",
     });
     scheduleCallCleanup(callId);
   };
 
-  socket.on('call:cancel', handleCallCancel);
+  socket.on("call:cancel", handleCallCancel);
 
   const handleCallEnd = ({ callId, reason }) => {
     const call = callService.getCall(callId);
@@ -607,19 +702,19 @@ io.on('connection', socket => {
 
     console.log(`📞 Call ended: ${callId} by ${username}`);
     callService.clearTimeout(call);
-    callService.setStatus(callId, 'ENDED', { reason: reason || 'ended' });
+    callService.setStatus(callId, "ENDED", { reason: reason || "ended" });
 
     const otherUser = call.caller === username ? call.receiver : call.caller;
-    emitToUser(otherUser, 'call:end', {
+    emitToUser(otherUser, "call:end", {
       callId,
       from: username,
-      reason: reason || 'ended',
+      reason: reason || "ended",
     });
-    emitToUser(otherUser, 'end-call', { from: username });
+    emitToUser(otherUser, "end-call", { from: username });
     scheduleCallCleanup(callId);
   };
 
-  socket.on('call:end', handleCallEnd);
+  socket.on("call:end", handleCallEnd);
 
   const handleCallIceCandidate = ({ callId, candidate }) => {
     const call = callService.getCall(callId);
@@ -627,8 +722,8 @@ io.on('connection', socket => {
     if (call.caller !== username && call.receiver !== username) return;
     if (!call.acceptedBy && username === call.caller) {
       // Broadcast caller ICE candidates to all ringing receivers
-      (call.receivers || []).forEach(receiverName => {
-        emitToUser(receiverName, 'call:ice-candidate', {
+      (call.receivers || []).forEach((receiverName) => {
+        emitToUser(receiverName, "call:ice-candidate", {
           callId,
           candidate,
           from: username,
@@ -639,100 +734,122 @@ io.on('connection', socket => {
 
     const otherUser = call.caller === username ? call.receiver : call.caller;
     if (!otherUser) return;
-    emitToUser(otherUser, 'call:ice-candidate', { callId, candidate, from: username });
+    emitToUser(otherUser, "call:ice-candidate", {
+      callId,
+      candidate,
+      from: username,
+    });
   };
 
-  socket.on('call:ice-candidate', handleCallIceCandidate);
+  socket.on("call:ice-candidate", handleCallIceCandidate);
 
-  socket.on('call:offer', ({ callId, offer }) => {
+  socket.on("call:offer", ({ callId, offer }) => {
     const call = callService.getCall(callId);
     if (!call) return;
     if (call.caller !== username && call.receiver !== username) return;
-    if (call.status !== 'ACCEPTED') return;
+    if (call.status !== "ACCEPTED") return;
     const otherUser = call.caller === username ? call.receiver : call.caller;
-    emitToUser(otherUser, 'call:offer', { callId, offer, from: username, type: call.type });
+    emitToUser(otherUser, "call:offer", {
+      callId,
+      offer,
+      from: username,
+      type: call.type,
+    });
   });
 
-  socket.on('call:answer', ({ callId, answer }) => {
+  socket.on("call:answer", ({ callId, answer }) => {
     const call = callService.getCall(callId);
     if (!call) return;
     if (call.caller !== username && call.receiver !== username) return;
-    if (call.status !== 'ACCEPTED') return;
+    if (call.status !== "ACCEPTED") return;
     const otherUser = call.caller === username ? call.receiver : call.caller;
-    emitToUser(otherUser, 'call:answer', { callId, answer, from: username });
+    emitToUser(otherUser, "call:answer", { callId, answer, from: username });
   });
 
   /* ===== Legacy WebRTC events (backward compatibility) ===== */
-  socket.on('call-user', ({ username: targetUsername, offer, type = 'video' }) => {
-    handleCallInitiate({ to: targetUsername, offer, type });
-  });
+  socket.on(
+    "call-user",
+    ({ username: targetUsername, offer, type = "video" }) => {
+      handleCallInitiate({ to: targetUsername, offer, type });
+    },
+  );
 
-  socket.on('call-accepted', ({ to, answer }) => {
+  socket.on("call-accepted", ({ to, answer }) => {
     const legacyCall = findLegacyCall(to);
     if (!legacyCall) {
-      socket.emit('call-failed', { message: 'Call not found' });
+      socket.emit("call-failed", { message: "Call not found" });
       return;
     }
     handleCallAccept({ callId: legacyCall.callId, answer });
   });
 
-  socket.on('call-rejected', ({ to }) => {
+  socket.on("call-rejected", ({ to }) => {
     const legacyCall = findLegacyCall(to);
     if (!legacyCall) return;
-    handleCallReject({ callId: legacyCall.callId, reason: 'rejected' });
+    handleCallReject({ callId: legacyCall.callId, reason: "rejected" });
   });
 
-  socket.on('ice-candidate', ({ to, candidate }) => {
+  socket.on("ice-candidate", ({ to, candidate }) => {
     const legacyCall = findLegacyCall(to);
     if (!legacyCall) return;
     handleCallIceCandidate({ callId: legacyCall.callId, candidate });
   });
 
-  socket.on('end-call', ({ to }) => {
+  socket.on("end-call", ({ to }) => {
     const legacyCall = findLegacyCall(to);
     if (!legacyCall) return;
-    handleCallEnd({ callId: legacyCall.callId, reason: 'ended' });
+    handleCallEnd({ callId: legacyCall.callId, reason: "ended" });
   });
 
   /* ========== AI CODE REVIEW ========== */
-  socket.on('get-review', async ({ projectId, code, language }) => {
+  socket.on("get-review", async ({ projectId, code, language }) => {
     if (!projectId || !code) {
-      socket.emit('error', { message: 'Invalid review request' });
+      socket.emit("error", { message: "Invalid review request" });
       return;
     }
 
     try {
+      const project = await authorizeProject(projectId);
+      if (!project) {
+        socket.emit("error", { message: "Project not found or access denied" });
+        return;
+      }
+
       console.log(`Generating AI review for project ${projectId}`);
 
       // Import AI service
-      const { default: AIService } = await import('./src/services/ai.service.js');
+      const { default: AIService } = await import(
+        "./src/services/ai.service.js"
+      );
       const result = await AIService.reviewCode(code, language);
       const projectRoom = roomManager.getProjectRoomId(teamName, projectId);
 
-      io.to(projectRoom).emit('code-review', {
+      io.to(projectRoom).emit("code-review", {
         projectId,
         success: result.success,
         review: result.review,
         reason: result.reason,
       });
 
-      console.log(`Review sent to project ${projectId} | success=${result.success}`);
+      console.log(
+        `Review sent to project ${projectId} | success=${result.success}`,
+      );
     } catch (error) {
-      console.error('AI review error:', error);
+      console.error("AI review error:", error);
 
       const projectRoom = roomManager.getProjectRoomId(teamName, projectId);
-      io.to(projectRoom).emit('code-review', {
+      io.to(projectRoom).emit("code-review", {
         projectId,
         success: false,
-        review: '⚠️ AI review unavailable. Using offline analysis.',
-        reason: 'AI_FAILED',
+        review: "⚠️ AI review unavailable. Using offline analysis.",
+        reason: "AI_FAILED",
       });
     }
   });
 
   /* ========== DISCONNECT ========== */
 
-  socket.on('disconnect', reason => {
+  socket.on("disconnect", (reason) => {
     console.log(`🔌 Client disconnected: ${username} (${reason})`);
 
     const connection = roomManager.getConnection(socket.id);
@@ -740,46 +857,61 @@ io.on('connection', socket => {
     const isStillOnline = roomManager.hasUserConnection(teamName, username);
 
     if (!isStillOnline) {
-      void authService.updateMemberActivity(teamName, username, false).catch(error => {
-        console.error('Failed to mark member inactive:', error.message);
-      });
+      void authService
+        .updateMemberActivity(teamName, username, false)
+        .catch((error) => {
+          console.error("Failed to mark member inactive:", error.message);
+        });
     }
 
     const activeCall = callService.findActiveCallByUser(teamName, username);
-    if (activeCall && !['REJECTED', 'CANCELLED', 'ENDED', 'FAILED'].includes(activeCall.status)) {
+    if (
+      activeCall &&
+      !["REJECTED", "CANCELLED", "ENDED", "FAILED"].includes(activeCall.status)
+    ) {
       callService.clearTimeout(activeCall);
-      callService.setStatus(activeCall.callId, 'ENDED', { reason: 'user-disconnected' });
+      callService.setStatus(activeCall.callId, "ENDED", {
+        reason: "user-disconnected",
+      });
       const otherUser =
-        activeCall.caller === username ? activeCall.receiver : activeCall.caller;
-      emitToUser(otherUser, 'call:user-disconnected', {
+        activeCall.caller === username
+          ? activeCall.receiver
+          : activeCall.caller;
+      emitToUser(otherUser, "call:user-disconnected", {
         callId: activeCall.callId,
         from: username,
-        reason: 'user-disconnected',
+        reason: "user-disconnected",
       });
-      emitToUser(otherUser, 'call:end', {
+      emitToUser(otherUser, "call:end", {
         callId: activeCall.callId,
         from: username,
-        reason: 'user-disconnected',
+        reason: "user-disconnected",
       });
-      emitToUser(otherUser, 'end-call', { from: username });
+      emitToUser(otherUser, "end-call", { from: username });
       scheduleCallCleanup(activeCall.callId);
     }
 
     if (connection?.currentProjectId) {
-      const projectRoom = roomManager.getProjectRoomId(teamName, connection.currentProjectId);
-      const activeUsers = roomManager.getProjectUsers(teamName, connection.currentProjectId);
+      const projectRoom = roomManager.getProjectRoomId(
+        teamName,
+        connection.currentProjectId,
+      );
+      const activeUsers = roomManager.getProjectUsers(
+        teamName,
+        connection.currentProjectId,
+      );
       const stillInProject = activeUsers.includes(username);
 
       // Notify project room
       if (!stillInProject) {
-        socket.to(projectRoom).emit('user-left-project', {
+        socket.to(projectRoom).emit("user-left-project", {
           username,
           projectId: connection.currentProjectId,
         });
       }
 
       // Update active users
-      io.to(projectRoom).emit('active-users', {
+      io.to(projectRoom).emit("active-users", {
         projectId: connection.currentProjectId,
         users: activeUsers,
       });
@@ -788,7 +920,7 @@ io.on('connection', socket => {
     // Notify team
     if (!isStillOnline) {
       const teamRoom = roomManager.getTeamRoomId(teamName);
-      io.to(teamRoom).emit('user-offline', {
+      io.to(teamRoom).emit("user-offline", {
         username,
         timestamp: Date.now(),
       });
@@ -797,7 +929,7 @@ io.on('connection', socket => {
 
   /* ========== ERROR HANDLING ========== */
 
-  socket.on('error', error => {
+  socket.on("error", (error) => {
     console.error(`Socket error for ${username}:`, error);
   });
 });

@@ -1,14 +1,13 @@
 // Success.jsx
 import React from "react";
-import {
-  Check,
-  Zap,
-  Gift,
-  Home,
-  ArrowRight,
-} from "lucide-react";
+import { Check, Zap, Gift, Home, ArrowRight } from "lucide-react";
 
-const Success = ({ showSuccess, purchasedPlan, redirectCount, handleGoHome }) => {
+const Success = ({
+  showSuccess,
+  purchasedPlan,
+  redirectCount,
+  handleGoHome,
+}) => {
   if (!showSuccess || !purchasedPlan) {
     return null;
   }
@@ -176,9 +175,7 @@ const Success = ({ showSuccess, purchasedPlan, redirectCount, handleGoHome }) =>
 
           <div className="flex-1 bg-slate-800/40 backdrop-blur-xl border border-slate-700/50 rounded-xl p-4 flex items-center justify-center relative overflow-hidden">
             <div className="text-center relative z-10">
-              <p className="text-slate-400 text-sm mb-2">
-                Auto-redirecting in
-              </p>
+              <p className="text-slate-400 text-sm mb-2">Auto-redirecting in</p>
               <div className="flex items-center gap-3 justify-center">
                 <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-red-500 rounded-full flex items-center justify-center relative">
                   <span className="text-white font-bold text-lg">

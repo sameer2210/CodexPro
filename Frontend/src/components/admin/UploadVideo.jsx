@@ -1,31 +1,39 @@
-import React, { useState, useRef } from 'react';
-import { Upload, Video, Clock, FileText, CheckCircle, AlertCircle, X, Play, Pause } from 'lucide-react';
-import axios from 'axios';
-import axiosClient from '../../utils/axiosClient';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
-import { toast } from 'sonner';
-
+import React, { useState, useRef } from "react";
+import {
+  Upload,
+  Video,
+  Clock,
+  FileText,
+  CheckCircle,
+  AlertCircle,
+  X,
+  Play,
+  Pause,
+} from "lucide-react";
+import axios from "axios";
+import axiosClient from "../../utils/axiosClient";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
 
 const UploadVideo = () => {
-  
-  const {problemId} = useParams(); 
+  const { problemId } = useParams();
   const navigate = useNavigate();
-  
+
   const [isDragging, setIsDragging] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
-  const [uploadStatus, setUploadStatus] = useState('idle'); 
+  const [uploadStatus, setUploadStatus] = useState("idle");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [videoPreview, setVideoPreview] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [uploadedVideo, setUploadedVideo] = useState(null);
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    tags: '',
-    visibility: 'public'
+    title: "",
+    description: "",
+    tags: "",
+    visibility: "public",
   });
   const [errors, setErrors] = useState({});
-  
+
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
 
@@ -48,86 +56,96 @@ const UploadVideo = () => {
     }
   };
 
-
-
   const handleFileSelection = (file) => {
     // Validate file
-    if (!file.type.startsWith('video/')) {
-      setErrors({ file: 'Please select a valid video file' });
+    if (!file.type.startsWith("video/")) {
+      setErrors({ file: "Please select a valid video file" });
       return;
     }
 
-    if (file.size > 100 * 1024 * 1024) { // 100MB limit to match original
-      setErrors({ file: 'File size must be less than 100MB' });
+    if (file.size > 100 * 1024 * 1024) {
+      // 100MB limit to match original
+      setErrors({ file: "File size must be less than 100MB" });
       return;
     }
 
     setSelectedFile(file);
     setErrors({});
-    
+
     // Create preview
     const url = URL.createObjectURL(file);
     setVideoPreview(url);
-    
+
     // Auto-fill title from filename
     const fileName = file.name.replace(/\.[^/.]+$/, "");
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      title: fileName.charAt(0).toUpperCase() + fileName.slice(1)
+      title: fileName.charAt(0).toUpperCase() + fileName.slice(1),
     }));
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const formatFileSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   const formatDuration = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   // Real upload to Cloudinary via backend
   const uploadToCloudinary = async () => {
     if (!selectedFile) return;
-    
-    setUploadStatus('uploading');
+
+    setUploadStatus("uploading");
     setUploadProgress(0);
     setErrors({});
 
     try {
       // Step 1: Get upload signature from backend
-      console.log("Problem id"  , problemId)
-      const signatureResponse = await axiosClient.get(`/video/create/${problemId}`);
-      const { signature, timestamp, public_id, api_key, cloud_name, upload_url } = signatureResponse.data;
+      console.log("Problem id", problemId);
+      const signatureResponse = await axiosClient.get(
+        `/video/create/${problemId}`,
+      );
+      const {
+        signature,
+        timestamp,
+        public_id,
+        api_key,
+        cloud_name,
+        upload_url,
+      } = signatureResponse.data;
 
       // Step 2: Create FormData for Cloudinary upload
       const cloudinaryFormData = new FormData();
-      cloudinaryFormData.append('file', selectedFile);
-      cloudinaryFormData.append('signature', signature);
-      cloudinaryFormData.append('timestamp', timestamp);
-      cloudinaryFormData.append('public_id', public_id);
-      cloudinaryFormData.append('api_key', api_key);
+      cloudinaryFormData.append("file", selectedFile);
+      cloudinaryFormData.append("signature", signature);
+      cloudinaryFormData.append("timestamp", timestamp);
+      cloudinaryFormData.append("public_id", public_id);
+      cloudinaryFormData.append("api_key", api_key);
 
       // Step 3: Upload directly to Cloudinary
       const uploadResponse = await axios.post(upload_url, cloudinaryFormData, {
         headers: {
-          'Content-Type': 'multipart/form-data',
+          "Content-Type": "multipart/form-data",
         },
         onUploadProgress: (progressEvent) => {
-          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          const progress = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total,
+          );
           setUploadProgress(progress);
         },
       });
@@ -135,7 +153,7 @@ const UploadVideo = () => {
       const cloudinaryResult = uploadResponse.data;
 
       // Step 4: Save video metadata to backend
-      const metadataResponse = await axiosClient.post('/video/save', {
+      const metadataResponse = await axiosClient.post("/video/save", {
         problemId: problemId,
         cloudinaryPublicId: cloudinaryResult.public_id,
         secureUrl: cloudinaryResult.secure_url,
@@ -146,15 +164,15 @@ const UploadVideo = () => {
       });
 
       setUploadedVideo(metadataResponse.data.videoSolution);
-      setUploadStatus('success');
+      setUploadStatus("success");
       toast.success("Video upload successfully");
-      navigate("/admin/video")
-      
+      navigate("/admin/video");
     } catch (err) {
-      console.error('Upload error:', err);
-      setUploadStatus('error');
+      console.error("Upload error:", err);
+      setUploadStatus("error");
       setErrors({
-        upload: err.response?.data?.message || 'Upload failed. Please try again.'
+        upload:
+          err.response?.data?.message || "Upload failed. Please try again.",
       });
     } finally {
       setUploadProgress(0);
@@ -164,34 +182,35 @@ const UploadVideo = () => {
   const handleSubmit = () => {
     // Validate form
     const newErrors = {};
-    if (!selectedFile) newErrors.file = 'Please select a video file';
-    if (!formData.title.trim()) newErrors.title = 'Title is required';
-    if (!formData.description.trim()) newErrors.description = 'Description is required';
-    
+    if (!selectedFile) newErrors.file = "Please select a video file";
+    if (!formData.title.trim()) newErrors.title = "Title is required";
+    if (!formData.description.trim())
+      newErrors.description = "Description is required";
+
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;
     }
-    
+
     uploadToCloudinary();
   };
 
   const resetForm = () => {
     setSelectedFile(null);
     setVideoPreview(null);
-    setUploadStatus('idle');
+    setUploadStatus("idle");
     setUploadProgress(0);
     setUploadedVideo(null);
     setFormData({
-      title: '',
-      description: '',
-      tags: '',
-      visibility: 'public'
+      title: "",
+      description: "",
+      tags: "",
+      visibility: "public",
     });
     setErrors({});
     setIsPlaying(false);
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
@@ -212,13 +231,19 @@ const UploadVideo = () => {
       <div className="max-w-6xl mx-auto mb-8">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Admin Video Upload</h1>
-            <p className="text-slate-400">Upload and manage video content for your platform</p>
+            <h1 className="text-3xl font-bold text-white mb-2">
+              Admin Video Upload
+            </h1>
+            <p className="text-slate-400">
+              Upload and manage video content for your platform
+            </p>
           </div>
           <div className="flex items-center space-x-4">
             <div className="bg-slate-800 rounded-lg px-4 py-2">
               <span className="text-sm text-slate-300">Storage Used: </span>
-              <span className="text-orange-400 font-semibold">2.4GB / 10GB</span>
+              <span className="text-orange-400 font-semibold">
+                2.4GB / 10GB
+              </span>
             </div>
           </div>
         </div>
@@ -237,11 +262,11 @@ const UploadVideo = () => {
               {/* File Upload Area */}
               <div
                 className={`relative border-2 border-dashed rounded-xl p-8 text-center transition-all duration-300 ${
-                  isDragging 
-                    ? 'border-orange-400 bg-orange-400/10' 
-                    : selectedFile 
-                    ? 'border-green-400 bg-green-400/10' 
-                    : 'border-slate-600 hover:border-slate-500'
+                  isDragging
+                    ? "border-orange-400 bg-orange-400/10"
+                    : selectedFile
+                      ? "border-green-400 bg-green-400/10"
+                      : "border-slate-600 hover:border-slate-500"
                 }`}
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -253,9 +278,12 @@ const UploadVideo = () => {
                       <Video className="text-green-400" size={48} />
                     </div>
                     <div>
-                      <h3 className="text-lg font-medium text-white">{selectedFile.name}</h3>
+                      <h3 className="text-lg font-medium text-white">
+                        {selectedFile.name}
+                      </h3>
                       <p className="text-slate-400 text-sm mt-1">
-                        {formatFileSize(selectedFile.size)} • {selectedFile.type}
+                        {formatFileSize(selectedFile.size)} •{" "}
+                        {selectedFile.type}
                       </p>
                     </div>
                     <button
@@ -273,9 +301,12 @@ const UploadVideo = () => {
                       <Upload className="text-slate-400" size={48} />
                     </div>
                     <div>
-                      <h3 className="text-lg font-medium text-white">Drop your video here</h3>
+                      <h3 className="text-lg font-medium text-white">
+                        Drop your video here
+                      </h3>
                       <p className="text-slate-400 text-sm mt-1">
-                        or <button
+                        or{" "}
+                        <button
                           type="button"
                           onClick={() => fileInputRef.current?.click()}
                           className="text-orange-400 hover:text-orange-300 underline"
@@ -289,12 +320,14 @@ const UploadVideo = () => {
                     </div>
                   </div>
                 )}
-                
+
                 <input
                   ref={fileInputRef}
                   type="file"
                   accept="video/*"
-                  onChange={(e) => e.target.files[0] && handleFileSelection(e.target.files[0])}
+                  onChange={(e) =>
+                    e.target.files[0] && handleFileSelection(e.target.files[0])
+                  }
                   className="hidden"
                 />
               </div>
@@ -355,7 +388,9 @@ const UploadVideo = () => {
                   placeholder="Describe your video content..."
                 />
                 {errors.description && (
-                  <p className="text-red-400 text-sm mt-1">{errors.description}</p>
+                  <p className="text-red-400 text-sm mt-1">
+                    {errors.description}
+                  </p>
                 )}
               </div>
 
@@ -374,14 +409,18 @@ const UploadVideo = () => {
               </div>
 
               {/* Upload Progress */}
-              {uploadStatus === 'uploading' && (
+              {uploadStatus === "uploading" && (
                 <div className="bg-slate-700/30 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm text-slate-300">Uploading to Cloudinary...</span>
-                    <span className="text-sm text-orange-400">{Math.round(uploadProgress)}%</span>
+                    <span className="text-sm text-slate-300">
+                      Uploading to Cloudinary...
+                    </span>
+                    <span className="text-sm text-orange-400">
+                      {Math.round(uploadProgress)}%
+                    </span>
                   </div>
                   <div className="w-full bg-slate-600 rounded-full h-2">
-                    <div 
+                    <div
                       className="bg-gradient-to-r from-orange-400 to-orange-500 h-2 rounded-full transition-all duration-300"
                       style={{ width: `${uploadProgress}%` }}
                     />
@@ -395,7 +434,9 @@ const UploadVideo = () => {
                   <div className="flex items-center">
                     <AlertCircle className="text-red-400 mr-2" size={20} />
                     <div>
-                      <h3 className="text-red-400 font-medium">Upload Failed</h3>
+                      <h3 className="text-red-400 font-medium">
+                        Upload Failed
+                      </h3>
                       <p className="text-slate-300 text-sm">{errors.upload}</p>
                     </div>
                   </div>
@@ -403,17 +444,20 @@ const UploadVideo = () => {
               )}
 
               {/* Success Message */}
-              {uploadStatus === 'success' && uploadedVideo && (
+              {uploadStatus === "success" && uploadedVideo && (
                 <div className="bg-green-400/10 border border-green-400/20 rounded-lg p-4">
                   <div className="flex items-center">
                     <CheckCircle className="text-green-400 mr-2" size={20} />
                     <div>
-                      <h3 className="text-green-400 font-medium">Upload Successful!</h3>
+                      <h3 className="text-green-400 font-medium">
+                        Upload Successful!
+                      </h3>
                       <p className="text-slate-300 text-sm">
                         Duration: {formatDuration(uploadedVideo.duration)}
                       </p>
                       <p className="text-slate-300 text-sm">
-                        Uploaded: {new Date(uploadedVideo.uploadedAt).toLocaleString()}
+                        Uploaded:{" "}
+                        {new Date(uploadedVideo.uploadedAt).toLocaleString()}
                       </p>
                     </div>
                   </div>
@@ -422,7 +466,7 @@ const UploadVideo = () => {
 
               {/* Submit Button */}
               <div className="flex justify-end space-x-4">
-                {uploadStatus === 'success' && (
+                {uploadStatus === "success" && (
                   <button
                     type="button"
                     onClick={resetForm}
@@ -434,10 +478,10 @@ const UploadVideo = () => {
                 <button
                   type="button"
                   onClick={handleSubmit}
-                  disabled={uploadStatus === 'uploading'}
+                  disabled={uploadStatus === "uploading"}
                   className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-medium py-3 px-8 rounded-lg transition-all duration-200 flex items-center"
                 >
-                  {uploadStatus === 'uploading' ? (
+                  {uploadStatus === "uploading" ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
                       Uploading...
@@ -519,7 +563,8 @@ const UploadVideo = () => {
               <div className="flex items-start">
                 <div className="w-2 h-2 bg-orange-400 rounded-full mt-2 mr-3 flex-shrink-0"></div>
                 <div>
-                  <strong>Processing:</strong> Videos are automatically optimized
+                  <strong>Processing:</strong> Videos are automatically
+                  optimized
                 </div>
               </div>
             </div>
@@ -533,20 +578,39 @@ const UploadVideo = () => {
             </h3>
             <div className="space-y-3">
               {[
-                { title: "React Hooks Tutorial", status: "Processing", time: "2 min ago" },
-                { title: "JavaScript Fundamentals", status: "Live", time: "1 hour ago" },
-                { title: "CSS Grid Layout", status: "Live", time: "3 hours ago" }
+                {
+                  title: "React Hooks Tutorial",
+                  status: "Processing",
+                  time: "2 min ago",
+                },
+                {
+                  title: "JavaScript Fundamentals",
+                  status: "Live",
+                  time: "1 hour ago",
+                },
+                {
+                  title: "CSS Grid Layout",
+                  status: "Live",
+                  time: "3 hours ago",
+                },
               ].map((item, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg">
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-3 bg-slate-700/30 rounded-lg"
+                >
                   <div>
-                    <p className="text-white text-sm font-medium">{item.title}</p>
+                    <p className="text-white text-sm font-medium">
+                      {item.title}
+                    </p>
                     <p className="text-slate-400 text-xs">{item.time}</p>
                   </div>
-                  <span className={`text-xs px-2 py-1 rounded-full ${
-                    item.status === 'Live' 
-                      ? 'bg-green-400/20 text-green-400' 
-                      : 'bg-orange-400/20 text-orange-400'
-                  }`}>
+                  <span
+                    className={`text-xs px-2 py-1 rounded-full ${
+                      item.status === "Live"
+                        ? "bg-green-400/20 text-green-400"
+                        : "bg-orange-400/20 text-orange-400"
+                    }`}
+                  >
                     {item.status}
                   </span>
                 </div>

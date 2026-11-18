@@ -1,9 +1,14 @@
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export const handleAssistantQuery = async (req, res) => {
-  const apiKey = process.env.GEMINI_KEY_1 || process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+  const apiKey =
+    process.env.GEMINI_KEY_1 ||
+    process.env.GEMINI_API_KEY ||
+    process.env.GOOGLE_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({ error: 'Server configuration error: Gemini API key missing' });
+    return res
+      .status(500)
+      .json({ error: "Server configuration error: Gemini API key missing" });
   }
 
   const genAI = new GoogleGenerativeAI(apiKey);
@@ -11,10 +16,10 @@ export const handleAssistantQuery = async (req, res) => {
   try {
     const { query } = req.query;
     if (!query) {
-      return res.status(400).json({ error: 'Query parameter is required' });
+      return res.status(400).json({ error: "Query parameter is required" });
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const platformContext = `
       You are CodeX, an AI assistant for a comprehensive coding platform designed to help developers improve their programming skills.
@@ -46,14 +51,14 @@ Determine if the user's query is a navigation request.
 
     const prompt = `${platformContext}\n\nUser query: "${query}"`;
 
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
     res.flushHeaders();
 
     const result = await model.generateContentStream(prompt);
 
-    let fullResponse = '';
+    let fullResponse = "";
     for await (const chunk of result.stream) {
       const chunkText = chunk.text();
       fullResponse += chunkText;
@@ -62,7 +67,7 @@ Determine if the user's query is a navigation request.
 
     try {
       const potentialJson = fullResponse.trim();
-      if (potentialJson.startsWith('{') && potentialJson.endsWith('}')) {
+      if (potentialJson.startsWith("{") && potentialJson.endsWith("}")) {
         const jsonResponse = JSON.parse(potentialJson);
         if (jsonResponse.route) {
           res.write(`event: navigation\ndata: ${potentialJson}\n\n`);
@@ -74,8 +79,10 @@ Determine if the user's query is a navigation request.
 
     res.end();
   } catch (error) {
-    console.error('Error with Gemini API:', error);
-    res.write(`event: error\ndata: ${JSON.stringify({ error: 'Failed to process your request.' })}\n\n`);
+    console.error("Error with Gemini API:", error);
+    res.write(
+      `event: error\ndata: ${JSON.stringify({ error: "Failed to process your request." })}\n\n`,
+    );
     res.end();
   }
 };

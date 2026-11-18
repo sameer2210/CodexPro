@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const commentSchema = new mongoose.Schema(
   {
@@ -8,29 +8,29 @@ const commentSchema = new mongoose.Schema(
     },
     author: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'user',
+      ref: "user",
       required: true,
     },
     discussion: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Discussion',
+      ref: "Discussion",
       required: true,
     },
     parentComment: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'Comment',
+      ref: "Comment",
       default: null,
     },
     upvotes: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'user',
+        ref: "user",
       },
     ],
     downvotes: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'user',
+        ref: "user",
       },
     ],
     createdAt: {
@@ -42,8 +42,9 @@ const commentSchema = new mongoose.Schema(
       default: Date.now,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-const Comment = mongoose.models.Comment || mongoose.model('Comment', commentSchema);
+const Comment =
+  mongoose.models.Comment || mongoose.model("Comment", commentSchema);
 export default Comment;

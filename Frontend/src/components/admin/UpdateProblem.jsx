@@ -107,7 +107,7 @@ const UpdateProblem = () => {
     setFormData((prev) => ({
       ...prev,
       [type]: prev[type].map((testCase, i) =>
-        i === index ? { ...testCase, [field]: value } : testCase
+        i === index ? { ...testCase, [field]: value } : testCase,
       ),
     }));
   };
@@ -116,7 +116,7 @@ const UpdateProblem = () => {
     setFormData((prev) => ({
       ...prev,
       [type]: prev[type].map((code, i) =>
-        i === index ? { ...code, [field]: value } : code
+        i === index ? { ...code, [field]: value } : code,
       ),
     }));
   };
@@ -128,7 +128,7 @@ const UpdateProblem = () => {
     try {
       const response = await axiosClient.put(
         `/problem/update/${selectedProblem._id}`,
-        formData
+        formData,
       );
 
       if (response.status === 200) {
@@ -150,7 +150,7 @@ const UpdateProblem = () => {
       console.error("Error updating problem:", error);
       alert(
         "Error updating problem: " +
-          (error.response?.data?.message || error.message)
+          (error.response?.data?.message || error.message),
       );
     } finally {
       setUpdating(false);
@@ -160,7 +160,7 @@ const UpdateProblem = () => {
   const filteredProblems = problems.filter(
     (problem) =>
       problem.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      problem.difficulty?.toLowerCase().includes(searchTerm.toLowerCase())
+      problem.difficulty?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   // Helper function to get difficulty color class - Fixed colors
@@ -245,7 +245,7 @@ const UpdateProblem = () => {
                       e.target.value
                         .split(",")
                         .map((tag) => tag.trim())
-                        .filter((tag) => tag.length > 0)
+                        .filter((tag) => tag.length > 0),
                     )
                   }
                   className="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
@@ -301,7 +301,7 @@ const UpdateProblem = () => {
                             "visibleTestCases",
                             index,
                             "input",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         rows="3"
@@ -320,7 +320,7 @@ const UpdateProblem = () => {
                             "visibleTestCases",
                             index,
                             "output",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         rows="3"
@@ -373,7 +373,7 @@ const UpdateProblem = () => {
                             "hiddenTestCases",
                             index,
                             "input",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         rows="3"
@@ -392,7 +392,7 @@ const UpdateProblem = () => {
                             "hiddenTestCases",
                             index,
                             "output",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         rows="3"
@@ -433,7 +433,7 @@ const UpdateProblem = () => {
                             "startCode",
                             index,
                             "language",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded text-white text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
@@ -456,7 +456,7 @@ const UpdateProblem = () => {
                             "startCode",
                             index,
                             "code",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         rows="6"
@@ -492,7 +492,7 @@ const UpdateProblem = () => {
                             "referenceSolution",
                             index,
                             "language",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         className="w-full px-3 py-2 bg-slate-800 border border-slate-600 rounded text-white text-sm focus:outline-none focus:ring-1 focus:ring-orange-500"
@@ -515,7 +515,7 @@ const UpdateProblem = () => {
                             "referenceSolution",
                             index,
                             "completeCode",
-                            e.target.value
+                            e.target.value,
                           )
                         }
                         rows="8"
@@ -680,7 +680,7 @@ const UpdateProblem = () => {
                         <div className="flex items-center gap-2 text-sm">
                           <span
                             className={`px-2 py-1 rounded text-xs font-medium ${getDifficultyColorClass(
-                              problem.difficulty
+                              problem.difficulty,
                             )}`}
                           >
                             {problem.difficulty}
@@ -720,8 +720,8 @@ const UpdateProblem = () => {
                           step === stepItem.num
                             ? "bg-orange-500 text-white"
                             : step > stepItem.num
-                            ? "bg-green-500 text-white"
-                            : "bg-slate-700 text-gray-400"
+                              ? "bg-green-500 text-white"
+                              : "bg-slate-700 text-gray-400"
                         }`}
                         onClick={() => setStep(stepItem.num)}
                       >

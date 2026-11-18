@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const discussionSchema = new mongoose.Schema(
   {
@@ -13,12 +13,12 @@ const discussionSchema = new mongoose.Schema(
     },
     author: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'user',
+      ref: "user",
       required: true,
     },
     community: {
       type: String,
-      enum: ['dsa', 'global', 'india', 'other', 'general'],
+      enum: ["dsa", "global", "india", "other", "general"],
       required: true,
     },
     tags: [
@@ -30,13 +30,13 @@ const discussionSchema = new mongoose.Schema(
     upvotes: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'user',
+        ref: "user",
       },
     ],
     downvotes: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'user',
+        ref: "user",
       },
     ],
     views: {
@@ -52,10 +52,11 @@ const discussionSchema = new mongoose.Schema(
       default: Date.now,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-discussionSchema.index({ title: 'text', content: 'text' });
+discussionSchema.index({ title: "text", content: "text" });
 
-const Discussion = mongoose.models.Discussion || mongoose.model('Discussion', discussionSchema);
+const Discussion =
+  mongoose.models.Discussion || mongoose.model("Discussion", discussionSchema);
 export default Discussion;

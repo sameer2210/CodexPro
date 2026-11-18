@@ -1,22 +1,22 @@
 // src/components/ui/ResizableContainer.jsx
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from "react";
 
 const directions = [
-  'top',
-  'right',
-  'bottom',
-  'left',
-  'top-right',
-  'bottom-right',
-  'bottom-left',
-  'top-left',
+  "top",
+  "right",
+  "bottom",
+  "left",
+  "top-right",
+  "bottom-right",
+  "bottom-left",
+  "top-left",
 ];
 
 export default function ResizableContainer({
   children,
   minWidth = 200,
   minHeight = 150,
-  className = '',
+  className = "",
 }) {
   const ref = useRef(null);
   const [size, setSize] = useState({ width: undefined, height: undefined });
@@ -38,14 +38,15 @@ export default function ResizableContainer({
     const startWidth = ref.current.offsetWidth;
     const startHeight = ref.current.offsetHeight;
 
-    const onMouseMove = ev => {
+    const onMouseMove = (ev) => {
       let newWidth = startWidth;
       let newHeight = startHeight;
 
-      if (dir.includes('right')) newWidth = startWidth + (ev.clientX - startX);
-      if (dir.includes('left')) newWidth = startWidth - (ev.clientX - startX);
-      if (dir.includes('bottom')) newHeight = startHeight + (ev.clientY - startY);
-      if (dir.includes('top')) newHeight = startHeight - (ev.clientY - startY);
+      if (dir.includes("right")) newWidth = startWidth + (ev.clientX - startX);
+      if (dir.includes("left")) newWidth = startWidth - (ev.clientX - startX);
+      if (dir.includes("bottom"))
+        newHeight = startHeight + (ev.clientY - startY);
+      if (dir.includes("top")) newHeight = startHeight - (ev.clientY - startY);
 
       setSize({
         width: Math.max(newWidth, minWidth),
@@ -54,12 +55,12 @@ export default function ResizableContainer({
     };
 
     const stopResize = () => {
-      document.removeEventListener('mousemove', onMouseMove);
-      document.removeEventListener('mouseup', stopResize);
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", stopResize);
     };
 
-    document.addEventListener('mousemove', onMouseMove);
-    document.addEventListener('mouseup', stopResize);
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", stopResize);
   };
 
   const style = {};
@@ -74,10 +75,10 @@ export default function ResizableContainer({
     >
       {children}
 
-      {directions.map(dir => (
+      {directions.map((dir) => (
         <div
           key={dir}
-          onMouseDown={e => startResize(e, dir)}
+          onMouseDown={(e) => startResize(e, dir)}
           className={`absolute ${getHandleClass(dir)}`}
         />
       ))}
@@ -86,23 +87,23 @@ export default function ResizableContainer({
 }
 
 function getHandleClass(dir) {
-  const base = 'bg-transparent z-10';
+  const base = "bg-transparent z-10";
   switch (dir) {
-    case 'right':
+    case "right":
       return `${base} right-0 top-0 w-2 h-full cursor-ew-resize`;
-    case 'left':
+    case "left":
       return `${base} left-0 top-0 w-2 h-full cursor-ew-resize`;
-    case 'bottom':
+    case "bottom":
       return `${base} bottom-0 left-0 h-2 w-full cursor-ns-resize`;
-    case 'top':
+    case "top":
       return `${base} top-0 left-0 h-2 w-full cursor-ns-resize`;
-    case 'top-right':
+    case "top-right":
       return `${base} right-0 top-0 w-3 h-3 cursor-nwse-resize`;
-    case 'bottom-right':
+    case "bottom-right":
       return `${base} right-0 bottom-0 w-3 h-3 cursor-nesw-resize`;
-    case 'bottom-left':
+    case "bottom-left":
       return `${base} left-0 bottom-0 w-3 h-3 cursor-nwse-resize`;
-    case 'top-left':
+    case "top-left":
       return `${base} left-0 top-0 w-3 h-3 cursor-nesw-resize`;
   }
 }

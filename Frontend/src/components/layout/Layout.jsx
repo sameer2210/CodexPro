@@ -1,10 +1,10 @@
-import { Outlet } from 'react-router-dom';
-import { useLocation } from 'react-router-dom';
-import Navigation from './Navigation';
+import { Outlet } from "react-router-dom";
+import { useLocation } from "react-router-dom";
+import Navigation from "./Navigation";
 
 const Layout = () => {
   const location = useLocation();
-  const showNavigation = location.pathname === '/';
+  const showNavigation = location.pathname === "/";
   return (
     <div className="min-h-screen bg-[#10120F] text-[#C2CABB] selection:bg-[#C2CABB] selection:text-[#10120F] font-sans antialiased">
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">

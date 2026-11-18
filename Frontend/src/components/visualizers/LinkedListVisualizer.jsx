@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Button } from "../ui/button";
+import { Button } from "../ui/Button";
 import { Input } from "../ui/input";
 import { toast } from "sonner";
-import { Plus, Minus, RotateCcw, ArrowRight , Play} from "lucide-react";
+import { Plus, Minus, RotateCcw, ArrowRight, Play } from "lucide-react";
 
 export const LinkedListVisualizer = () => {
   const [list, setList] = useState([]);
@@ -145,7 +145,6 @@ export const LinkedListVisualizer = () => {
                 isNaN(parseInt(inputValue)) || isNaN(parseInt(insertIndex))
               }
             >
-
               Insert at Index
             </Button>
             <Button
@@ -154,7 +153,6 @@ export const LinkedListVisualizer = () => {
               className="bg-[#334155] border-[#475569] hover:bg-[#475569] text-gray-300 text-xs"
               disabled={isNaN(parseInt(insertIndex)) || list.length === 0}
             >
-           
               Delete at Index
             </Button>
           </div>
@@ -166,7 +164,6 @@ export const LinkedListVisualizer = () => {
               className="bg-[#334155] border-[#475569] hover:bg-[#475569] text-gray-300"
               disabled={list.length === 0}
             >
-             
               Delete Head
             </Button>
             <Button
@@ -175,7 +172,6 @@ export const LinkedListVisualizer = () => {
               className="bg-[#334155] border-[#475569] hover:bg-[#475569] text-gray-300"
               disabled={list.length === 0}
             >
-              
               Delete Tail
             </Button>
             <Button
@@ -183,37 +179,49 @@ export const LinkedListVisualizer = () => {
               variant="outline"
               className="bg-[#334155] border-[#475569] hover:bg-[#475569] text-gray-300"
             >
-            
               Clear
             </Button>
           </div>
 
           <div className="bg-[#0F172A] rounded-lg p-4 font-mono text-sm text-gray-300">
-            <div className="text-gray-500 mb-2">// Linked List Implementation</div>
+            <div className="text-gray-500 mb-2">
+              // Linked List Implementation
+            </div>
             <div>
               <span className="text-purple-400">class</span>
-              <span className="text-white"> LinkedList {'{'}</span>
+              <span className="text-white"> LinkedList {"{"}</span>
             </div>
             <div className="ml-4">
               <div>
                 <span className="text-purple-400">constructor</span>
-                <span className="text-white">() {'{'}</span>
+                <span className="text-white">() {"{"}</span>
               </div>
               <div className="ml-4">
                 <span className="text-white">this.head = null;</span>
               </div>
-              <div className="text-white">{'}'}</div>
+              <div className="text-white">{"}"}</div>
               <br />
-              <div className="text-yellow-400">{lastOperation || "// Operations will appear here"}</div>
+              <div className="text-yellow-400">
+                {lastOperation || "// Operations will appear here"}
+              </div>
             </div>
-            <div className="text-white">{'}'}</div>
+            <div className="text-white">{"}"}</div>
           </div>
 
           <div className="text-sm text-gray-400 space-y-1">
-            <div><strong>Length:</strong> {list.length}</div>
-            <div><strong>Head:</strong> {list.length > 0 ? list[0].value : "null"}</div>
-            <div><strong>Tail:</strong> {list.length > 0 ? list[list.length - 1].value : "null"}</div>
-            <div><strong>Empty:</strong> {list.length === 0 ? "Yes" : "No"}</div>
+            <div>
+              <strong>Length:</strong> {list.length}
+            </div>
+            <div>
+              <strong>Head:</strong> {list.length > 0 ? list[0].value : "null"}
+            </div>
+            <div>
+              <strong>Tail:</strong>{" "}
+              {list.length > 0 ? list[list.length - 1].value : "null"}
+            </div>
+            <div>
+              <strong>Empty:</strong> {list.length === 0 ? "Yes" : "No"}
+            </div>
           </div>
         </div>
       </div>
@@ -221,7 +229,9 @@ export const LinkedListVisualizer = () => {
       {/* Linked List Visualization Section */}
       <div className="bg-[#1E293B] rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-300">Linked List Visualization</h2>
+          <h2 className="text-xl font-semibold text-gray-300">
+            Linked List Visualization
+          </h2>
           <span className="text-sm text-gray-500">Dynamic Data Structure</span>
         </div>
 
@@ -236,7 +246,9 @@ export const LinkedListVisualizer = () => {
               <div className="flex items-center gap-2 pb-4 min-w-max">
                 {/* Head pointer */}
                 <div className="flex flex-col items-center mr-4">
-                  <div className="text-[#F9A825] text-sm font-medium mb-1">HEAD</div>
+                  <div className="text-[#F9A825] text-sm font-medium mb-1">
+                    HEAD
+                  </div>
                   <div className="w-0.5 h-6 bg-[#F9A825]"></div>
                 </div>
 
@@ -244,15 +256,18 @@ export const LinkedListVisualizer = () => {
                   <div key={node.id} className="flex items-center">
                     {/* Node */}
                     <div className="flex items-center bg-[#334155] border-2 border-[#475569] rounded-lg overflow-hidden">
-                      <div className={`
+                      <div
+                        className={`
                         w-16 h-12 flex items-center justify-center font-bold
-                        ${index === 0 
-                          ? 'bg-[#F9A825] text-slate-900' 
-                          : index === list.length - 1
-                          ? 'bg-[#475569] text-white'
-                          : 'bg-[#334155] text-gray-300'
+                        ${
+                          index === 0
+                            ? "bg-[#F9A825] text-slate-900"
+                            : index === list.length - 1
+                              ? "bg-[#475569] text-white"
+                              : "bg-[#334155] text-gray-300"
                         }
-                      `}>
+                      `}
+                      >
                         {node.value}
                       </div>
                       <div className="w-8 h-12 bg-[#0F172A] flex items-center justify-center border-l border-[#475569]">
@@ -274,7 +289,9 @@ export const LinkedListVisualizer = () => {
                 {/* Tail pointer */}
                 {list.length > 0 && (
                   <div className="flex flex-col items-center ml-4">
-                    <div className="text-[#475569] text-sm font-medium mb-1">TAIL</div>
+                    <div className="text-[#475569] text-sm font-medium mb-1">
+                      TAIL
+                    </div>
                     <div className="w-0.5 h-6 bg-[#475569]"></div>
                   </div>
                 )}
@@ -304,10 +321,22 @@ export const LinkedListVisualizer = () => {
 
           {/* Operations Info */}
           <div className="bg-[#0F172A] rounded-lg p-4 w-full text-sm space-y-2 text-gray-400">
-            <div><strong className="text-[#F9A825]">Insert:</strong> O(1) at head, O(n) at tail/index</div>
-            <div><strong className="text-[#F9A825]">Delete:</strong> O(1) at head, O(n) at tail/index</div>
-            <div><strong className="text-[#F9A825]">Search:</strong> O(n) - Linear traversal required</div>
-            <div><strong className="text-[#F9A825]">Access:</strong> O(n) - No random access</div>
+            <div>
+              <strong className="text-[#F9A825]">Insert:</strong> O(1) at head,
+              O(n) at tail/index
+            </div>
+            <div>
+              <strong className="text-[#F9A825]">Delete:</strong> O(1) at head,
+              O(n) at tail/index
+            </div>
+            <div>
+              <strong className="text-[#F9A825]">Search:</strong> O(n) - Linear
+              traversal required
+            </div>
+            <div>
+              <strong className="text-[#F9A825]">Access:</strong> O(n) - No
+              random access
+            </div>
           </div>
         </div>
       </div>

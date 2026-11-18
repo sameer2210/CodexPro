@@ -59,7 +59,9 @@ const ContestDetails = () => {
 
         // Fetch user status
         if (user) {
-          const statusResponse = await axiosClient.get(`/contest/${contestId}/status`);
+          const statusResponse = await axiosClient.get(
+            `/contest/${contestId}/status`,
+          );
           const { status } = statusResponse.data;
           setHasEntered(status.isRegistered);
           setHasCompleted(status.isCompleted);
@@ -67,7 +69,7 @@ const ContestDetails = () => {
 
         // Fetch problems for this contest
         const problemsResponse = await axiosClient.get(
-          `/contest/${contestId}/problems`
+          `/contest/${contestId}/problems`,
         );
         setProblems(problemsResponse.data.problems || []);
       }
@@ -103,7 +105,7 @@ const ContestDetails = () => {
         const timeLeft = startTime - now;
         const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
         const hours = Math.floor(
-          (timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+          (timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60),
         );
         const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
         const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
@@ -304,8 +306,8 @@ const ContestDetails = () => {
                     {contestStatus === "upcoming"
                       ? "Starts In"
                       : contestStatus === "active"
-                      ? "Ends In"
-                      : "Status"}
+                        ? "Ends In"
+                        : "Status"}
                   </div>
                   <div className="text-lg font-mono font-semibold text-white">
                     {timeRemaining}
@@ -323,13 +325,13 @@ const ContestDetails = () => {
                       setHasEntered(true);
                       showToast(
                         "Registered for contest successfully",
-                        "success"
+                        "success",
                       );
 
                       // Refetch contest details to update UI fully
                       try {
                         const response = await axiosClient.get(
-                          `/contest/${contestId}`
+                          `/contest/${contestId}`,
                         );
                         const { contest, userStatus } = response.data;
                         setContest(contest);
@@ -344,13 +346,13 @@ const ContestDetails = () => {
                               ? contest.problems[0]._id
                               : contest.problems[0];
                           navigate(
-                            `/contest/${contestId}/problem/${firstProblemId}`
+                            `/contest/${contestId}/problem/${firstProblemId}`,
                           );
                         }
                       } catch (fetchError) {
                         console.error(
                           "Error fetching updated contest details:",
-                          fetchError
+                          fetchError,
                         );
                         // Still navigate to contest even if refresh fails
                         navigate(`/contest/${contestId}`);
@@ -378,7 +380,7 @@ const ContestDetails = () => {
                           ? contest.problems[0]._id
                           : contest.problems[0];
                       navigate(
-                        `/contest/${contestId}/problem/${firstProblemId}`
+                        `/contest/${contestId}/problem/${firstProblemId}`,
                       );
                     }
                   }}
@@ -512,7 +514,7 @@ const ContestDetails = () => {
                           <button
                             onClick={() =>
                               navigate(
-                                `/contest/${contestId}/problem/${problem._id}`
+                                `/contest/${contestId}/problem/${problem._id}`,
                               )
                             }
                             disabled={

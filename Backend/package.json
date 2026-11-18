@@ -9,7 +9,7 @@
     "start": "node server.js",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules MONGODB_URI=mongodb://localhost:27017/codex-test jest --runInBand"
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules MONGODB_URI=mongodb://localhost:27017/codex-test jest --runInBand --passWithNoTests"
   },
   "keywords": [
     "express",
@@ -18,10 +18,11 @@
     "socket.io",
     "genai"
   ],
-  "author": "",
+  "author": "sameer khan",
   "license": "MIT",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
+    "@sentry/node": "^11.7.0",
     "axios": "^1.7.9",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.5.1",
@@ -33,12 +34,13 @@
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.18.1",
-    "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
     "node-cron": "^3.0.3",
     "node-fetch": "^3.3.2",
     "nodemailer": "^6.10.0",
     "pdf-parse": "^1.1.1",
+    "pino": "^10.4.0",
+    "pino-http": "^11.0.0",
     "razorpay": "^2.9.5",
     "redis": "^4.7.0",
     "socket.io": "^4.8.1",

@@ -1,5 +1,5 @@
-import React from 'react';
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react';
+import React from "react";
+import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -18,7 +18,7 @@ class ErrorBoundary extends React.Component {
     });
 
     // Log to error reporting service (e.g., Sentry, LogRocket)
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
 
     // You can send to external service here
     // logErrorToService(error, errorInfo);
@@ -26,7 +26,7 @@ class ErrorBoundary extends React.Component {
 
   handleReset = () => {
     this.setState({ hasError: false, error: null, errorInfo: null });
-    window.location.href = '/';
+    window.location.href = "/";
   };
 
   handleReload = () => {

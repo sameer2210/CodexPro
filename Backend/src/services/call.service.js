@@ -1,7 +1,7 @@
-import crypto from 'crypto';
+import crypto from "crypto";
 
 const CALL_TIMEOUT_MS = 30000;
-const TERMINAL_STATUSES = new Set(['REJECTED', 'CANCELLED', 'ENDED', 'FAILED']);
+const TERMINAL_STATUSES = new Set(["REJECTED", "CANCELLED", "ENDED", "FAILED"]);
 
 const buildUserKey = (teamName, username) => `${teamName}:${username}`;
 
@@ -13,7 +13,7 @@ class CallService {
 
   generateCallId() {
     if (crypto.randomUUID) return crypto.randomUUID();
-    return crypto.randomBytes(16).toString('hex');
+    return crypto.randomBytes(16).toString("hex");
   }
 
   isTerminal(status) {
@@ -48,36 +48,40 @@ class CallService {
     offer,
   }) {
     const callerKey = buildUserKey(teamName, caller);
-    const targetList = Array.isArray(receivers) ? receivers : receiver ? [receiver] : [];
-    const uniqueTargets = Array.from(new Set(targetList.filter(Boolean))).filter(
-      username => username !== caller
-    );
+    const targetList = Array.isArray(receivers)
+      ? receivers
+      : receiver
+        ? [receiver]
+        : [];
+    const uniqueTargets = Array.from(
+      new Set(targetList.filter(Boolean)),
+    ).filter((username) => username !== caller);
 
     if (this.activeByUser.has(callerKey)) {
-      return { error: 'busy' };
+      return { error: "busy" };
     }
 
     if (uniqueTargets.length === 0) {
-      return { error: 'no-targets' };
+      return { error: "no-targets" };
     }
 
     const availableTargets = uniqueTargets.filter(
-      username => !this.activeByUser.has(buildUserKey(teamName, username))
+      (username) => !this.activeByUser.has(buildUserKey(teamName, username)),
     );
 
     if (availableTargets.length === 0) {
-      return { error: 'busy' };
+      return { error: "busy" };
     }
 
     const id = callId || this.generateCallId();
     if (this.calls.has(id)) {
-      return { error: 'duplicate' };
+      return { error: "duplicate" };
     }
 
     const now = Date.now();
     const receiverStates = {};
-    availableTargets.forEach(username => {
-      receiverStates[username] = 'RINGING';
+    availableTargets.forEach((username) => {
+      receiverStates[username] = "RINGING";
     });
 
     const call = {
@@ -93,7 +97,7 @@ class CallService {
       receiverSocketId,
       offer,
       answer: null,
-      status: 'CALLING',
+      status: "CALLING",
       createdAt: now,
       updatedAt: now,
       startedAt: now,
@@ -103,11 +107,13 @@ class CallService {
 
     this.calls.set(id, call);
     this.activeByUser.set(callerKey, id);
-    availableTargets.forEach(username => {
+    availableTargets.forEach((username) => {
       this.activeByUser.set(buildUserKey(teamName, username), id);
     });
 
-    const skipped = uniqueTargets.filter(username => !availableTargets.includes(username));
+    const skipped = uniqueTargets.filter(
+      (username) => !availableTargets.includes(username),
+    );
 
     return { call, skipped };
   }
@@ -137,7 +143,7 @@ class CallService {
     call.timeoutId = null;
   }
 
-  releaseReceiver(callId, username, status = 'CANCELLED') {
+  releaseReceiver(callId, username, status = "CANCELLED") {
     const call = this.calls.get(callId);
     if (!call) return;
     if (!call.receivers?.includes(username)) return;
@@ -161,7 +167,7 @@ class CallService {
     this.calls.delete(callId);
     this.activeByUser.delete(buildUserKey(call.teamName, call.caller));
     if (Array.isArray(call.receivers)) {
-      call.receivers.forEach(username => {
+      call.receivers.forEach((username) => {
         this.activeByUser.delete(buildUserKey(call.teamName, username));
       });
     } else if (call.receiver) {

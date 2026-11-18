@@ -1,12 +1,18 @@
-import { AnimatePresence } from 'framer-motion';
-import { ChevronRight, CornerDownRight, Eye, EyeOff, UserPlus } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { HUDLabel, LEDIndicator } from '../../components/HUD';
-import { useTheme } from '../../context/ThemeContext';
-import { notify } from '../../lib/notify';
-import { useAppDispatch } from '../../store/hooks';
-import { clearError, registerUser } from '../../store/slices/authSlice';
+import { AnimatePresence } from "framer-motion";
+import {
+  ChevronRight,
+  CornerDownRight,
+  Eye,
+  EyeOff,
+  UserPlus,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { HUDLabel, LEDIndicator } from "../../components/background/HUD";
+import { useTheme } from "../../context/ThemeContext";
+import { notify } from "../../lib/notify";
+import { useAppDispatch } from "../../store/hooks";
+import { clearError, registerUser } from "../../store/slices/authSlice";
 
 const Register = () => {
   const navigate = useNavigate();
@@ -14,9 +20,9 @@ const Register = () => {
 
   // Core state for registration
   const [formData, setFormData] = useState({
-    teamName: '',
-    username: '',
-    password: '',
+    teamName: "",
+    username: "",
+    password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -24,9 +30,9 @@ const Register = () => {
   const { isDarkMode } = useTheme();
 
   // Form handling
-  const handleChange = e => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
     if (error) setError(null);
   };
   useEffect(() => {
@@ -35,11 +41,15 @@ const Register = () => {
     };
   }, [dispatch]);
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.username.trim() || !formData.teamName.trim() || !formData.password) {
-      setError('INITIALIZATION FAILED: MISSING MANDATORY PARAMETERS.');
+    if (
+      !formData.username.trim() ||
+      !formData.teamName.trim() ||
+      !formData.password
+    ) {
+      setError("INITIALIZATION FAILED: MISSING MANDATORY PARAMETERS.");
       return;
     }
 
@@ -50,14 +60,14 @@ const Register = () => {
       const result = await dispatch(registerUser(formData));
 
       if (registerUser.fulfilled.match(result)) {
-        notify('Registration successful', 'success');
-        navigate('/login');
+        notify("Registration successful", "success");
+        navigate("/login");
       } else {
-        setError(result.payload || 'REGISTRATION FAILED');
+        setError(result.payload || "REGISTRATION FAILED");
       }
     } catch {
-      setError('SYSTEM ERROR. TRY AGAIN.');
-      notify('Registration failed', 'error');
+      setError("SYSTEM ERROR. TRY AGAIN.");
+      notify("Registration failed", "error");
     } finally {
       setIsLoading(false);
     }
@@ -92,29 +102,34 @@ const Register = () => {
   return (
     <div
       className={`relative min-h-screen w-full flex flex-col overflow-hidden transition-colors duration-500 font-['Inter',_sans-serif] selection:bg-[#17E1FF] selection:text-black ${
-        isDarkMode ? 'bg-[#0B0E11] text-[#E6E8E5]' : 'bg-[#F4F6F5] text-[#10120F]'
+        isDarkMode
+          ? "bg-[#0B0E11] text-[#E6E8E5]"
+          : "bg-[#F4F6F5] text-[#10120F]"
       }`}
     >
       {/* Background Layering (Landing Style) */}
       <div
         className="fixed inset-0 pointer-events-none opacity-[0.03] z-[1]"
-        style={{ backgroundImage: 'url("https://grainy-gradients.vercel.app/noise.svg")' }}
+        style={{
+          backgroundImage:
+            'url("https://grainy-gradients.vercel.app/noise.svg")',
+        }}
       />
       <div
         className={`fixed inset-0 pointer-events-none z-[1] ${
-          isDarkMode ? 'opacity-[0.03]' : 'opacity-[0.02]'
+          isDarkMode ? "opacity-[0.03]" : "opacity-[0.02]"
         }`}
         style={{
           backgroundImage: isDarkMode
-            ? 'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)'
-            : 'linear-gradient(#0B0E11 1px, transparent 1px), linear-gradient(90deg, #0B0E11 1px, transparent 1px)',
-          backgroundSize: '100px 100px',
+            ? "linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)"
+            : "linear-gradient(#0B0E11 1px, transparent 1px), linear-gradient(90deg, #0B0E11 1px, transparent 1px)",
+          backgroundSize: "100px 100px",
         }}
       />
       <div className="absolute top-[-15%] right-[-10%] w-[50%] h-[50%] bg-[#17E1FF]/10 blur-[160px] rounded-full pointer-events-none z-[1]" />
       <div
         className={`absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] blur-[140px] rounded-full pointer-events-none z-[1] ${
-          isDarkMode ? 'bg-white/5' : 'bg-[#0B0E11]/5'
+          isDarkMode ? "bg-white/5" : "bg-[#0B0E11]/5"
         }`}
       />
 
@@ -124,13 +139,13 @@ const Register = () => {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           className="flex items-center gap-4 cursor-pointer"
-          onClick={() => navigate('/')}
+          onClick={() => navigate("/")}
         >
           <div
             className={`group relative w-10 h-10 flex items-center justify-center rounded-full border overflow-hidden transition-colors ${
               isDarkMode
-                ? 'bg-[#C2CABB]/5 border-[#C2CABB]/10 group-hover:border-[#C2CABB]/30 group-hover:shadow-[0_0_12px_rgba(194,202,187,0.2)]'
-                : 'bg-white/90 border-[#0B0E11]/15 group-hover:border-[#0B0E11]/30 group-hover:shadow-[0_0_12px_rgba(11,14,17,0.15)]'
+                ? "bg-[#C2CABB]/5 border-[#C2CABB]/10 group-hover:border-[#C2CABB]/30 group-hover:shadow-[0_0_12px_rgba(194,202,187,0.2)]"
+                : "bg-white/90 border-[#0B0E11]/15 group-hover:border-[#0B0E11]/30 group-hover:shadow-[0_0_12px_rgba(11,14,17,0.15)]"
             }`}
           >
             <img
@@ -141,7 +156,9 @@ const Register = () => {
             />
             <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
           </div>
-          <h1 className="text-xl font-black tracking-[-0.05em] uppercase">CODEX / SYSTEMS</h1>
+          <h1 className="text-xl font-black tracking-[-0.05em] uppercase">
+            CODEX / SYSTEMS
+          </h1>
         </motion.div>
 
         <motion.div
@@ -167,13 +184,15 @@ const Register = () => {
             <motion.div
               variants={itemVariants}
               className={`inline-flex items-center gap-3 px-4 py-1.5 rounded-full border backdrop-blur-sm ${
-                isDarkMode ? 'border-white/10 bg-white/5' : 'border-[#0B0E11]/10 bg-white/80'
+                isDarkMode
+                  ? "border-white/10 bg-white/5"
+                  : "border-[#0B0E11]/10 bg-white/80"
               }`}
             >
               <LEDIndicator />
               <span
                 className={`text-[12px] font-mono tracking-[0.4em] uppercase ${
-                  isDarkMode ? 'text-white/40' : 'text-[#0B0E11]/60'
+                  isDarkMode ? "text-white/40" : "text-[#0B0E11]/60"
                 }`}
               >
                 00 / PROTOCOL INITIALIZATION
@@ -191,11 +210,12 @@ const Register = () => {
             <motion.p
               variants={itemVariants}
               className={`max-w-2xl text-sm md:text-base leading-relaxed ${
-                isDarkMode ? 'text-white/50' : 'text-[#0B0E11]/70'
+                isDarkMode ? "text-white/50" : "text-[#0B0E11]/70"
               }`}
             >
-              Create your team workspace by choosing a team name, username, and secure password.
-              You can invite others after registration send them credentials. Already registered? Use the login link below.
+              Create your team workspace by choosing a team name, username, and
+              secure password. You can invite others after registration send
+              them credentials. Already registered? Use the login link below.
             </motion.p>
           </div>
 
@@ -205,7 +225,7 @@ const Register = () => {
               <motion.div variants={itemVariants} className="relative group">
                 <label
                   className={`block text-[10px] md:text-[12px] uppercase tracking-[0.2em] font-mono font-bold mb-2 group-focus-within:text-[#17E1FF] transition-colors ${
-                    isDarkMode ? 'text-white/40' : 'text-[#0B0E11]/70'
+                    isDarkMode ? "text-white/40" : "text-[#0B0E11]/70"
                   }`}
                 >
                   USER IDENTIFIER*
@@ -220,13 +240,15 @@ const Register = () => {
                     required
                     placeholder="YOUR name"
                     className={`w-full bg-transparent py-4 text-xl md:text-2xl font-light tracking-tight focus:outline-none uppercase ${
-                      isDarkMode ? 'placeholder:text-white/10' : 'placeholder:text-[#0B0E11]/30'
+                      isDarkMode
+                        ? "placeholder:text-white/10"
+                        : "placeholder:text-[#0B0E11]/30"
                     }`}
                   />
                   <motion.div
                     variants={lineVariants}
                     className={`absolute bottom-0 left-0 right-0 h-[1px] origin-left ${
-                      isDarkMode ? 'bg-white/10' : 'bg-[#0B0E11]/20'
+                      isDarkMode ? "bg-white/10" : "bg-[#0B0E11]/20"
                     }`}
                   />
                   <motion.div
@@ -241,7 +263,7 @@ const Register = () => {
               <motion.div variants={itemVariants} className="relative group">
                 <label
                   className={`block text-[10px] md:text-[12px] uppercase tracking-[0.2em] font-mono font-bold mb-2 group-focus-within:text-[#17E1FF] transition-colors ${
-                    isDarkMode ? 'text-white/40' : 'text-[#0B0E11]/70'
+                    isDarkMode ? "text-white/40" : "text-[#0B0E11]/70"
                   }`}
                 >
                   TEAM DESIGNATION*
@@ -256,13 +278,15 @@ const Register = () => {
                     required
                     placeholder="ENTER TEAM NAME"
                     className={`w-full bg-transparent py-4 text-xl md:text-2xl font-light tracking-tight focus:outline-none uppercase ${
-                      isDarkMode ? 'placeholder:text-white/10' : 'placeholder:text-[#0B0E11]/30'
+                      isDarkMode
+                        ? "placeholder:text-white/10"
+                        : "placeholder:text-[#0B0E11]/30"
                     }`}
                   />
                   <motion.div
                     variants={lineVariants}
                     className={`absolute bottom-0 left-0 right-0 h-[1px] origin-left ${
-                      isDarkMode ? 'bg-white/10' : 'bg-[#0B0E11]/20'
+                      isDarkMode ? "bg-white/10" : "bg-[#0B0E11]/20"
                     }`}
                   />
                   <motion.div
@@ -277,14 +301,14 @@ const Register = () => {
               <motion.div variants={itemVariants} className="relative group">
                 <label
                   className={`block text-[10px] md:text-[12px] tracking-[0.2em] font-mono font-bold mb-2 group-focus-within:text-[#17E1FF] transition-colors ${
-                    isDarkMode ? 'text-white/40' : 'text-[#0B0E11]/70'
+                    isDarkMode ? "text-white/40" : "text-[#0B0E11]/70"
                   }`}
                 >
                   ACCESS KEY*
                 </label>
                 <div className="relative flex items-center">
                   <input
-                    type={showPassword ? 'text' : 'password'}
+                    type={showPassword ? "text" : "password"}
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
@@ -292,7 +316,9 @@ const Register = () => {
                     required
                     placeholder="SECURE MASTER KEY"
                     className={`w-full bg-transparent py-4 text-xl md:text-2xl font-light tracking-tight focus:outline-none ${
-                      isDarkMode ? 'placeholder:text-white/10' : 'placeholder:text-[#0B0E11]/30'
+                      isDarkMode
+                        ? "placeholder:text-white/10"
+                        : "placeholder:text-[#0B0E11]/30"
                     }`}
                   />
                   <button
@@ -300,8 +326,8 @@ const Register = () => {
                     onClick={() => setShowPassword(!showPassword)}
                     className={`absolute right-0 transition-colors ${
                       isDarkMode
-                        ? 'text-white/20 hover:text-white'
-                        : 'text-[#0B0E11]/40 hover:text-[#0B0E11]'
+                        ? "text-white/20 hover:text-white"
+                        : "text-[#0B0E11]/40 hover:text-[#0B0E11]"
                     }`}
                   >
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -309,7 +335,7 @@ const Register = () => {
                   <motion.div
                     variants={lineVariants}
                     className={`absolute bottom-0 left-0 right-0 h-[1px] origin-left ${
-                      isDarkMode ? 'bg-white/10' : 'bg-[#0B0E11]/20'
+                      isDarkMode ? "bg-white/10" : "bg-[#0B0E11]/20"
                     }`}
                   />
                   <motion.div
@@ -335,7 +361,10 @@ const Register = () => {
                       exit={{ opacity: 0, y: -10 }}
                       className="flex items-start gap-3 text-red-400"
                     >
-                      <CornerDownRight size={16} className="mt-1 flex-shrink-0" />
+                      <CornerDownRight
+                        size={16}
+                        className="mt-1 flex-shrink-0"
+                      />
                       <p className="text-xs font-mono uppercase tracking-tight font-bold">
                         {error}
                       </p>
@@ -345,12 +374,12 @@ const Register = () => {
                 <div className="flex items-center gap-3">
                   <div
                     className={`w-1 h-1 rounded-full ${
-                      isDarkMode ? 'bg-white/20' : 'bg-[#0B0E11]/20'
+                      isDarkMode ? "bg-white/20" : "bg-[#0B0E11]/20"
                     }`}
                   />
                   <p
                     className={`text-[10px] font-mono uppercase tracking-widest ${
-                      isDarkMode ? 'text-white/30' : 'text-[#0B0E11]/60'
+                      isDarkMode ? "text-white/30" : "text-[#0B0E11]/60"
                     }`}
                   >
                     Awaiting system confirmation
@@ -365,27 +394,31 @@ const Register = () => {
                 whileTap={{ scale: 0.95 }}
                 className={`group relative w-full md:w-64 h-20 flex items-center justify-center overflow-hidden rounded-full border transition-all duration-300 ${
                   isDarkMode
-                    ? 'border-white/20 hover:border-[#17E1FF] shadow-[0_0_40px_rgba(23,225,255,0.18)]'
-                    : 'border-[#0B0E11]/20 hover:border-[#0B0E11]/40 shadow-[0_0_30px_rgba(11,14,17,0.08)]'
+                    ? "border-white/20 hover:border-[#17E1FF] shadow-[0_0_40px_rgba(23,225,255,0.18)]"
+                    : "border-[#0B0E11]/20 hover:border-[#0B0E11]/40 shadow-[0_0_30px_rgba(11,14,17,0.08)]"
                 }`}
               >
                 <motion.div
                   className={`absolute inset-0 translate-y-full group-hover:translate-y-0 transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] ${
-                    isDarkMode ? 'bg-white' : 'bg-[#0B0E11]'
+                    isDarkMode ? "bg-white" : "bg-[#0B0E11]"
                   }`}
                 />
                 <span
                   className={`relative z-10 font-bold uppercase tracking-[0.3em] text-[14px] transition-colors duration-300 ${
-                    isDarkMode ? 'group-hover:text-black' : 'group-hover:text-white'
+                    isDarkMode
+                      ? "group-hover:text-black"
+                      : "group-hover:text-white"
                   }`}
                 >
-                  {isLoading ? 'DEPLOYING...' : 'INITIATE PROTOCOL'}
+                  {isLoading ? "DEPLOYING..." : "INITIATE PROTOCOL"}
                 </span>
                 {!isLoading && (
                   <ChevronRight
                     size={18}
                     className={`relative z-10 ml-2 transition-colors ${
-                      isDarkMode ? 'group-hover:text-black' : 'group-hover:text-white'
+                      isDarkMode
+                        ? "group-hover:text-black"
+                        : "group-hover:text-white"
                     }`}
                   />
                 )}
@@ -397,26 +430,26 @@ const Register = () => {
           <motion.div
             variants={itemVariants}
             className={`mt-20 pt-10 border-t flex flex-col md:flex-row md:items-center justify-between gap-6 ${
-              isDarkMode ? 'border-white/5' : 'border-[#0B0E11]/10'
+              isDarkMode ? "border-white/5" : "border-[#0B0E11]/10"
             }`}
           >
             <div className="flex items-center gap-3">
               <UserPlus
                 size={16}
-                className={isDarkMode ? 'text-white/20' : 'text-[#0B0E11]/40'}
+                className={isDarkMode ? "text-white/20" : "text-[#0B0E11]/40"}
               />
               <p
                 className={`text-[14px] font-mono ${
-                  isDarkMode ? 'text-white/40' : 'text-[#0B0E11]/70'
+                  isDarkMode ? "text-white/40" : "text-[#0B0E11]/70"
                 }`}
               >
-                REGISTERED?{' '}
+                REGISTERED?{" "}
                 <button
-                  onClick={() => navigate('/login')}
+                  onClick={() => navigate("/login")}
                   className={`underline transition-all font-bold ${
                     isDarkMode
-                      ? 'text-white hover:text-[#17E1FF] decoration-white/20'
-                      : 'text-[#0B0E11] hover:text-[#17E1FF] decoration-[#0B0E11]/30'
+                      ? "text-white hover:text-[#17E1FF] decoration-white/20"
+                      : "text-[#0B0E11] hover:text-[#17E1FF] decoration-[#0B0E11]/30"
                   }`}
                 >
                   RE-LOGIN
@@ -435,33 +468,41 @@ const Register = () => {
       {/* Aerospacial Footer Dock */}
       <footer
         className={`relative z-50 p-8 flex flex-col md:flex-row justify-between items-center border-t backdrop-blur-xl ${
-          isDarkMode ? 'border-white/5 bg-[#0B0E11]/80' : 'border-[#0B0E11]/10 bg-white/85'
+          isDarkMode
+            ? "border-white/5 bg-[#0B0E11]/80"
+            : "border-[#0B0E11]/10 bg-white/85"
         }`}
       >
         <div
           className={`flex flex-col md:flex-row gap-8 md:gap-16 text-[10px] font-mono tracking-widest uppercase ${
-            isDarkMode ? 'text-white/40' : 'text-[#0B0E11]/60'
+            isDarkMode ? "text-white/40" : "text-[#0B0E11]/60"
           }`}
         >
           <div className="flex items-center gap-2">
-            <span className={isDarkMode ? 'text-white/10' : 'text-[#0B0E11]/30'}>©</span>
+            <span
+              className={isDarkMode ? "text-white/10" : "text-[#0B0E11]/30"}
+            >
+              ©
+            </span>
             <span>2024 CODEX / SYSTEMS</span>
           </div>
           <span
             className={`hidden md:inline border-l pl-16 ${
-              isDarkMode ? 'border-white/10' : 'border-[#0B0E11]/15'
+              isDarkMode ? "border-white/10" : "border-[#0B0E11]/15"
             }`}
           >
             DESIGNED FOR EXCELLENCE
           </span>
         </div>
-        <div onClick={() => navigate('/')} className="flex gap-10 mt-6 md:mt-0">
-          {['Privacy', 'Network', 'home'].map(item => (
+        <div onClick={() => navigate("/")} className="flex gap-10 mt-6 md:mt-0">
+          {["Privacy", "Network", "home"].map((item) => (
             <a
               key={item}
               href="#"
               className={`text-[10px] font-mono uppercase transition-colors tracking-widest ${
-                isDarkMode ? 'text-white/40 hover:text-white' : 'text-[#0B0E11]/60 hover:text-[#0B0E11]'
+                isDarkMode
+                  ? "text-white/40 hover:text-white"
+                  : "text-[#0B0E11]/60 hover:text-[#0B0E11]"
               }`}
             >
               {item}

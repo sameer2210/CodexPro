@@ -1,11 +1,16 @@
-import Submission from '../models/submission.js';
-import User from '../models/user.js';
+import Submission from "../models/submission.js";
+import User from "../models/user.js";
 
 export const getUserStreaks = async (req, res) => {
   try {
     const userId = req.result._id;
-    const submissions = await Submission.find({ userId, status: 'Accepted' }).sort({ createdAt: 1 });
-    const days = new Set(submissions.map((s) => new Date(s.createdAt).toISOString().slice(0, 10)));
+    const submissions = await Submission.find({
+      userId,
+      status: "Accepted",
+    }).sort({ createdAt: 1 });
+    const days = new Set(
+      submissions.map((s) => new Date(s.createdAt).toISOString().slice(0, 10)),
+    );
     if (days.size === 0) return res.json({ currentStreak: 0, maxStreak: 0 });
     const sortedDays = Array.from(days).sort();
     let maxStreak = 1,
@@ -32,10 +37,10 @@ export const getUserStreaks = async (req, res) => {
 export const getUserBadges = async (req, res) => {
   try {
     const userId = req.result._id;
-    const submissions = await Submission.find({ userId, status: 'Accepted' });
+    const submissions = await Submission.find({ userId, status: "Accepted" });
     const badges = [];
-    if (submissions.length > 0) badges.push('First Problem Solved');
-    if (submissions.length >= 7) badges.push('Weekly Streak');
+    if (submissions.length > 0) badges.push("First Problem Solved");
+    if (submissions.length >= 7) badges.push("Weekly Streak");
     res.json({ badges });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -45,9 +50,12 @@ export const getUserBadges = async (req, res) => {
 export const getUserRank = async (req, res) => {
   try {
     const userId = req.result._id;
-    const users = await User.find().select('problemSolved');
-    const userSolved = users.find((u) => u._id.equals(userId))?.problemSolved.length || 0;
-    const rank = 1 + users.filter((u) => (u.problemSolved?.length || 0) > userSolved).length;
+    const users = await User.find().select("problemSolved");
+    const userSolved =
+      users.find((u) => u._id.equals(userId))?.problemSolved.length || 0;
+    const rank =
+      1 +
+      users.filter((u) => (u.problemSolved?.length || 0) > userSolved).length;
     res.json({ rank, totalUsers: users.length });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -58,13 +66,13 @@ export const getAllUserSubmissions = async (req, res) => {
   try {
     const userId = req.result._id;
     const submissions = await Submission.find({ userId })
-      .populate('problemId', 'title difficulty')
+      .populate("problemId", "title difficulty")
       .sort({ createdAt: -1 });
 
     const formattedSubmissions = submissions.map((sub) => ({
       ...sub.toObject(),
-      title: sub.problemId ? sub.problemId.title : 'Unknown Problem',
-      difficulty: sub.problemId ? sub.problemId.difficulty : 'Unknown',
+      title: sub.problemId ? sub.problemId.title : "Unknown Problem",
+      difficulty: sub.problemId ? sub.problemId.difficulty : "Unknown",
     }));
 
     res.json({ submissions: formattedSubmissions });
@@ -90,9 +98,9 @@ export const getHeatmapData = async (req, res) => {
         $group: {
           _id: {
             $dateToString: {
-              format: '%Y-%m-%d',
-              date: '$createdAt',
-              timezone: 'Asia/Kolkata',
+              format: "%Y-%m-%d",
+              date: "$createdAt",
+              timezone: "Asia/Kolkata",
             },
           },
           count: { $sum: 1 },
@@ -100,7 +108,7 @@ export const getHeatmapData = async (req, res) => {
       },
       {
         $project: {
-          date: '$_id',
+          date: "$_id",
           count: 1,
           _id: 0,
         },

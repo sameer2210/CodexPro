@@ -49,7 +49,7 @@ const ContestLeaderboard = ({ contestId, isContestActive }) => {
     try {
       setLoading(true);
       const response = await axiosClient.get(
-        `/contest/${contestId}/leaderboard`
+        `/contest/${contestId}/leaderboard`,
       );
       setLeaderboard(response.data.leaderboard);
       setError(null);
@@ -72,10 +72,10 @@ const ContestLeaderboard = ({ contestId, isContestActive }) => {
         }
       };
 
-      socket.on('leaderboardUpdate', handleLeaderboardUpdate);
+      socket.on("leaderboardUpdate", handleLeaderboardUpdate);
 
       return () => {
-        socket.off('leaderboardUpdate', handleLeaderboardUpdate);
+        socket.off("leaderboardUpdate", handleLeaderboardUpdate);
       };
     }
   }, [contestId, socket]);

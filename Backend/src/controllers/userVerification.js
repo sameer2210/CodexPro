@@ -1,13 +1,14 @@
-import bcrypt from 'bcryptjs';
-import crypto from 'crypto';
-import jwt from 'jsonwebtoken';
-import nodemailer from 'nodemailer';
-import validator from 'validator';
-import redisWrapper from '../config/redis.js';
-import User from '../models/user.js';
+import bcrypt from "bcryptjs";
+import crypto from "crypto";
+import jwt from "jsonwebtoken";
+import nodemailer from "nodemailer";
+import validator from "validator";
+import redisWrapper from "../config/redis.js";
+import User from "../models/user.js";
+import config from "../config/config.js";
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: "gmail",
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
@@ -25,13 +26,13 @@ function generateOTP() {
 
 async function sendOTPEmail(email, otp) {
   if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.log(`[DEV MODE] Verification OTP for ${email}: ${otp}`);
+    console.log("[DEV MODE] Verification email delivery is not configured");
     return;
   }
   const mailOptions = {
     from: process.env.EMAIL_USER,
     to: email,
-    subject: 'Your OTP for CodeX Verification',
+    subject: "Your OTP for CodeX Verification",
     text: `Your OTP code is: ${otp}. It is valid for 10 minutes.`,
     html: `<p>Your OTP code is: <strong>${otp}</strong>. It is valid for 10 minutes.</p>`,
   };
@@ -43,20 +44,26 @@ export const requestEmailVerificationOTP = async (req, res) => {
     const { email } = req.body;
 
     if (!email) {
-      return res.status(400).json({ success: false, message: 'Email is required' });
+      return res
+        .status(400)
+        .json({ success: false, message: "Email is required" });
     }
 
     if (!validator.isEmail(email)) {
-      return res.status(400).json({ success: false, message: 'Invalid email format' });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid email format" });
     }
 
     const rateLimitKey = `rate_limit:otp:${email}`;
-    const currentCount = parseInt((await redisWrapper.get(rateLimitKey)) || '0');
+    const currentCount = parseInt(
+      (await redisWrapper.get(rateLimitKey)) || "0",
+    );
 
     if (currentCount >= OTP_RATE_LIMIT.max) {
       return res.status(429).json({
         success: false,
-        message: 'Too many OTP requests. Please try again later.',
+        message: "Too many OTP requests. Please try again later.",
       });
     }
 
@@ -64,7 +71,7 @@ export const requestEmailVerificationOTP = async (req, res) => {
     if (user && user.emailVerified) {
       return res.status(400).json({
         success: false,
-        message: 'Email already verified',
+        message: "Email already verified",
       });
     }
 
@@ -81,13 +88,13 @@ export const requestEmailVerificationOTP = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'OTP sent to email',
+      message: "OTP sent to email",
     });
   } catch (error) {
-    console.error('Error in requestEmailVerificationOTP:', error);
+    console.error("Error in requestEmailVerificationOTP:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to send OTP',
+      message: "Failed to send OTP",
     });
   }
 };
@@ -99,21 +106,21 @@ export const verifyEmailOTP = async (req, res) => {
     if (!email || !otp) {
       return res.status(400).json({
         success: false,
-        message: 'Email and OTP are required',
+        message: "Email and OTP are required",
       });
     }
 
     if (!validator.isEmail(email)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid email format',
+        message: "Invalid email format",
       });
     }
 
     if (!/^\d{6}$/.test(otp)) {
       return res.status(400).json({
         success: false,
-        message: 'OTP must be 6 digits',
+        message: "OTP must be 6 digits",
       });
     }
 
@@ -121,14 +128,14 @@ export const verifyEmailOTP = async (req, res) => {
     if (!storedOTP) {
       return res.status(400).json({
         success: false,
-        message: 'OTP expired or not found',
+        message: "OTP expired or not found",
       });
     }
 
     if (storedOTP !== otp) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid OTP',
+        message: "Invalid OTP",
       });
     }
 
@@ -137,7 +144,7 @@ export const verifyEmailOTP = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found',
+        message: "User not found",
       });
     } else {
       user.emailVerified = true;
@@ -148,26 +155,26 @@ export const verifyEmailOTP = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Email verified successfully',
+      message: "Email verified successfully",
       user: {
         emailId: user.emailId,
         emailVerified: user.emailVerified,
       },
     });
   } catch (error) {
-    console.error('Error in verifyEmailOTP:', error);
-    if (error.name === 'ValidationError') {
+    console.error("Error in verifyEmailOTP:", error);
+    if (error.name === "ValidationError") {
       const messages = Object.values(error.errors).map((err) => err.message);
       return res.status(400).json({
         success: false,
-        message: 'Validation failed',
+        message: "Validation failed",
         errors: messages,
       });
     }
 
     res.status(500).json({
       success: false,
-      message: 'Failed to verify OTP',
+      message: "Failed to verify OTP",
     });
   }
 };
@@ -179,51 +186,53 @@ export const requestPasswordResetOTP = async (req, res) => {
     if (!email) {
       return res.status(400).json({
         success: false,
-        message: 'Email is required',
+        message: "Email is required",
       });
     }
 
     if (!validator.isEmail(email)) {
       return res.status(400).json({
         success: false,
-        message: 'Invalid email format',
+        message: "Invalid email format",
       });
     }
 
     const user = await User.findOne({ emailId: email.toLowerCase() });
     if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: 'User not found',
+      return res.status(200).json({
+        success: true,
+        message: "If an account exists, a password reset link has been sent",
       });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET || 'your-secret-key', { expiresIn: '1h' });
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const token = jwt.sign({ id: user._id }, config.JWT_SECRET, {
+      expiresIn: "1h",
+    });
+    const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
     const resetLink = `${frontendUrl}/reset-password/${token}`;
 
     if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
       const mailOptions = {
         from: process.env.EMAIL_USER,
         to: email,
-        subject: 'Password Reset Request for CodeX',
+        subject: "Password Reset Request for CodeX",
         text: `You requested a password reset. Click this link to reset your password: ${resetLink}`,
         html: `<p>You requested a password reset. Click this link to reset your password: <a href="${resetLink}">${resetLink}</a></p>`,
       };
       await transporter.sendMail(mailOptions);
     } else {
-      console.log(`[DEV MODE] Password reset link for ${email}: ${resetLink}`);
+      console.log("[DEV MODE] Password reset email delivery is not configured");
     }
 
     res.status(200).json({
       success: true,
-      message: 'Password reset link sent to email',
+      message: "Password reset link sent to email",
     });
   } catch (error) {
-    console.error('Error in requestPasswordResetOTP:', error);
+    console.error("Error in requestPasswordResetOTP:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to send password reset link',
+      message: "Failed to send password reset link",
     });
   }
 };
@@ -236,24 +245,24 @@ export const resetPassword = async (req, res) => {
     if (!newPassword) {
       return res.status(400).json({
         success: false,
-        message: 'New password is required',
+        message: "New password is required",
       });
     }
 
     if (newPassword.length < 6) {
       return res.status(400).json({
         success: false,
-        message: 'Password must be at least 6 characters',
+        message: "Password must be at least 6 characters",
       });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key');
+    const decoded = jwt.verify(token, config.JWT_SECRET);
     const user = await User.findById(decoded.id);
 
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found',
+        message: "User not found",
       });
     }
 
@@ -261,7 +270,7 @@ export const resetPassword = async (req, res) => {
     if (isSamePassword) {
       return res.status(400).json({
         success: false,
-        message: 'New password cannot be same as old password',
+        message: "New password cannot be same as old password",
       });
     }
 
@@ -270,16 +279,18 @@ export const resetPassword = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Password reset successfully',
+      message: "Password reset successfully",
     });
   } catch (error) {
-    console.error('Error in resetPassword:', error);
-    if (error.name === 'JsonWebTokenError') {
-      return res.status(400).json({ success: false, message: 'Invalid or expired token' });
+    console.error("Error in resetPassword:", error);
+    if (error.name === "JsonWebTokenError") {
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid or expired token" });
     }
     res.status(500).json({
       success: false,
-      message: 'Failed to reset password',
+      message: "Failed to reset password",
     });
   }
 };
@@ -292,14 +303,14 @@ export const changePassword = async (req, res) => {
     if (!oldPassword || !newPassword) {
       return res.status(400).json({
         success: false,
-        message: 'Old and new passwords are required',
+        message: "Old and new passwords are required",
       });
     }
 
     if (newPassword.length < 6) {
       return res.status(400).json({
         success: false,
-        message: 'New password must be at least 6 characters',
+        message: "New password must be at least 6 characters",
       });
     }
 
@@ -307,7 +318,7 @@ export const changePassword = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        message: 'User not found',
+        message: "User not found",
       });
     }
 
@@ -315,7 +326,7 @@ export const changePassword = async (req, res) => {
     if (!match) {
       return res.status(400).json({
         success: false,
-        message: 'Old password is incorrect',
+        message: "Old password is incorrect",
       });
     }
 
@@ -323,7 +334,7 @@ export const changePassword = async (req, res) => {
     if (isSamePassword) {
       return res.status(400).json({
         success: false,
-        message: 'New password cannot be same as old password',
+        message: "New password cannot be same as old password",
       });
     }
 
@@ -332,13 +343,13 @@ export const changePassword = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: 'Password changed successfully',
+      message: "Password changed successfully",
     });
   } catch (error) {
-    console.error('Error in changePassword:', error);
+    console.error("Error in changePassword:", error);
     res.status(500).json({
       success: false,
-      message: 'Failed to change password',
+      message: "Failed to change password",
     });
   }
 };

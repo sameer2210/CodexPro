@@ -1,4 +1,4 @@
-import Message from '../models/message.model.js';
+import Message from "../models/message.model.js";
 
 class MessageService {
   async getProjectMessages(teamName, projectId, options = {}) {
@@ -9,7 +9,11 @@ class MessageService {
     if (before) query.createdAt = { $lt: new Date(before) };
     if (after) query.createdAt = { $gt: new Date(after) };
 
-    return await Message.find(query).sort({ createdAt: -1 }).limit(limit).select('-__v').lean();
+    return await Message.find(query)
+      .sort({ createdAt: -1 })
+      .limit(limit)
+      .select("-__v")
+      .lean();
   }
 
   async createMessage(data) {
@@ -18,7 +22,7 @@ class MessageService {
       teamName: data.teamName,
       username: data.username,
       message: data.message,
-      type: data.type || 'user',
+      type: data.type || "user",
     });
 
     await message.save();
@@ -29,9 +33,9 @@ class MessageService {
     return await this.createMessage({
       teamName,
       projectId,
-      username: 'System',
+      username: "System",
       message: text,
-      type: 'system',
+      type: "system",
     });
   }
 

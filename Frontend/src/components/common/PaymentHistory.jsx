@@ -31,14 +31,23 @@ const PaymentHistory = () => {
           <tbody>
             {user?.paymentHistory?.length > 0 ? (
               user.paymentHistory.map((payment, index) => (
-                <tr key={index} className="border-b border-slate-800 hover:bg-slate-700/50 transition-colors">
-                  <td className="p-4 text-slate-400">{new Date(payment.date).toLocaleDateString()}</td>
-                  <td className="p-4 text-orange-400 font-medium">{getPlanDisplayName(payment.plan)}</td>
+                <tr
+                  key={index}
+                  className="border-b border-slate-800 hover:bg-slate-700/50 transition-colors"
+                >
+                  <td className="p-4 text-slate-400">
+                    {new Date(payment.date).toLocaleDateString()}
+                  </td>
+                  <td className="p-4 text-orange-400 font-medium">
+                    {getPlanDisplayName(payment.plan)}
+                  </td>
                   <td className="p-4 text-slate-300 flex items-center">
                     <IndianRupee className="w-4 h-4 mr-1" />
                     {payment.amount}
                   </td>
-                  <td className="p-4 text-slate-500 font-mono text-xs">{payment.orderId}</td>
+                  <td className="p-4 text-slate-500 font-mono text-xs">
+                    {payment.orderId}
+                  </td>
                 </tr>
               ))
             ) : (

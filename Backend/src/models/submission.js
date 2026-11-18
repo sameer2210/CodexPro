@@ -1,16 +1,16 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const submissionSchema = new Schema(
   {
     userId: {
       type: Schema.Types.ObjectId,
-      ref: 'user',
+      ref: "user",
       required: true,
     },
     problemId: {
       type: Schema.Types.ObjectId,
-      ref: 'problem',
+      ref: "problem",
       required: true,
     },
     code: {
@@ -20,12 +20,21 @@ const submissionSchema = new Schema(
     language: {
       type: String,
       required: true,
-      enum: ['cpp', 'c++', 'java', 'javascript'],
+      enum: ["cpp", "c++", "java", "javascript"],
     },
     status: {
       type: String,
-      enum: ['Pending', 'Accepted', 'Wrong Answer', 'Compiler Error'],
-      default: 'Pending',
+      enum: [
+        "Pending",
+        "Accepted",
+        "Wrong Answer",
+        "Compiler Error",
+        "Compilation Error",
+        "Time Limit Exceeded",
+        "Runtime Error",
+        "Error",
+      ],
+      default: "Pending",
     },
     runtime: {
       type: Number,
@@ -37,7 +46,7 @@ const submissionSchema = new Schema(
     },
     errorMessage: {
       type: String,
-      default: ' ',
+      default: " ",
     },
     testCasesPassed: {
       type: Number,
@@ -48,9 +57,9 @@ const submissionSchema = new Schema(
       default: 0,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Submission =
-  mongoose.models.submission || mongoose.model('submission', submissionSchema);
+  mongoose.models.submission || mongoose.model("submission", submissionSchema);
 export default Submission;

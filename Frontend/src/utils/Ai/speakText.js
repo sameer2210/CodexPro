@@ -3,9 +3,9 @@
  * Uses browser-native TTS; falls back silently if unavailable.
  */
 export const speakText = (text) => {
-  if (!text || typeof window === 'undefined') return;
+  if (!text || typeof window === "undefined") return;
   if (!window.speechSynthesis) {
-    console.warn('SpeechSynthesis API not available in this browser.');
+    console.warn("SpeechSynthesis API not available in this browser.");
     return;
   }
   // Cancel any ongoing speech

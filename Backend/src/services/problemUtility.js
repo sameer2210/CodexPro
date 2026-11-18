@@ -1,9 +1,9 @@
-import axios from 'axios';
+import axios from "axios";
 
 export const getLanguageById = (lang) => {
   const normalizedLang = lang.toLowerCase();
   const language = {
-    'c++': 54,
+    "c++": 54,
     cpp: 54,
     java: 91,
     javascript: 93,
@@ -14,15 +14,15 @@ export const getLanguageById = (lang) => {
 
 export const SubmitBatch = async (submissions) => {
   const options = {
-    method: 'POST',
-    url: 'https://judge0-ce.p.rapidapi.com/submissions/batch',
+    method: "POST",
+    url: "https://judge0-ce.p.rapidapi.com/submissions/batch",
     params: {
-      base64_encoded: 'false',
+      base64_encoded: "false",
     },
     headers: {
-      'x-rapidapi-key': process.env.JUDGE_0_API_KEY,
-      'x-rapidapi-host': process.env.JUDGE_0_HOST_API,
-      'Content-Type': 'application/json',
+      "x-rapidapi-key": process.env.JUDGE_0_API_KEY,
+      "x-rapidapi-host": process.env.JUDGE_0_HOST_API,
+      "Content-Type": "application/json",
     },
     data: {
       submissions,
@@ -33,7 +33,7 @@ export const SubmitBatch = async (submissions) => {
     const response = await axios.request(options);
     return response.data;
   } catch (error) {
-    console.error('Judge0 Batch Submit Error:', error.message);
+    console.error("Judge0 Batch Submit Error:", error.message);
     throw error;
   }
 };
@@ -43,17 +43,18 @@ const waiting = (timer) => {
 };
 
 export const submitToken = async (resultToken) => {
+  const deadline = Date.now() + 30000;
   const options = {
-    method: 'GET',
-    url: 'https://judge0-ce.p.rapidapi.com/submissions/batch',
+    method: "GET",
+    url: "https://judge0-ce.p.rapidapi.com/submissions/batch",
     params: {
-      tokens: resultToken.join(','),
-      base64_encoded: 'false',
-      fields: '*',
+      tokens: resultToken.join(","),
+      base64_encoded: "false",
+      fields: "*",
     },
     headers: {
-      'x-rapidapi-key': process.env.JUDGE_0_API_KEY,
-      'x-rapidapi-host': process.env.JUDGE_0_HOST_API,
+      "x-rapidapi-key": process.env.JUDGE_0_API_KEY,
+      "x-rapidapi-host": process.env.JUDGE_0_HOST_API,
     },
   };
 
@@ -69,10 +70,12 @@ export const submitToken = async (resultToken) => {
       } catch (error) {
         if (error.response && error.response.status === 429) {
           if (retryCount >= maxRetries) {
-            throw new Error('Exceeded maximum retries due to rate limiting');
+            throw new Error("Exceeded maximum retries due to rate limiting");
           }
           const delay = baseDelay * Math.pow(2, retryCount);
-          console.warn(`Rate limited by Judge0 API. Retrying after ${delay} ms...`);
+          console.warn(
+            `Rate limited by Judge0 API. Retrying after ${delay} ms...`,
+          );
           await waiting(delay);
           retryCount++;
         } else {
@@ -84,14 +87,19 @@ export const submitToken = async (resultToken) => {
   }
 
   while (true) {
+    if (Date.now() >= deadline) {
+      throw new Error("Judge0 polling timed out");
+    }
     const result = await fetchData();
-    const isResultObtained = await result.submissions.every((r) => r.status.id > 2);
+    const isResultObtained = await result.submissions.every(
+      (r) => r.status.id > 2,
+    );
 
     if (isResultObtained) {
       return result.submissions;
     }
 
-    await waiting(1000);
+    await waiting(Math.min(1000, Math.max(0, deadline - Date.now())));
   }
 };
 

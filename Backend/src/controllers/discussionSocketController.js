@@ -1,6 +1,6 @@
-import { getIO } from '../config/socket.js';
-import Comment from '../models/comment.js';
-import Discussion from '../models/discussion.js';
+import { getIO } from "../config/socket.js";
+import Comment from "../models/comment.js";
+import Discussion from "../models/discussion.js";
 
 export const createDiscussion = async (req, res) => {
   try {
@@ -8,7 +8,9 @@ export const createDiscussion = async (req, res) => {
     const userId = req.user?._id || req.result?._id;
 
     if (!title || !content || !community) {
-      return res.status(400).json({ success: false, message: 'Missing required fields' });
+      return res
+        .status(400)
+        .json({ success: false, message: "Missing required fields" });
     }
 
     const discussion = new Discussion({
@@ -20,55 +22,66 @@ export const createDiscussion = async (req, res) => {
     });
 
     await discussion.save();
-    await discussion.populate('author', 'name email profileImage');
+    await discussion.populate("author", "name email profileImage");
 
     try {
       const io = getIO();
-      io.emit('new-discussion', discussion);
+      io.emit("new-discussion", discussion);
     } catch (e) {}
 
     return res.status(201).json({
       success: true,
-      message: 'Discussion created successfully',
+      message: "Discussion created successfully",
       discussion,
     });
   } catch (error) {
-    console.error('Error creating discussion:', error);
-    return res.status(500).json({ success: false, message: 'Internal server error' });
+    console.error("Error creating discussion:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
 
 export const getDiscussions = async (req, res) => {
   try {
-    const { community, tag, sortBy = 'newest', page = 1, limit = 10, search } = req.query;
+    const {
+      community,
+      tag,
+      sortBy = "newest",
+      page = 1,
+      limit = 10,
+      search,
+    } = req.query;
     const skip = (page - 1) * limit;
 
     const query = {};
-    if (community && community !== 'all') query.community = community;
+    if (community && community !== "all") query.community = community;
     if (tag) query.tags = { $in: [tag] };
     if (search) {
       query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { content: { $regex: search, $options: 'i' } },
+        { title: { $regex: search, $options: "i" } },
+        { content: { $regex: search, $options: "i" } },
       ];
     }
 
     let sortOption = { createdAt: -1 };
-    if (sortBy === 'popular') sortOption = { views: -1 };
-    if (sortBy === 'mostUpvoted') sortOption = { 'upvotes.length': -1 };
+    if (sortBy === "popular") sortOption = { views: -1 };
+    if (sortBy === "mostUpvoted") sortOption = { "upvotes.length": -1 };
 
     const discussions = await Discussion.find(query)
       .sort(sortOption)
       .skip(skip)
       .limit(parseInt(limit))
-      .populate('author', 'name email profileImage')
+      .populate("author", "name email profileImage")
       .lean();
 
     const discussionsWithCommentCount = await Promise.all(
       discussions.map(async (discussion) => {
-        const commentCount = await Comment.countDocuments({ discussion: discussion._id });
+        const commentCount = await Comment.countDocuments({
+          discussion: discussion._id,
+        });
         return { ...discussion, commentCount };
-      })
+      }),
     );
 
     const totalDiscussions = await Discussion.countDocuments(query);
@@ -85,8 +98,10 @@ export const getDiscussions = async (req, res) => {
       },
     });
   } catch (error) {
-    console.error('Error fetching discussions:', error);
-    return res.status(500).json({ success: false, message: 'Internal server error' });
+    console.error("Error fetching discussions:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal server error" });
   }
 };
 

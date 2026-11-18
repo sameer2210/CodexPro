@@ -6,14 +6,14 @@ import { QueueVisualizer } from "../../components/visualizers/QueueVisualizer";
 import { LinkedListVisualizer } from "../../components/visualizers/LinkedListVisualizer";
 import { TreeVisualizer } from "../../components/visualizers/TreeVisualizer";
 import { GraphVisualizer } from "../../components/visualizers/GraphVisualizer";
-import Navbar from "../../components/common/Navbar";
+import Navbar from "../layout/Navbar";
 
 export const DSAVisualizer = () => {
   const [activeTab, setActiveTab] = useState("array");
 
   return (
     <div className="min-h-screen bg-[#0F172A] p-6 text-white">
-      <Navbar/>
+      <Navbar />
       <div className="max-w-7xl mx-auto">
         <div className="mb-8 text-center">
           <h1 className="text-2xl font-bold text-gray-300 mb-2">

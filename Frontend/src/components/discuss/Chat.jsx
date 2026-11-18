@@ -1,17 +1,17 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Send, MessageSquare } from 'lucide-react';
-import { useSelector } from 'react-redux';
-import axiosClient from '../../utils/axiosClient';
+import React, { useState, useEffect, useRef } from "react";
+import { Send, MessageSquare } from "lucide-react";
+import { useSelector } from "react-redux";
+import axiosClient from "../../utils/axiosClient";
 
 const Chat = ({ discussionId }) => {
   const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState('');
+  const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef(null);
   const user = useSelector((state) => state.auth.user);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -24,7 +24,7 @@ const Chat = ({ discussionId }) => {
           setMessages(response.data.discussion.comments);
         }
       } catch (err) {
-        console.warn('Failed to load chat comments:', err);
+        console.warn("Failed to load chat comments:", err);
       } finally {
         setLoading(false);
       }
@@ -44,22 +44,22 @@ const Chat = ({ discussionId }) => {
       _id: Date.now().toString(),
       content: input.trim(),
       author: {
-        firstName: user?.firstName || user?.username || 'You',
-        lastName: user?.lastName || '',
+        firstName: user?.firstName || user?.username || "You",
+        lastName: user?.lastName || "",
       },
       createdAt: new Date().toISOString(),
     };
 
     setMessages((prev) => [...prev, newMessage]);
     const currentInput = input;
-    setInput('');
+    setInput("");
 
     try {
       await axiosClient.post(`/discussions/${discussionId}/comments`, {
         content: currentInput.trim(),
       });
     } catch (err) {
-      console.warn('Failed to send comment:', err);
+      console.warn("Failed to send comment:", err);
     }
   };
 
@@ -67,23 +67,36 @@ const Chat = ({ discussionId }) => {
     <div className="flex flex-col h-[450px] bg-slate-900/80 border border-slate-700/50 rounded-xl overflow-hidden shadow-xl">
       <div className="flex items-center gap-2 px-4 py-3 bg-slate-800/80 border-b border-slate-700/50">
         <MessageSquare className="w-5 h-5 text-orange-400" />
-        <span className="font-semibold text-white text-sm">Discussion Chat</span>
+        <span className="font-semibold text-white text-sm">
+          Discussion Chat
+        </span>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {loading && messages.length === 0 ? (
-          <div className="text-center text-slate-400 py-8 text-sm">Loading messages...</div>
+          <div className="text-center text-slate-400 py-8 text-sm">
+            Loading messages...
+          </div>
         ) : messages.length === 0 ? (
-          <div className="text-center text-slate-500 py-8 text-sm">No messages yet. Be the first to start the chat!</div>
+          <div className="text-center text-slate-500 py-8 text-sm">
+            No messages yet. Be the first to start the chat!
+          </div>
         ) : (
           messages.map((msg, index) => (
             <div key={msg._id || index} className="flex flex-col">
               <div className="flex items-baseline gap-2">
                 <span className="text-xs font-semibold text-orange-400">
-                  {msg.author?.firstName ? `${msg.author.firstName} ${msg.author.lastName || ''}`.trim() : 'Anonymous'}
+                  {msg.author?.firstName
+                    ? `${msg.author.firstName} ${msg.author.lastName || ""}`.trim()
+                    : "Anonymous"}
                 </span>
                 <span className="text-[10px] text-slate-500">
-                  {msg.createdAt ? new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}
+                  {msg.createdAt
+                    ? new Date(msg.createdAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })
+                    : ""}
                 </span>
               </div>
               <div className="mt-1 text-sm text-slate-200 bg-slate-800/60 p-2.5 rounded-lg border border-slate-700/40">
@@ -95,7 +108,10 @@ const Chat = ({ discussionId }) => {
         <div ref={messagesEndRef} />
       </div>
 
-      <form onSubmit={handleSend} className="p-3 bg-slate-800/90 border-t border-slate-700/50 flex gap-2">
+      <form
+        onSubmit={handleSend}
+        className="p-3 bg-slate-800/90 border-t border-slate-700/50 flex gap-2"
+      >
         <input
           type="text"
           value={input}

@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const userScehma = Schema(
@@ -34,14 +34,14 @@ const userScehma = Schema(
     },
     role: {
       type: String,
-      enum: ['user', 'admin'],
-      default: 'user',
+      enum: ["user", "admin"],
+      default: "user",
     },
     problemSolved: {
       type: [
         {
           type: Schema.Types.ObjectId,
-          ref: 'problem',
+          ref: "problem",
           solvedAt: { type: Date, default: Date.now },
         },
       ],
@@ -50,7 +50,7 @@ const userScehma = Schema(
       type: [
         {
           type: Schema.Types.ObjectId,
-          ref: 'contest',
+          ref: "contest",
           completedAt: { type: Date, default: Date.now },
         },
       ],
@@ -77,10 +77,10 @@ const userScehma = Schema(
       default: false,
     },
     socialLinks: {
-      linkedin: { type: String, default: '' },
-      github: { type: String, default: '' },
-      twitter: { type: String, default: '' },
-      website: { type: String, default: '' },
+      linkedin: { type: String, default: "" },
+      github: { type: String, default: "" },
+      twitter: { type: String, default: "" },
+      website: { type: String, default: "" },
     },
     points: {
       type: Number,
@@ -99,7 +99,7 @@ const userScehma = Schema(
         {
           contestId: {
             type: Schema.Types.ObjectId,
-            ref: 'contest',
+            ref: "contest",
           },
           rank: Number,
           score: Number,
@@ -119,14 +119,14 @@ const userScehma = Schema(
       },
     ],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-userScehma.post('findOneAndDelete', async (userInfo) => {
+userScehma.post("findOneAndDelete", async (userInfo) => {
   if (userInfo) {
-    await mongoose.model('submission').deleteMany({ userId: userInfo._id });
+    await mongoose.model("submission").deleteMany({ userId: userInfo._id });
   }
 });
 
-const User = mongoose.models.user || mongoose.model('user', userScehma);
+const User = mongoose.models.user || mongoose.model("user", userScehma);
 export default User;
