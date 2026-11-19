@@ -1,7 +1,7 @@
 import { Bars3Icon, UsersIcon } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
-import { useTheme } from "../../Context/ThemeContext";
+import { useTheme } from "../../context/ThemeContext";
 import Sidebar from "../layout/Sidebar";
 import ActiveMember from "./ActiveMember";
 

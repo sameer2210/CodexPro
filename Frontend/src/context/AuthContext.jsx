@@ -1,10 +1,24 @@
-import React, { createContext, useContext, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useMemo } from "react";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { loginUser, logout as reduxLogout } from "../store/slices/authSlice";
 import axiosClient from "../utils/axiosClient";
 
 const AuthContext = createContext();
 
+const readLocalUser = () => {
+  try {
+    return JSON.parse(localStorage.getItem("user") || "{}");
+  } catch {
+    return {};
+  }
+};
+
+/**
+ * AuthContext bridges two preserved identity systems:
+ * - Team/collab: Redux authSlice + /api/auth (username/teamName)
+ * - User/academy: localStorage user + /api/user (emailId/_id)
+ * Do not unify these systems; prefer the identity that has concrete fields.
+ */
 export const AuthProvider = ({ children }) => {
   const dispatch = useAppDispatch();
   const reduxUser = useAppSelector((state) => state.auth.user);
@@ -15,8 +29,8 @@ export const AuthProvider = ({ children }) => {
 
   const token =
     reduxToken ||
-    localStorage.getItem("token") ||
-    localStorage.getItem("codex_token");
+    localStorage.getItem("codex_token") ||
+    localStorage.getItem("token");
   const isAuthenticated = reduxIsAuthenticated || !!token;
 
   useEffect(() => {
@@ -24,45 +38,54 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("token", token);
       localStorage.setItem("codex_token", token);
     }
-    if (reduxUser) {
+  }, [token]);
+
+  useEffect(() => {
+    if (reduxUser?.username || reduxUser?.teamName) {
       localStorage.setItem("user", JSON.stringify(reduxUser));
     }
-  }, [token, reduxUser]);
+  }, [reduxUser]);
 
   const login = async (identifier, password) => {
-    const payload = identifier?.includes("@")
-      ? { email: identifier, password }
-      : { username: identifier, teamName: "DemoTeam", password };
+    const isEmail = identifier?.includes("@");
 
     try {
-      const response = await axiosClient
-        .post("/user/login", payload)
-        .catch(async () => {
-          const res = await dispatch(loginUser(payload));
-          if (loginUser.fulfilled.match(res)) {
-            return {
-              data: {
-                success: true,
-                user: res.payload.user,
-                token: res.payload.token,
-              },
-            };
-          }
-          throw new Error(res.payload || "Login failed");
+      if (isEmail) {
+        // User/academy identity — backend expects emailId
+        const response = await axiosClient.post("/user/login", {
+          emailId: identifier,
+          password,
         });
+        const data = response?.data;
+        if (data?.token && data?.user) {
+          localStorage.setItem("user", JSON.stringify(data.user));
+          localStorage.setItem("token", data.token);
+          localStorage.setItem("codex_token", data.token);
+          return { success: true, identity: "user" };
+        }
+        return {
+          success: false,
+          message: data?.message || "Login failed",
+        };
+      }
 
-      if (response?.data?.success) {
-        const { user, token } = response.data;
-        localStorage.setItem("user", JSON.stringify(user));
-        localStorage.setItem("token", token);
-        localStorage.setItem("codex_token", token);
-        return { success: true };
+      // Team/collab identity
+      const payload = {
+        username: identifier,
+        teamName: "DemoTeam",
+        password,
+      };
+      const res = await dispatch(loginUser(payload));
+      if (loginUser.fulfilled.match(res)) {
+        localStorage.setItem("user", JSON.stringify(res.payload.user));
+        return { success: true, identity: "team" };
       }
       return {
         success: false,
-        message: response?.data?.message || "Login failed",
+        message: res.payload || "Login failed",
       };
     } catch (error) {
+      // Email path failed — optional team fallback only for non-email was already handled
       return {
         success: false,
         message: error.response?.data?.message || error.message,
@@ -84,7 +107,16 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("codex_team");
   };
 
-  const user = reduxUser || JSON.parse(localStorage.getItem("user") || "{}");
+  const user = useMemo(() => {
+    const localUser = readLocalUser();
+    const hasAcademyUser = !!(localUser?._id && localUser?.emailId);
+    const hasTeamUser = !!(reduxUser?.username || reduxUser?.teamName);
+    if (hasAcademyUser && !hasTeamUser) return localUser;
+    if (hasTeamUser && !hasAcademyUser) return reduxUser;
+    // If both present, prefer academy user for profile fields; team pages use Redux directly
+    if (hasAcademyUser) return localUser;
+    return reduxUser || localUser || {};
+  }, [reduxUser]);
 
   return (
     <AuthContext.Provider
@@ -104,14 +136,15 @@ export const AuthProvider = ({ children }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
+    const localUser = readLocalUser();
     return {
-      user: JSON.parse(localStorage.getItem("user") || "{}"),
+      user: localUser,
       token:
-        localStorage.getItem("token") || localStorage.getItem("codex_token"),
+        localStorage.getItem("codex_token") || localStorage.getItem("token"),
       isAuthenticated: !!(
-        localStorage.getItem("token") || localStorage.getItem("codex_token")
+        localStorage.getItem("codex_token") || localStorage.getItem("token")
       ),
-      login: async () => {},
+      login: async () => ({ success: false }),
       logout: async () => {},
     };
   }

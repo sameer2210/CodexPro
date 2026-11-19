@@ -14,7 +14,8 @@ export const handleAssistantQuery = async (req, res) => {
   const genAI = new GoogleGenerativeAI(apiKey);
 
   try {
-    const { query } = req.query;
+    // Accept POST body (canonical) or query string (legacy)
+    const query = req.body?.query || req.query?.query;
     if (!query) {
       return res.status(400).json({ error: "Query parameter is required" });
     }

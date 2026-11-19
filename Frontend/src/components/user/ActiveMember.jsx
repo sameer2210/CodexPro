@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useTheme } from "../../Context/ThemeContext";
+import { useTheme } from "../../context/ThemeContext";
 import { useAppSelector } from "../../store/hooks";
 
 const buildAvatarFallback = (displayName) =>

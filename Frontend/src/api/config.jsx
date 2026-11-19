@@ -1,20 +1,28 @@
 import axios from "axios";
 import { notify } from "../lib/notify";
 
+/** Canonical API base URL (includes `/api`). */
+export const getApiBaseURL = () =>
+  import.meta.env.VITE_API_URL ||
+  `${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api`;
+
+/**
+ * Shared token lookup used by axios interceptors and SSE fetch callers.
+ * Prefer codex_token; fall back to legacy `token`.
+ */
+export const getAuthToken = () =>
+  localStorage.getItem("codex_token") || localStorage.getItem("token");
+
 const api = axios.create({
-  baseURL:
-    import.meta.env.VITE_API_URL ||
-    `${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api`,
+  baseURL: getApiBaseURL(),
   withCredentials: true,
   timeout: 15000,
   timeoutErrorMessage: "Request timed out. Please try again.",
 });
 
-// Attach token
 api.interceptors.request.use(
   (config) => {
-    const token =
-      localStorage.getItem("codex_token") || localStorage.getItem("token");
+    const token = getAuthToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -23,7 +31,6 @@ api.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
-// Handle 401
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -47,6 +54,29 @@ api.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+
+/**
+ * Authenticated fetch for SSE / streaming endpoints where axios is unsuitable.
+ * Shares base URL and token conventions with the canonical axios instance.
+ */
+export const apiFetch = (path, options = {}) => {
+  const token = getAuthToken();
+  const headers = {
+    "Content-Type": "application/json",
+    ...(options.headers || {}),
+  };
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+  const url = path.startsWith("http")
+    ? path
+    : `${getApiBaseURL()}${path.startsWith("/") ? path : `/${path}`}`;
+  return fetch(url, {
+    credentials: "include",
+    ...options,
+    headers,
+  });
+};
 
 export const axiosClient = api;
 export default api;

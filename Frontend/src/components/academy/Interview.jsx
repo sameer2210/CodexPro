@@ -33,6 +33,7 @@ import {
   handleAPIError,
   createInterviewSession,
 } from "../../utils/interviewAPI";
+import { speakText, stopSpeaking } from "../../utils/Ai/speakText";
 
 const Interview = () => {
   const navigate = useNavigate();
@@ -406,17 +407,6 @@ const Interview = () => {
     }
   };
 
-  const speakText = (text) => {
-    if ("speechSynthesis" in window) {
-      speechSynthesis.cancel();
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 0.9;
-      utterance.pitch = 1;
-      utterance.volume = 0.8;
-      speechSynthesis.speak(utterance);
-    }
-  };
-
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -424,6 +414,7 @@ const Interview = () => {
   };
 
   const resetInterview = () => {
+    stopSpeaking();
     setStage("upload");
     setSessionId(null);
     setMessages([]);

@@ -36,13 +36,13 @@ aiRouter.get("/capabilities", (req, res) => {
       ],
       available_routes: [
         "/dashboard",
+        "/stats",
         "/contests",
         "/premium",
-        "/doubt",
-        "/submissions",
-        "/leaderboard",
-        "/courses",
+        "/doubt-ai",
+        "/interview",
         "/explore",
+        "/problems",
       ],
     },
     doubt_solver: {

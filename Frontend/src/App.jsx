@@ -1,9 +1,11 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Toaster } from "sonner";
 import ErrorBoundary from "./components/ui/ErrorBoundary";
 import Routes from "./routes/Routes";
+import EmailVerificationPopup from "./components/auth/EmailVerificationPopup";
 import { useTheme } from "./context/ThemeContext";
 import { useAppDispatch, useAppSelector } from "./store/hooks";
+import { getUserProfile } from "./utils/apis/userApi";
 
 const App = () => {
   const dispatch = useAppDispatch();
@@ -11,6 +13,7 @@ const App = () => {
   const isAuthenticated = useAppSelector((state) => state.auth.isAuthenticated);
   const authToken = useAppSelector((state) => state.auth.token);
   const authUser = useAppSelector((state) => state.auth.user);
+  const [academyUser, setAcademyUser] = useState(null);
   const socketConnected = useAppSelector((state) => state.socket.connected);
   const socketConnecting = useAppSelector((state) => state.socket.isConnecting);
 
@@ -26,6 +29,37 @@ const App = () => {
       localStorage.setItem("codex_token", authToken);
     }
   }, [authToken]);
+
+  // Load academy user profile only when a user JWT is present (has _id claim).
+  // Team JWTs do not have email verification — skip popup for team identity.
+  useEffect(() => {
+    let cancelled = false;
+    const loadAcademyProfile = async () => {
+      const token =
+        authToken ||
+        localStorage.getItem("codex_token") ||
+        localStorage.getItem("token");
+      if (!token) {
+        setAcademyUser(null);
+        return;
+      }
+      try {
+        const payload = JSON.parse(atob(token.split(".")[1]));
+        if (!payload?._id) {
+          setAcademyUser(null);
+          return;
+        }
+        const profile = await getUserProfile();
+        if (!cancelled) setAcademyUser(profile);
+      } catch {
+        if (!cancelled) setAcademyUser(null);
+      }
+    };
+    loadAcademyProfile();
+    return () => {
+      cancelled = true;
+    };
+  }, [authToken, isAuthenticated]);
 
   useEffect(() => {
     if (authUser?.teamName) {
@@ -95,9 +129,15 @@ const App = () => {
     [isDarkMode],
   );
 
+  const showEmailVerificationPopup =
+    !!academyUser?.emailId && academyUser?.emailVerified === false;
+
   return (
     <ErrorBoundary>
       <Routes />
+      {showEmailVerificationPopup && (
+        <EmailVerificationPopup user={academyUser} />
+      )}
       <Toaster
         position="top-right"
         theme={isDarkMode ? "dark" : "light"}

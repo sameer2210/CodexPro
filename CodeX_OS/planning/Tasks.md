@@ -3,16 +3,15 @@
 **Status:** Candidate tasks; update after current-checkout audit. Mark completion only with evidence.
 
 ## P0 — Baseline and repository reconciliation
-- [ ] Record branch, `git status`, recent commits and worktree changes.
-- [ ] Read frontend/backend manifests and lockfiles; list real scripts and versions.
-- [ ] Reproduce frontend lint/build claims from the supplied audit report.
-- [ ] Run backend tests/build/lint commands that actually exist; record absent scripts separately.
-- [ ] Map all Express route mounts and identify overlap between `server.js`, `src/app.js`, auth/user routes and controllers.
-- [ ] Build endpoint matrix: frontend client → method/path/body → backend mount/route → middleware → handler → response.
-- [ ] Build Socket.IO event matrix: auth, payload, room, authorization, persistence, rate limit and failure behavior.
-- [ ] Build feature matrix for Academy, editor, AI, contests, discussion, calls, dashboards, admin and payments.
-- [ ] Classify each flow Working / Partial / Broken / Unknown with evidence.
-- [ ] Create baseline issue list without changing code.
+- [x] Record branch, `git status`, recent commits and worktree changes. (stabilization pass started from clean `main`)
+- [x] Read frontend/backend manifests and lockfiles; list real scripts and versions.
+- [x] Reproduce frontend lint/build after stabilization (lint 0 errors; build passed; logo in dist — see Memory).
+- [x] Run backend lint / `node --check` / test after stabilization (all passed — see Memory).
+- [x] Map Express route mounts; document dual auth + AI ownership (see `docs/API.md`, ADR-001/003).
+- [x] Reconcile critical FE↔BE contracts for AI, contest history, user login emailId (Implemented).
+- [ ] Full Socket.IO event matrix still open (preserve contracts; deeper audit deferred).
+- [x] Module connectivity classification for dashboards/premium/doubt/orphans (see `docs/CurrentState.md`).
+- [x] Baseline issues updated in `planning/KnownIssues.md`.
 
 ## P0 — Security blockers
 - [ ] Rotate exposed Google AI credentials and replace weak JWT secret; inspect Git history and deployment variables.

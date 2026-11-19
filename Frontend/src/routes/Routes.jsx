@@ -17,6 +17,11 @@ const ResetPassword = lazy(() => import("../components/auth/ResetPassword"));
 
 const Landing = lazy(() => import("../views/Landing"));
 const Dashboard = lazy(() => import("../views/Dashboard"));
+const StatsDashboard = lazy(
+  () => import("../components/dashboards/DashboardPage"),
+);
+const Premium = lazy(() => import("../components/common/Premium"));
+const DoubtAi = lazy(() => import("../components/Ai/DoubtAi"));
 const CreateProject = lazy(() => import("../components/project/CreateProject"));
 const Project = lazy(() => import("../components/project/Project"));
 
@@ -136,6 +141,10 @@ const Routes = () => {
             <Route path="/create-project" element={<CreateProject />} />
             <Route path="/project/:id" element={<Project />} />
 
+            {/* Learning analytics (separate from IDE dashboard) */}
+            <Route path="/stats" element={<StatsDashboard />} />
+            <Route path="/premium" element={<Premium />} />
+
             {/* Platform Academy & Problem Solving */}
             <Route path="/problems" element={<Problem />} />
             <Route path="/problem/:problemId" element={<ProblemSolve />} />
@@ -145,6 +154,7 @@ const Routes = () => {
             <Route path="/visualizer" element={<DSAVisualizer />} />
             <Route path="/explore" element={<Explore />} />
             <Route path="/interview" element={<Interview />} />
+            <Route path="/doubt-ai" element={<DoubtAi />} />
 
             {/* Contest Arena */}
             <Route path="/contests" element={<ContestPage />} />

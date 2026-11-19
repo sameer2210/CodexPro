@@ -12,7 +12,7 @@ import DiscussHeader from "../../components/discuss/DiscussHeader";
 import DiscussionCard from "../../components/discuss/DiscussionCard";
 import DiscussSidebar from "../../components/discuss/DiscussSidebar";
 import CreateDiscussionModal from "../../components/discuss/CreateDiscussionModal";
-import Loader from "../ui/Loader";
+import LoadingSpinner from "../ui/LoadingSpinner";
 
 const DiscussPage = () => {
   const navigate = useNavigate();
@@ -390,7 +390,7 @@ const DiscussPage = () => {
               <>
                 {loading ? (
                   <div className="flex justify-center items-center h-64">
-                    <Loader />
+                    <LoadingSpinner />
                   </div>
                 ) : error ? (
                   <div className="bg-red-500/20 border border-red-500/50 text-red-300 p-4 rounded-md">

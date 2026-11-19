@@ -17,17 +17,39 @@ import ProblemCard from "../contest/ProblemCard";
 import Navbar from "../layout/Navbar";
 import LoadingSpinner from "../ui/LoadingSpinner";
 import { getSocket } from "../../utils/socket";
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
+
+const settledValue = (result, fallback) =>
+  result.status === "fulfilled" ? result.value : fallback;
+
+const buildProblemStats = (allProblems, solvedProblems) => {
+  const list = Array.isArray(allProblems) ? allProblems : [];
+  const solved = Array.isArray(solvedProblems) ? solvedProblems : [];
+  const countByDifficulty = (items, difficulty) =>
+    items.filter(
+      (p) => (p.difficulty || "").toLowerCase() === difficulty.toLowerCase(),
+    ).length;
+
+  return {
+    totalProblems: list.length,
+    solvedCount: solved.length,
+    unsolvedCount: Math.max(list.length - solved.length, 0),
+    easy: countByDifficulty(solved, "easy"),
+    medium: countByDifficulty(solved, "medium"),
+    hard: countByDifficulty(solved, "hard"),
+    attempting: 0,
+    problems: list,
+  };
+};
 
 const DashboardPage = () => {
-  const dispatch = useDispatch(); // Initialize useDispatch
-  const { user: authUser } = useSelector((state) => state.auth); // Get user from Redux state
-
+  const { user: authUser } = useSelector((state) => state.auth);
+  const [profileUser, setProfileUser] = useState(null);
   const [dashboardData, setDashboardData] = useState({
-    user: null,
-    problemsSolved: null,
+    problemsSolved: [],
     allProblems: null,
-    streaks: null,
+    streaks: { currentStreak: 0, maxStreak: 0 },
     badges: [],
     rank: null,
     fullSubmissions: [],
@@ -35,118 +57,149 @@ const DashboardPage = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [partialErrors, setPartialErrors] = useState([]);
 
   const fetchDashboardData = useCallback(async () => {
     setLoading(true);
-    try {
-      const [
-        profileRes,
-        solvedRes,
-        allRes,
-        streaksRes,
-        badgesRes,
-        rankRes,
-        submissionsRes,
-        activityRes,
-      ] = await Promise.all([
-        fetchProblemsSolved(),
-        fetchAllProblems(),
-        fetchUserStreaks(),
-        fetchUserBadges(),
-        fetchUserRank(),
-        fetchAllUserSubmissions(),
-        fetchHeatmapData(),
-      ]);
+    setError(null);
+    setPartialErrors([]);
 
-      setDashboardData({
-        user: { ...profileRes.user, rank: rankRes.data.rank },
-        problemsSolved: solvedRes.data,
-        allProblems: {
-          totalProblems: allRes.data.totalProblems,
-          solvedCount: allRes.data.solvedCount,
-          unsolvedCount: allRes.data.unsolvedCount,
-          easy: allRes.data.easy,
-          medium: allRes.data.medium,
-          hard: allRes.data.hard,
-          attempting: allRes.data.attempting,
-          problems: allRes.data.problems || [],
-        },
-        streaks: {
-          currentStreak: profileRes.user?.streak ?? 0,
-          maxStreak: streaksRes.data?.maxStreak ?? 0,
-        },
-        badges: badgesRes.data.badges || [],
-        rank: rankRes.data,
-        fullSubmissions: submissionsRes.data.submissions || [],
-        activity: activityRes.data.submissions || [],
-      });
-    } catch (err) {
-      setError(
-        err.response?.data?.message ||
-          err.message ||
-          "Failed to fetch dashboard data",
-      );
-    } finally {
+    const results = await Promise.allSettled([
+      fetchUserProfile(),
+      fetchProblemsSolved(),
+      fetchAllProblems(),
+      fetchUserStreaks(),
+      fetchUserBadges(),
+      fetchUserRank(),
+      fetchAllUserSubmissions(),
+      fetchHeatmapData(),
+    ]);
+
+    const labels = [
+      "profile",
+      "solved",
+      "problems",
+      "streaks",
+      "badges",
+      "rank",
+      "submissions",
+      "heatmap",
+    ];
+    const failures = results
+      .map((r, i) =>
+        r.status === "rejected"
+          ? `${labels[i]}: ${r.reason?.message || "failed"}`
+          : null,
+      )
+      .filter(Boolean);
+
+    // Hard fail only if every request failed
+    if (failures.length === results.length) {
+      setError(failures.join("; ") || "Failed to fetch dashboard data");
       setLoading(false);
+      return;
     }
-  }, [dispatch]);
+
+    if (failures.length) setPartialErrors(failures);
+
+    const profile = settledValue(results[0], null);
+    const solvedPayload = settledValue(results[1], { problems: [] });
+    const allProblems = settledValue(results[2], []);
+    const streaks = settledValue(results[3], {
+      currentStreak: 0,
+      maxStreak: 0,
+    });
+    const badgesPayload = settledValue(results[4], { badges: [] });
+    const rank = settledValue(results[5], null);
+    const submissions = settledValue(results[6], []);
+    const heatmap = settledValue(results[7], {});
+
+    const solvedProblems = Array.isArray(solvedPayload)
+      ? solvedPayload
+      : solvedPayload?.problems || [];
+    const badges = Array.isArray(badgesPayload)
+      ? badgesPayload
+      : badgesPayload?.badges || [];
+    const activity = Array.isArray(heatmap)
+      ? heatmap
+      : heatmap?.submissions || [];
+
+    setProfileUser(profile);
+    setDashboardData({
+      problemsSolved: solvedProblems,
+      allProblems: buildProblemStats(allProblems, solvedProblems),
+      streaks: {
+        currentStreak:
+          streaks?.currentStreak ?? profile?.streak ?? 0,
+        maxStreak: streaks?.maxStreak ?? 0,
+      },
+      badges,
+      rank,
+      fullSubmissions: Array.isArray(submissions) ? submissions : [],
+      activity: Array.isArray(activity) ? activity : [],
+    });
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
     fetchDashboardData();
   }, [fetchDashboardData]);
 
   useEffect(() => {
-    if (!authUser) return; // Don't run if user is not authenticated
-
     const socket = getSocket();
-    if (socket) {
-      const handleUserStatsUpdate = (data) => {
-        console.log("Received userStatsUpdate event, refetching data:", data);
-        fetchDashboardData();
-      };
+    if (!socket) return undefined;
 
-      socket.on("userStatsUpdate", handleUserStatsUpdate);
-      console.log("Socket listener for 'userStatsUpdate' attached.");
+    const handleUserStatsUpdate = () => {
+      fetchDashboardData();
+    };
+    socket.on("userStatsUpdate", handleUserStatsUpdate);
+    return () => {
+      socket.off("userStatsUpdate", handleUserStatsUpdate);
+    };
+  }, [fetchDashboardData]);
 
-      return () => {
-        socket.off("userStatsUpdate", handleUserStatsUpdate);
-        console.log("Socket listener for 'userStatsUpdate' removed.");
-      };
-    }
-  }, [authUser, fetchDashboardData]);
+  const displayUser = profileUser || authUser;
 
-  if (loading) return <LoadingSpinner fullScreen />;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 via-gray-900 to-black">
+        <LoadingSpinner size="xl" />
+      </div>
+    );
+  }
+
   if (error) return <ErrorDisplay message={error} />;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-900 to-black font-poppins text-gray-100">
       <Navbar />
       <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-8 p-6 md:p-8">
-        {/* Sidebar - Left Column */}
+        {partialErrors.length > 0 && (
+          <div className="lg:col-span-4 rounded-xl border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm text-amber-200">
+            Some widgets could not load: {partialErrors.join(" · ")}
+          </div>
+        )}
+
         <div className="lg:col-span-1 space-y-8">
           <SidebarProfileCard
-            user={authUser} // Pass user from Redux state
+            user={displayUser}
             stats={dashboardData.allProblems}
             rank={dashboardData.rank?.rank}
           />
         </div>
 
-        {/* Main Content - Right Column */}
         <div className="lg:col-span-3 space-y-8">
-          {/* Stats Overview */}
           <StatsOverview
             stats={dashboardData.allProblems}
             streaks={dashboardData.streaks}
             badges={dashboardData.badges}
             rank={dashboardData.rank}
-            loading={loading}
-            user={authUser} // Pass authUser to StatsOverview
+            loading={false}
+            user={displayUser}
           />
 
-          {/* Heatmap Calendar */}
           <HeatmapCalendar activity={dashboardData.activity} />
 
-          {/* Recent Problems Section */}
           <div className="bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 rounded-2xl shadow-2xl overflow-hidden">
             <div className="p-6">
               <div className="flex items-center justify-between mb-6">
@@ -154,9 +207,12 @@ const DashboardPage = () => {
                   <span className="mr-2">🎯</span>
                   Recent Problems
                 </h2>
-                <button className="text-orange-400 hover:text-orange-300 font-semibold text-sm transition-colors duration-200 hover:underline">
+                <Link
+                  to="/problems"
+                  className="text-orange-400 hover:text-orange-300 font-semibold text-sm transition-colors duration-200 hover:underline"
+                >
                   View all →
-                </button>
+                </Link>
               </div>
 
               <div className="space-y-4">
@@ -166,7 +222,7 @@ const DashboardPage = () => {
                     .map((problem) => (
                       <div
                         key={problem._id}
-                        className="group p-4 rounded-xl border border-gray-700 hover:border-orange-500/50 bg-gray-800/50 hover:bg-gray-700/50 transition-all duration-300 cursor-pointer"
+                        className="group p-4 rounded-xl border border-gray-700 hover:border-orange-500/50 bg-gray-800/50 hover:bg-gray-700/50 transition-all duration-300"
                       >
                         <ProblemCard problem={problem} compact />
                       </div>
@@ -175,24 +231,23 @@ const DashboardPage = () => {
                   <div className="flex flex-col items-center justify-center py-12 text-center">
                     <div className="text-6xl mb-4 opacity-50">🚀</div>
                     <div className="text-gray-400 text-lg mb-2">
-                      No problems solved yet
+                      No problems available yet
                     </div>
-                    <div className="text-gray-500 text-sm mb-4">
-                      Start your coding journey today!
-                    </div>
-                    <button className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors duration-200 font-semibold">
-                      Solve Your First Problem
-                    </button>
+                    <Link
+                      to="/problems"
+                      className="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors duration-200 font-semibold"
+                    >
+                      Browse Problems
+                    </Link>
                   </div>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Submissions Tabs */}
           <SubmissionsTabs
             submissions={dashboardData.fullSubmissions}
-            loading={loading}
+            loading={false}
           />
         </div>
       </div>

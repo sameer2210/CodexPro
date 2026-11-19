@@ -4,11 +4,10 @@ import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  publicDir: "../public",
+  publicDir: "public",
   test: {
     globals: true,
     environment: "jsdom",
-    setupFiles: "./src/tests/setup.js",
     css: true,
   },
 });

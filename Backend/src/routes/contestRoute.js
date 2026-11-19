@@ -7,6 +7,7 @@ import { userMiddleware } from "../middlewares/userMiddleware.js";
 
 const contestRouter = express.Router();
 
+// Static paths must be registered before dynamic :id / :contestId segments
 contestRouter.get("/today", contestController.getTodayContest);
 contestRouter.post("/create", adminMiddleware, contestController.createContest);
 contestRouter.get(
@@ -15,6 +16,12 @@ contestRouter.get(
   contestController.getAllProblems,
 );
 contestRouter.get("/", contestController.getAllContests);
+contestRouter.get(
+  "/user/history",
+  userMiddleware,
+  leaderboardController.getUserContestHistory,
+);
+
 contestRouter.get("/:id", contestController.getContestById);
 contestRouter.put(
   "/update/:id",
@@ -51,11 +58,6 @@ contestRouter.post(
   "/:contestId/finalize",
   adminMiddleware,
   leaderboardController.finalizeContestRankings,
-);
-contestRouter.get(
-  "/user/history",
-  userMiddleware,
-  leaderboardController.getUserContestHistory,
 );
 
 contestRouter.post(

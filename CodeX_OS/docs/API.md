@@ -1,47 +1,51 @@
 # CodeX API Contracts
 
-**Status:** Contract template and inventory starting point. Do not treat proposed routes as implemented. Audit existing routers/controllers before changing or adding endpoints.
+**Status:** Verified mounts from `Backend/src/app.js` plus notes from the stabilization pass. Always re-check handlers before changing contracts.
 
-## Existing route patterns observed in supplied files
-- Auth router mounts under `/api/auth`.
-- Project router mounts under `/api/projects`.
-- Auth routes shown include register, login, verify, logout, team members/activity, and team messages.
-- Project routes shown include create, list, fetch by ID, update, and AI review.
-- API response formats are not fully consistent across all supplied controllers; standardize only with an explicit compatibility plan.
+## Canonical frontend client
 
-## Contract rules for new endpoints
-For each endpoint document:
-- Method/path and versioning policy.
-- Purpose and authentication requirement.
-- Resource ownership/role requirements.
-- Request schema, validation, size limits.
-- Success status and response schema.
-- Error statuses and safe error format.
-- Idempotency/retry semantics.
-- Rate/cost limits.
-- Audit/logging and privacy behavior.
-- Tests including unauthorized and malformed requests.
+- Base URL: `VITE_API_URL` or `${VITE_BACKEND_URL||http://localhost:8000}/api`
+- Instance: `Frontend/src/api/config.jsx`
+- Auth header: `Bearer` from `codex_token` || `token`
+- SSE: `apiFetch(path, options)` — same base URL and token
+- 401 (non-auth pages): clear storage → `/login`
 
-## Proposed future API domains
-- Problems and topics.
-- Submissions and execution status.
-- Learning progress and revision.
-- Study rooms and membership.
-- Contests, entries, results, and leaderboard.
-- AI hints/reviews.
-- System Design exercises and evaluations.
+## Mounted prefixes (Verified)
 
-These are proposals, not existing endpoints. Prefer the established routing conventions until an audit supports a change.
-## Current-repository reconciliation requirement
-The frontend inventory reports API logic in `src/api/`, `src/services/`, `src/utils/apis/`, and standalone `src/utils/*api*` modules. Do not assume all are active or that reported endpoint alignment is still current.
+| Prefix | Router file | Auth family |
+|--------|-------------|-------------|
+| `GET /` | health in `app.js` | public |
+| `/api/auth` | `auth.routes.js` | team JWT (`verifyToken`) |
+| `/api/projects` | `project.routes.js` | team |
+| `/api/messages` | `message.routes.js` | team |
+| `/api/webrtc` | `webrtc.routes.js` | team (TURN) |
+| `/api/user` | `userAuth.js` | user JWT (`userMiddleware` / admin) |
+| `/api/problem` | `problemRoutes.js` | mixed |
+| `/api/submission` | `submit.js` | user |
+| `/api/ai` | `AiChat.js` **then** `aiInterview.js` | user |
+| `/api/video` | `video.js` | admin |
+| `/api/payments` | `payment.js` | user |
+| `/api/contest` | `contestRoute.js` | mixed |
+| `/api/playlists` | `playlistRoute.js` | user |
+| `/api/discussions` | `discussionRoute.js` | user / optional |
+| `/api/dsa` | `dsa.js` | user |
 
-Before changing an endpoint, trace:
-1. Frontend call site and exact HTTP method/path/query/body/headers.
-2. Axios base URL and interceptors.
-3. Backend route mount prefix in `server.js`/`src/app.js`.
-4. Route middleware and validation.
-5. Controller/service behavior and model/provider effects.
-6. Response and error shape consumed by the UI.
-7. Auth/role/object-ownership checks and regression tests.
+## AI contracts (Implemented)
 
-Maintain a route contract table with status **Verified**, **Reported**, or **Unknown**. Never “fix” a mismatch by changing only one side without checking all callers and backward compatibility.
+| Method | Path | Owner | Notes |
+|--------|------|-------|-------|
+| POST | `/api/ai/chat` | AiChat | Body: messages + problem context; premium/tokens middleware; SSE |
+| POST | `/api/ai/assistant` | AiChat | Body `{ query }` (also accepts query string); SSE |
+| POST | `/api/ai/create-session` etc. | aiInterview | Interview only |
+
+## Contest note (Implemented)
+
+`GET /api/contest/user/history` is registered **before** `GET /api/contest/:id` so `user` is not captured as an id.
+
+## User login contract (Verified)
+
+`POST /api/user/login` expects `{ emailId, password }`. Response `{ user, token, message }` (no `success: true` required).
+
+## Unmounted (Deferred)
+
+- `routes/user.js` (duplicate Google login surface)

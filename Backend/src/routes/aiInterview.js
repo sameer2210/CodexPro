@@ -1,7 +1,5 @@
 import express from "express";
 import multer from "multer";
-import { handleAssistantQuery } from "../controllers/aiAssistantController.js";
-import DoubtAi from "../controllers/doubtAi.js";
 import {
   continueInterview,
   createSession,
@@ -12,10 +10,7 @@ import {
   saveRecording,
   uploadResume,
 } from "../controllers/interview.js";
-import {
-  checkPremiumAndTokens,
-  userMiddleware,
-} from "../middlewares/userMiddleware.js";
+import { userMiddleware } from "../middlewares/userMiddleware.js";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const interviewRouter = express.Router();
@@ -82,8 +77,7 @@ interviewRouter.get(
   userMiddleware,
   asyncHandler(getSessionStatus),
 );
-interviewRouter.post("/chat", userMiddleware, checkPremiumAndTokens, DoubtAi);
-interviewRouter.get("/assistant", userMiddleware, handleAssistantQuery);
+// /chat and /assistant are owned exclusively by routes/AiChat.js
 
 interviewRouter.post(
   "/upload-resume",

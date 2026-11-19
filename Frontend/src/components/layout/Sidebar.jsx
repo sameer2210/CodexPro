@@ -15,7 +15,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 import { NavLink, useNavigate } from "react-router-dom";
-import { useTheme } from "../../Context/ThemeContext";
+import { useTheme } from "../../context/ThemeContext";
 import { useAppDispatch } from "../../store/hooks";
 import { logout } from "../../store/slices/authSlice";
 
@@ -66,12 +66,14 @@ const Sidebar = ({
 
   const navItems = [
     { name: "Dashboard", path: "/dashboard", icon: Squares2X2Icon },
+    { name: "Stats", path: "/stats", icon: TrophyIcon },
     { name: "Projects", path: "/projects", icon: FolderIcon },
     { name: "Problems", path: "/problems", icon: CodeBracketIcon },
     { name: "Contests", path: "/contests", icon: TrophyIcon },
     { name: "Discuss", path: "/discuss", icon: ChatBubbleLeftRightIcon },
     { name: "Visualizer", path: "/visualizer", icon: CpuChipIcon },
     { name: "AI Mock", path: "/interview", icon: SparklesIcon },
+    { name: "Premium", path: "/premium", icon: SparklesIcon },
     { name: "Profile", path: "/profile", icon: UserIcon },
     { name: "Admin", path: "/admin", icon: ShieldCheckIcon },
   ];

@@ -1,7 +1,10 @@
 import api from "../../api/config";
 
 export const requestEmailVerificationOTP = async (email) => {
-  const res = await api.post("/user/requestEmailVerificationOTP", { email });
+  // Backend expects `email` (not emailId) for OTP request body
+  const res = await api.post("/user/requestEmailVerificationOTP", {
+    email,
+  });
   return res.data;
 };
 

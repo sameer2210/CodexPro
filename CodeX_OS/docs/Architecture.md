@@ -1,89 +1,79 @@
 # CodeX Architecture
 
-**Status:** Current inventory reconciled from supplied structures; runtime and implementation details still require source-level verification.
+**Status:** Distinguishes **Verified current** shape from **Proposed** targets.
 
 ## 1. Product architecture
-CodeX is an existing full-stack application that combines:
-1. Academy and DSA practice.
-2. Project-based collaborative coding.
-3. Contest/arena and submissions.
-4. AI assistance and interview preparation.
-5. Community discussion and messaging.
-6. Audio/video calling and WebRTC signaling.
-7. User dashboards, profiles, administration, and reported payment/premium features.
 
-The target is one coherent student workflow, not a collection of disconnected screens:
-**Learn → Try → Practice → Ask for guidance → Collaborate → Submit/compete → Review progress → Learn next.**
+CodeX combines Academy/DSA practice, collaborative IDE projects, contests, AI assistance, discussions, WebRTC, dashboards, and premium/payment UI.
 
-## 2. Current technical shape (Reported)
+Target student workflow (Proposed):
+**Learn → Try → Practice → Guidance → Collaborate → Submit/compete → Review → Next.**
+
+## 2. Current technical shape (Verified)
+
 ### Frontend
-React/Vite application under `Frontend/src`, with React Router routes, Redux Toolkit store/slices, React Context providers, Axios clients, Socket.IO middleware, Monaco editor components, WebRTC helpers, DSA visualizers, and feature UI components. The supplied frontend audit reports successful build/lint after path/import/API cleanup; reproduce before relying on it.
+
+- React 19 + Vite 6 under `Frontend/src`
+- React Router lazy routes in `routes/Routes.jsx`
+- Redux Toolkit (`store/slices/*`) + Context (`context/*`)
+- Canonical HTTP: `api/config.jsx` (axios). `utils/axiosClient.js` re-exports the same instance. SSE uses `apiFetch` / `getAuthToken` from the same module.
+- Socket.IO client via `utils/socket.js` + middleware; WebRTC under `webrtc/`
+- Shared UI: `components/ui/*` only
+
+### Folder responsibilities (Frontend)
+
+| Folder | Responsibility |
+|--------|----------------|
+| `views/` | Top-level pages (Landing, IDE Dashboard, Auth, Admin shell) |
+| `components/<domain>/` | Feature UI (academy, contest, project, Ai, …) |
+| `components/ui/` | Reusable primitives |
+| `components/layout/` | Shell chrome |
+| `api/` | Axios instance + shared fetch helpers |
+| `utils/apis/` | Domain API helpers |
+| `services/` | Thin service wrappers |
+| `store/` | Redux |
+| `context/` | Theme / contest / auth facade |
+| `hooks/`, `lib/` | Shared hooks / notify-sounds |
 
 ### Backend
-Node/Express application with bootstrap files `server.js` and `src/app.js`, configuration modules for DB/Redis/payment/socket, route/controller/middleware/service/model layers, Mongoose models, Socket.IO, AI integrations, and WebRTC routes. Exact mount prefixes and overlapping route ownership must be read from source.
 
-### Data
-MongoDB/Mongoose appears to be the main persistence layer. Models include users, teams, projects, messages, problems, submissions, contests/participations/leaderboards, discussions/comments, playlists, and solution videos. Verify schemas, indexes, constraints, ownership relationships, and actual production database before migrations.
+- `server.js`: HTTP server, Socket.IO, DB connect (`src/db/db.js`), Redis, cron
+- `src/app.js`: Express middleware, CORS, route mounts, 404, errorHandler
+- Layers: `routes/` → `controllers/` → `services/` / models; `middlewares/` for auth
 
-## 3. Architecture risks to resolve before adding features
-- Identify the one backend entry point and the exact middleware/route registration sequence.
-- Build a route contract map from mounted routes, not README guesses.
-- Establish canonical frontend API client ownership and eliminate accidental duplicated base URLs.
-- Establish a single Socket.IO client lifecycle and per-event server authorization.
-- Verify whether project/team identity is truly user-centric and how membership/invitations are enforced.
-- Audit contest submission correctness and determine how code is compiled/executed.
-- Confirm payment provider, webhook handling, idempotency, and entitlement state if payment is active.
-- Confirm Redis purpose and behavior when unavailable.
-- Separate AI advisory feedback from deterministic judge verdicts and ranking.
+### Dual auth boundaries (Verified)
 
-## 4. Proposed logical boundaries
-Keep the existing deployment shape unless evidence requires a split. Organize responsibilities logically:
-- Identity: users, auth, profile, verification, roles.
-- Learning: topics, roadmap, lessons, visualizations, playlists, revision.
-- Problems: catalog, examples, hints, editor configuration.
-- Submissions/judge: submission lifecycle, isolated execution, verdicts, test results.
-- Progress: solved history, topic mastery, streaks, recommendations.
-- Competition: contest lifecycle, participation, scoring, rankings.
-- Collaboration: project/study room, shared document, presence, chat.
-- Communication: call signaling, media configuration, notifications.
-- AI mentor: context assembly, provider adapter, budgets, structured feedback.
-- Community: discussion, comments, moderation.
-- Billing (if retained): plans, provider webhooks, entitlements.
-- Platform infrastructure: configuration, logs, metrics, rate limits, queues, storage.
+| System | Mounts | Model | Frontend |
+|--------|--------|-------|----------|
+| Team | `/api/auth`, `/api/projects`, `/api/messages`, `/api/webrtc`, sockets | `models/team.model.js` | `authSlice` |
+| User | `/api/user`, problem, submission, contest, playlists, discussions, AI, payments | `models/user.js` | AuthContext academy login + profile APIs |
 
-These are domain boundaries, not a mandate to create microservices or rename every folder.
+**Decision:** Preserve both. See `planning/Decisions.md`.
 
-## 5. Target system view
-```text
-React/Vite client
-  ├─ Academy / Problems / Visualizers
-  ├─ Editor / Collaboration / Calls
-  ├─ Contests / Submissions / Leaderboards
-  ├─ AI Mentor / Discussions / Profile
-  └─ Canonical API + Socket clients
-             │
-Express API + authenticated Socket.IO
-  ├─ Auth / authorization / validation
-  ├─ Domain routes → controllers → services
-  ├─ MongoDB/Mongoose persistence
-  ├─ AI provider adapter
-  ├─ payment provider (if active)
-  └─ queue/adapter → isolated judge worker/provider
-WebRTC media: browser peers + configured STUN/TURN or managed provider
-Operations: logs, metrics, backups, alerts, deployment and rollback
-```
+### AI router ownership (Implemented)
 
-## 6. Safe execution boundary
-Do not expose arbitrary code execution through the main Express process. A production judge needs an isolated worker/provider with explicit CPU, memory, wall-time, process, filesystem, network, and output constraints; bounded queueing; cancellation; and auditable results. `node:vm` alone is not a security boundary for hostile code.
+| Routes | Owner file |
+|--------|------------|
+| `POST /api/ai/chat`, `POST /api/ai/assistant`, health/capabilities | `routes/AiChat.js` |
+| Interview create/continue/end/session/feedback/resume/recording | `routes/aiInterview.js` |
 
-## 7. Collaboration model
-- Authenticate socket connections.
-- Derive user identity from verified server-side credentials.
-- Authorize every room join and event against the referenced project/session and membership.
-- Validate payload size/schema and rate-limit high-frequency events.
-- Define persistence, ordering, reconnection, and conflict semantics.
-- Do not let client-provided socket IDs or room names bypass membership checks.
-- Decide whether the existing synchronization is sufficient before adopting CRDT/OT.
+### Dashboard split (Implemented)
 
-## 8. Scaling strategy
-Begin with a modular monolith. Add Redis adapters, queues, worker services, or separate deployments only when required by measured scale, isolation, or reliability. Document the operational cost and failure mode of each new dependency.
+| Route | Owner | Purpose |
+|-------|-------|---------|
+| `/dashboard` | `views/Dashboard.jsx` | IDE / projects / team |
+| `/stats` | `dashboards/DashboardPage.jsx` | Problem analytics / heatmap / submissions |
+
+## 3. Socket.IO / WebRTC (Verified intent; preserve contracts)
+
+- Socket handshake expects team credentials today.
+- Project rooms, chat, code sync, call signaling live in `server.js` + services.
+- Do not redesign event names in casual fixes.
+
+## 4. Proposed logical domain boundaries
+
+Identity, Learning, Problems, Submissions/judge, Progress, Competition, Collaboration, Communication, AI mentor, Community, Billing, Platform infra — **logical**, not a mandate to microservice or rename folders.
+
+## 5. Safe execution boundary (Proposed / security)
+
+Do not execute hostile user code in the Express process. Prefer isolated judge workers/providers.

@@ -15,10 +15,11 @@ import {
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { initializeSocket } from "../../utils/socket";
-import axiosClient from "../../utils/axiosClient";
+import { apiFetch, getAuthToken } from "../../api/config";
+
 function DoubtAI({ problem }) {
   const dispatch = useDispatch();
-  const { user, profileLoading, token } = useSelector((state) => state.auth);
+  const { user, profileLoading } = useSelector((state) => state.auth);
   const [messages, setMessages] = useState([
     {
       role: "model",
@@ -384,7 +385,7 @@ function DoubtAI({ problem }) {
     }
 
     try {
-      const authToken = localStorage.getItem("authToken");
+      const authToken = getAuthToken();
       if (!authToken) {
         setMessages((prev) => [
           ...prev,
@@ -402,13 +403,9 @@ function DoubtAI({ problem }) {
         return;
       }
 
-      // Use fetch for SSE streaming (axios doesn't support SSE properly)
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/ai/chat`, {
+      // SSE streaming via shared apiFetch (user JWT + canonical /api base URL)
+      const response = await apiFetch("/ai/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${authToken}`,
-        },
         body: JSON.stringify({
           messages: [...messages, userMessage],
           title: problem?.title,

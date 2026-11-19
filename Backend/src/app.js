@@ -22,6 +22,7 @@ import contestRouter from "./routes/contestRoute.js";
 import playlistRouter from "./routes/playlistRoute.js";
 import discussionRouter from "./routes/discussionRoute.js";
 import dsaRouter from "./routes/dsa.js";
+import errorHandler from "./common/middleware/errorHandler.js";
 
 const app = express();
 
@@ -102,5 +103,8 @@ app.use("/api/dsa", dsaRouter);
 app.use((req, res) => {
   res.status(404).json({ success: false, message: "Route not found" });
 });
+
+// Centralized error handler (CastError, validation, JWT, etc.)
+app.use(errorHandler);
 
 export default app;

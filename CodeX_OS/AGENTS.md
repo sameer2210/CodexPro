@@ -5,10 +5,11 @@ Evolve the existing CodeX product into a secure, reliable, student-first platfor
 
 ## Required task startup
 1. Inspect `git status`, current branch, uncommitted changes, and repository root. Preserve user work.
-2. Read this file and the relevant `docs/`, `planning/`, and `ai/` entries.
+2. Read `CodeX_OS/README.md`, this file, and the relevant `docs/`, `planning/`, and `ai/` entries **before** editing application code.
 3. Inspect actual files, manifests, lockfiles, imports, routes, middleware, controllers/services, models, socket events, tests, and scripts. Do not treat a tree/report as source-code verification.
-4. Classify important findings as **Verified**, **Reported**, **Inferred**, **Proposed**, or **Unknown**.
+4. Classify important findings as **Verified**, **Reported**, **Inferred**, **Proposed**, **Implemented**, **Deferred**, **Blocked**, or **Unknown**.
 5. Write acceptance criteria and a proportionate plan before substantial changes.
+6. Preserve dual auth (team `/api/auth` vs user `/api/user`) unless an ADR supersedes it. Prefer fixing imports/contracts over moving files. Reuse `components/ui/*` and the canonical axios instance in `api/config.jsx`.
 
 ## Source-of-truth hierarchy
 - Explicit user-approved requirements and safety constraints.

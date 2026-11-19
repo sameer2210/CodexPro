@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../store/slices/authSlice";
+import { apiFetch, getAuthToken } from "../../api/config";
 import "./AiAssistant.css";
 
 const AiAssistant = () => {
@@ -79,7 +80,7 @@ const AiAssistant = () => {
     setIsTyping(true);
 
     try {
-      const authToken = localStorage.getItem("authToken");
+      const authToken = getAuthToken();
       if (!authToken) {
         setMessages((prevMessages) => [
           ...prevMessages,
@@ -95,19 +96,14 @@ const AiAssistant = () => {
         return;
       }
 
-      const baseURL =
-        import.meta.env.VITE_API_URL || "http://localhost:3000/api";
-      const response = await fetch(
-        `${baseURL}/ai/assistant?query=${encodeURIComponent(messageText)}`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${authToken}`,
-          },
-        },
-      );
-      console.log("hhhh", response);
+      // SSE streaming: use shared apiFetch (same base URL + token as axios)
+      const response = await apiFetch("/ai/assistant", {
+        method: "POST",
+        body: JSON.stringify({ query: messageText }),
+      });
+      if (!response.ok) {
+        throw new Error(`Assistant request failed (${response.status})`);
+      }
       if (!response.body) {
         throw new Error("Streaming not supported or response body is empty.");
       }
@@ -166,7 +162,9 @@ const AiAssistant = () => {
                 ]);
                 setTimeout(() => navigate("/login"), 2000);
               } else if (
-                (parsedRoute === "/doubt" || parsedRoute === "/premium") &&
+                (parsedRoute === "/doubt" ||
+                  parsedRoute === "/doubt-ai" ||
+                  parsedRoute === "/premium") &&
                 user &&
                 !user.isPremium
               ) {
