@@ -30,21 +30,17 @@ const App = () => {
     }
   }, [authToken]);
 
-  // Load academy user profile only when a user JWT is present (has _id claim).
-  // Team JWTs do not have email verification — skip popup for team identity.
+  // Academy email-verification popup — only when academy_token is present.
   useEffect(() => {
     let cancelled = false;
     const loadAcademyProfile = async () => {
-      const token =
-        authToken ||
-        localStorage.getItem("codex_token") ||
-        localStorage.getItem("token");
-      if (!token) {
+      const academyToken = localStorage.getItem("academy_token");
+      if (!academyToken) {
         setAcademyUser(null);
         return;
       }
       try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
+        const payload = JSON.parse(atob(academyToken.split(".")[1]));
         if (!payload?._id) {
           setAcademyUser(null);
           return;
@@ -59,7 +55,7 @@ const App = () => {
     return () => {
       cancelled = true;
     };
-  }, [authToken, isAuthenticated]);
+  }, []);
 
   useEffect(() => {
     if (authUser?.teamName) {

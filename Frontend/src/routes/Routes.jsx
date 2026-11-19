@@ -12,6 +12,8 @@ import { useAppSelector } from "../store/hooks";
 // Lazy load components for performance
 const Login = lazy(() => import("../views/Auth/Login"));
 const Register = lazy(() => import("../views/Auth/Register"));
+const AcademyLogin = lazy(() => import("../views/Auth/AcademyLogin"));
+const AcademyRegister = lazy(() => import("../views/Auth/AcademyRegister"));
 const ForgotPassword = lazy(() => import("../components/auth/ForgotPassword"));
 const ResetPassword = lazy(() => import("../components/auth/ResetPassword"));
 
@@ -99,22 +101,38 @@ const LoadingFallback = () => (
   </div>
 );
 
-// Private route wrapper - checks Redux state or stored token
+// Team / IDE protected routes — team JWT or Redux team session
 const PrivateRoute = () => {
   const reduxIsAuth = useAppSelector((state) => state.auth.isAuthenticated);
-  const token =
-    localStorage.getItem("codex_token") || localStorage.getItem("token");
-  const isAuthenticated = reduxIsAuth || !!token;
-  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
+  const teamToken = localStorage.getItem("codex_token");
+  const academyToken = localStorage.getItem("academy_token");
+  // Allow either identity into shared private app shell; domain APIs stay isolated
+  const isAuthenticated = reduxIsAuth || !!teamToken || !!academyToken;
+  if (!isAuthenticated) {
+    return <Navigate to="/login" replace />;
+  }
+  return <Outlet />;
 };
 
-// Public route wrapper - redirects to dashboard if authenticated
+// Public auth pages — do not cross-redirect Team ↔ Academy sessions
 const PublicRoute = () => {
   const reduxIsAuth = useAppSelector((state) => state.auth.isAuthenticated);
-  const token =
-    localStorage.getItem("codex_token") || localStorage.getItem("token");
-  const isAuthenticated = reduxIsAuth || !!token;
-  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <Outlet />;
+  const teamToken = localStorage.getItem("codex_token");
+  const academyToken = localStorage.getItem("academy_token");
+  const path = window.location.pathname;
+  const isAcademyAuthPage = path.startsWith("/academy/");
+
+  if (isAcademyAuthPage && academyToken) {
+    return <Navigate to="/homepage" replace />;
+  }
+  if (
+    !isAcademyAuthPage &&
+    (path === "/login" || path === "/register") &&
+    (reduxIsAuth || teamToken)
+  ) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return <Outlet />;
 };
 
 const Routes = () => {
@@ -129,6 +147,8 @@ const Routes = () => {
             </Route>
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/academy/login" element={<AcademyLogin />} />
+            <Route path="/academy/register" element={<AcademyRegister />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/reset-password" element={<ResetPassword />} />
           </Route>

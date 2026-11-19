@@ -16,8 +16,15 @@ Reproduce before treating as active defects. Items marked **Addressed** were fix
 - EmailVerificationPopup for academy users with `emailVerified === false`.
 - Central `errorHandler` mounted on Express app.
 
+## Google Console (Blocked until configured)
+
+- Set `GOOGLE_CLIENT_ID` (Backend) and `VITE_GOOGLE_CLIENT_ID` (Frontend) to the same OAuth 2.0 Web client ID.
+- Authorized JavaScript origins: local Vite origin (e.g. `http://localhost:5173`) and production frontend origin.
+- Do not place Google client secrets in `VITE_*` variables.
+
 ## Deferred
 
+- Explicit authenticated Google↔password account linking UI (currently 409 on email collision).
 - `PremiumDashboard` — needs profile/entitlement fields not on authSlice.
 - `src/modules/**`, `unifiedAuth`, Redis `rateLimiter.js`, `routes/user.js`, `database/connection.js`.
 - SubmitCard stub, PlaylistCreate, Heatmap.jsx duplicate, AnimatedBackground, unused zustand.

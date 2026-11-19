@@ -23,9 +23,18 @@ const userScehma = Schema(
       trim: true,
       lowercase: true,
     },
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true,
+      default: undefined,
+    },
     password: {
       type: String,
-      required: true,
+      // Google-only accounts are not required to have a password
+      required: function () {
+        return !this.googleId;
+      },
     },
     age: {
       type: Number,

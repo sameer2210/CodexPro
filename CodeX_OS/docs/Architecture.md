@@ -43,12 +43,12 @@ Target student workflow (Proposed):
 
 ### Dual auth boundaries (Verified)
 
-| System | Mounts | Model | Frontend |
-|--------|--------|-------|----------|
-| Team | `/api/auth`, `/api/projects`, `/api/messages`, `/api/webrtc`, sockets | `models/team.model.js` | `authSlice` |
-| User | `/api/user`, problem, submission, contest, playlists, discussions, AI, payments | `models/user.js` | AuthContext academy login + profile APIs |
+| System | Pages | Mounts | Token | Frontend |
+|--------|-------|--------|-------|----------|
+| Team | `/login`, `/register` | `/api/auth`, projects, messages, webrtc, sockets | `codex_token` | `authSlice` |
+| Academy | `/academy/login`, `/academy/register` | `/api/user` + academy APIs | `academy_token` | `AuthContext` + Google GIS |
 
-**Decision:** Preserve both. See `planning/Decisions.md`.
+**Decision:** Preserve both; separate pages; path-based tokens. See ADR-001, ADR-006, ADR-007.
 
 ### AI router ownership (Implemented)
 

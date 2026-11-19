@@ -51,6 +51,21 @@
 
 ---
 
+### ADR-006: Separate Academy auth pages + Google ID token
+- **Status:** Accepted
+- **Date:** 2026-11-20
+- **Context:** Team Login/Register serve collaboration identity only. Google Sign-In fits individual Academy users.
+- **Decision:** Keep `/login` and `/register` as Team auth. Add `/academy/login` and `/academy/register`. Google Sign-In is Academy-only via GIS ID token verified with `google-auth-library` at `POST /api/user/googleLogin`.
+- **Account linking:** Do not auto-link Google to existing password accounts by email; return 409.
+- **Evidence:** Auth pages, AuthContext, `userAuthenticate.googleLogin`, user `googleId` field.
+
+### ADR-007: Dual token isolation
+- **Status:** Accepted
+- **Date:** 2026-11-20
+- **Context:** Academy login previously wrote into `codex_token`, colliding with Team sessions; 401 cleared all storage.
+- **Decision:** Team uses `codex_token`; Academy uses `academy_token` / `academy_user`. Axios picks token by API path prefix. 401 clears only the failing domain.
+- **Evidence:** `Frontend/src/api/authTokens.js`, `api/config.jsx`.
+
 ## Decisions still open
 1. Code execution provider vs self-managed isolated workers.
 2. Collaboration protocol and persistence model evolution.

@@ -1,4 +1,4 @@
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { ChevronRight, CornerDownRight, Eye, EyeOff } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -502,23 +502,44 @@ const Login = () => {
               isDarkMode ? "border-white/5" : "border-[#0B0E11]/10"
             }`}
           >
-            <p
-              className={`text-[14px] font-mono font-bold ${
-                isDarkMode ? "text-white/40" : "text-[#0B0E11]/70"
-              }`}
-            >
-              UNREGISTERED?{" "}
-              <button
-                onClick={() => navigate("/register")}
-                className={`underline transition-all ${
-                  isDarkMode
-                    ? "text-white hover:text-[#17E1FF] decoration-white/20"
-                    : "text-[#07090a] hover:text-[#17E1FF] decoration-[#0B0E11]/30"
+            <div className="flex flex-col gap-3">
+              <p
+                className={`text-[14px] font-mono font-bold ${
+                  isDarkMode ? "text-white/40" : "text-[#0B0E11]/70"
                 }`}
               >
-                REGISTERED NEW USER
-              </button>
-            </p>
+                UNREGISTERED?{" "}
+                <button
+                  type="button"
+                  onClick={() => navigate("/register")}
+                  className={`underline transition-all ${
+                    isDarkMode
+                      ? "text-white hover:text-[#17E1FF] decoration-white/20"
+                      : "text-[#07090a] hover:text-[#17E1FF] decoration-[#0B0E11]/30"
+                  }`}
+                >
+                  REGISTER NEW TEAM
+                </button>
+              </p>
+              <p
+                className={`text-[12px] font-mono ${
+                  isDarkMode ? "text-white/35" : "text-[#0B0E11]/55"
+                }`}
+              >
+                Looking for Academy (DSA / Contests)?{" "}
+                <button
+                  type="button"
+                  onClick={() => navigate("/academy/login")}
+                  className={`underline transition-all ${
+                    isDarkMode
+                      ? "text-[#17E1FF] hover:text-white"
+                      : "text-[#17E1FF] hover:text-[#0B0E11]"
+                  }`}
+                >
+                  Academy Sign In
+                </button>
+              </p>
+            </div>
             <div className="flex gap-8">
               <HUDLabel label="ENCRYPTION" value="AES-256" />
               <HUDLabel label="PROTOCOL" value="TLS 1.3" />

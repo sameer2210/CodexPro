@@ -1,17 +1,31 @@
 import axios from "axios";
 import { notify } from "../lib/notify";
+import {
+  clearAcademySession,
+  clearTeamSession,
+  getAuthToken,
+  getAuthTokenForUrl,
+  getAcademyToken,
+  getTeamToken,
+  isAcademyApiPath,
+  isTeamApiPath,
+} from "./authTokens";
+
+export {
+  clearAcademySession,
+  clearTeamSession,
+  getAuthToken,
+  getAuthTokenForUrl,
+  getAcademyToken,
+  getTeamToken,
+  isAcademyApiPath,
+  isTeamApiPath,
+};
 
 /** Canonical API base URL (includes `/api`). */
 export const getApiBaseURL = () =>
   import.meta.env.VITE_API_URL ||
   `${import.meta.env.VITE_BACKEND_URL || "http://localhost:8000"}/api`;
-
-/**
- * Shared token lookup used by axios interceptors and SSE fetch callers.
- * Prefer codex_token; fall back to legacy `token`.
- */
-export const getAuthToken = () =>
-  localStorage.getItem("codex_token") || localStorage.getItem("token");
 
 const api = axios.create({
   baseURL: getApiBaseURL(),
@@ -22,7 +36,7 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
-    const token = getAuthToken();
+    const token = getAuthTokenForUrl(config.url || "");
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -31,36 +45,47 @@ api.interceptors.request.use(
   (error) => Promise.reject(error),
 );
 
+const AUTH_FORM_PATHS = [
+  "/auth/login",
+  "/auth/register",
+  "/user/login",
+  "/user/register",
+  "/user/googleLogin",
+];
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     const status = error.response?.status;
     const requestUrl = error.config?.url || "";
-    const isAuthRequest =
-      requestUrl.includes("/auth/login") ||
-      requestUrl.includes("/auth/register") ||
-      requestUrl.includes("/user/login") ||
-      requestUrl.includes("/user/register");
+    const isAuthFormRequest = AUTH_FORM_PATHS.some((p) =>
+      requestUrl.includes(p),
+    );
+    const pathname = window.location.pathname;
     const isAuthPage =
-      window.location.pathname === "/login" ||
-      window.location.pathname === "/register";
+      pathname === "/login" ||
+      pathname === "/register" ||
+      pathname.startsWith("/academy/");
 
-    if (status === 401 && !isAuthRequest && !isAuthPage) {
-      localStorage.clear();
-      window.location.href = "/login";
+    if (status === 401 && !isAuthFormRequest && !isAuthPage) {
+      if (isTeamApiPath(requestUrl)) {
+        clearTeamSession();
+        window.location.href = "/login";
+      } else if (isAcademyApiPath(requestUrl)) {
+        clearAcademySession();
+        window.location.href = "/academy/login";
+      }
     }
 
-    notify(error.response?.data?.message || "Network error", "error");
+    if (!isAuthFormRequest) {
+      notify(error.response?.data?.message || "Network error", "error");
+    }
     return Promise.reject(error);
   },
 );
 
-/**
- * Authenticated fetch for SSE / streaming endpoints where axios is unsuitable.
- * Shares base URL and token conventions with the canonical axios instance.
- */
 export const apiFetch = (path, options = {}) => {
-  const token = getAuthToken();
+  const token = getAuthTokenForUrl(path);
   const headers = {
     "Content-Type": "application/json",
     ...(options.headers || {}),

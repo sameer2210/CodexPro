@@ -44,8 +44,21 @@
 
 ## User login contract (Verified)
 
-`POST /api/user/login` expects `{ emailId, password }`. Response `{ user, token, message }` (no `success: true` required).
+`POST /api/user/login` expects `{ emailId, password }`. Response `{ user, token, message }` (no `success: true` required). Email is normalized to lowercase on login.
+
+## Google Sign-In (Implemented)
+
+`POST /api/user/googleLogin` body `{ credential }` (Google ID token from GIS).
+Server verifies signature, audience (`GOOGLE_CLIENT_ID`), issuer, `sub`, email, `email_verified`.
+Response `{ user, token, message }` (Academy JWT). Does not accept access tokens.
+
+## Frontend token selection (Implemented)
+
+| Paths | Token |
+|-------|-------|
+| `/auth`, `/projects`, `/messages`, `/webrtc` | `codex_token` |
+| `/user`, `/problem`, `/submission`, `/contest`, `/playlists`, `/discussions`, `/ai`, `/payments`, `/dsa`, `/video` | `academy_token` |
 
 ## Unmounted (Deferred)
 
-- `routes/user.js` (duplicate Google login surface)
+- `routes/user.js` (legacy Google surface)

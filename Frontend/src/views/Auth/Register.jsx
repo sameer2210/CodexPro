@@ -1,4 +1,4 @@
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   ChevronRight,
   CornerDownRight,
@@ -44,11 +44,10 @@ const Register = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (
-      !formData.username.trim() ||
-      !formData.teamName.trim() ||
-      !formData.password
-    ) {
+    const trimmedUsername = (formData.username || "").trim();
+    const trimmedTeamName = (formData.teamName || "").trim();
+
+    if (!trimmedUsername || !trimmedTeamName || !formData.password) {
       setError("INITIALIZATION FAILED: MISSING MANDATORY PARAMETERS.");
       return;
     }
@@ -57,7 +56,13 @@ const Register = () => {
       setIsLoading(true);
       setError(null);
 
-      const result = await dispatch(registerUser(formData));
+      const result = await dispatch(
+        registerUser({
+          ...formData,
+          username: trimmedUsername,
+          teamName: trimmedTeamName,
+        }),
+      );
 
       if (registerUser.fulfilled.match(result)) {
         notify("Registration successful", "success");
@@ -445,6 +450,7 @@ const Register = () => {
               >
                 REGISTERED?{" "}
                 <button
+                  type="button"
                   onClick={() => navigate("/login")}
                   className={`underline transition-all font-bold ${
                     isDarkMode
@@ -453,6 +459,24 @@ const Register = () => {
                   }`}
                 >
                   RE-LOGIN
+                </button>
+              </p>
+              <p
+                className={`text-[12px] font-mono mt-2 ${
+                  isDarkMode ? "text-white/35" : "text-[#0B0E11]/55"
+                }`}
+              >
+                Academy account?{" "}
+                <button
+                  type="button"
+                  onClick={() => navigate("/academy/register")}
+                  className={`underline transition-all ${
+                    isDarkMode
+                      ? "text-[#17E1FF] hover:text-white"
+                      : "text-[#17E1FF] hover:text-[#0B0E11]"
+                  }`}
+                >
+                  Academy Sign Up
                 </button>
               </p>
             </div>

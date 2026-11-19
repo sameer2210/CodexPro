@@ -1,5 +1,4 @@
 import { OAuth2Client } from "google-auth-library";
-import axios from "axios";
 import bcrypt from "bcryptjs";
 import { v2 as cloudinary } from "cloudinary";
 import jwt from "jsonwebtoken";
@@ -19,7 +18,11 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+const getGoogleClient = () => {
+  const clientId = config.GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
+  if (!clientId) return null;
+  return new OAuth2Client(clientId);
+};
 
 const storage = multer.memoryStorage();
 const upload = multer({
@@ -110,11 +113,20 @@ export const login = async (req, res) => {
     const { emailId, password } = req.body;
     if (!emailId || !password) throw new Error("Credentials Missing");
 
-    const user = await User.findOne({ emailId });
+    const normalizedEmail = String(emailId).trim().toLowerCase();
+    const user = await User.findOne({ emailId: normalizedEmail });
     if (!user) {
       return res
         .status(403)
         .json({ success: false, message: "Error Invalid Credentials" });
+    }
+
+    if (!user.password) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "This account uses Google Sign-In. Please continue with Google.",
+      });
     }
 
     if (!user.emailVerified) {
@@ -123,7 +135,7 @@ export const login = async (req, res) => {
         message:
           "Email not verified. Please verify your email before logging in.",
         needsVerification: true,
-        email: emailId,
+        email: normalizedEmail,
       });
     }
 
@@ -404,34 +416,105 @@ export const updateAllProfileImages = async (req, res) => {
   }
 };
 
+/**
+ * Academy Google Sign-In — verifies Google ID token (GIS credential).
+ * Body: { credential: "<Google ID token>" }
+ * Does not silently link to existing password accounts by email alone.
+ */
 export const googleLogin = async (req, res) => {
   try {
-    const { token } = req.body;
-    if (!token) return res.status(400).json({ message: "Token is required" });
+    const clientId = config.GOOGLE_CLIENT_ID || process.env.GOOGLE_CLIENT_ID;
+    if (!clientId) {
+      return res.status(503).json({
+        success: false,
+        message: "Google Sign-In is not configured on the server",
+      });
+    }
 
-    const response = await axios.get(
-      "https://www.googleapis.com/oauth2/v3/userinfo",
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      },
-    );
+    const credential = req.body?.credential || req.body?.idToken;
+    if (!credential || typeof credential !== "string") {
+      return res.status(400).json({
+        success: false,
+        message: "Google ID token credential is required",
+      });
+    }
 
-    const { sub, email, given_name, family_name, picture } = response.data;
+    const client = getGoogleClient();
+    const ticket = await client.verifyIdToken({
+      idToken: credential,
+      audience: clientId,
+    });
+    const payload = ticket.getPayload();
 
-    let user = await User.findOne({ emailId: email });
+    const issuer = payload?.iss;
+    const allowedIssuers = [
+      "accounts.google.com",
+      "https://accounts.google.com",
+    ];
+    if (!allowedIssuers.includes(issuer)) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid Google token issuer",
+      });
+    }
+
+    const sub = payload?.sub;
+    const email = payload?.email ? String(payload.email).toLowerCase() : null;
+    const emailVerified = payload?.email_verified === true;
+
+    if (!sub) {
+      return res.status(401).json({
+        success: false,
+        message: "Google token missing subject identifier",
+      });
+    }
+    if (!email) {
+      return res.status(401).json({
+        success: false,
+        message: "Google token missing email",
+      });
+    }
+    if (!emailVerified) {
+      return res.status(403).json({
+        success: false,
+        message: "Google email is not verified",
+      });
+    }
+
+    let user = await User.findOne({ googleId: sub });
 
     if (!user) {
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(sub, salt);
+      const existingByEmail = await User.findOne({ emailId: email });
+      if (existingByEmail) {
+        if (existingByEmail.googleId && existingByEmail.googleId !== sub) {
+          return res.status(409).json({
+            success: false,
+            message: "This email is linked to a different Google account",
+          });
+        }
+        if (!existingByEmail.googleId) {
+          return res.status(409).json({
+            success: false,
+            message:
+              "An account with this email already exists. Sign in with your password. Google linking requires an authenticated account flow.",
+          });
+        }
+      }
+
+      const givenName = (payload.given_name || email.split("@")[0] || "User")
+        .toString()
+        .slice(0, 20);
+      const safeFirstName =
+        givenName.length >= 3 ? givenName : `${givenName}usr`.slice(0, 20);
 
       user = new User({
-        firstName: given_name,
-        lastName: family_name || "",
+        firstName: safeFirstName,
+        lastName: payload.family_name
+          ? String(payload.family_name).slice(0, 20)
+          : undefined,
         emailId: email,
-        password: hashedPassword,
-        profileImage: picture,
+        googleId: sub,
+        profileImage: payload.picture || null,
         emailVerified: true,
         role: "user",
         socialLinks: {},
@@ -459,18 +542,21 @@ export const googleLogin = async (req, res) => {
         _id: user._id,
         role: user.role,
         profileImage: user.profileImage,
+        emailVerified: user.emailVerified,
       },
       token: jwtToken,
       message: "Logged in with Google successfully",
     });
   } catch (error) {
-    console.error(
-      "Google login error:",
-      error.response ? error.response.data : error.message,
-    );
-    res
-      .status(500)
-      .json({ message: "Google login failed", error: error.message });
+    console.error("Google login error:", error.message);
+    const message =
+      error.message?.includes("Wrong recipient") ||
+      error.message?.includes("Token used too early") ||
+      error.message?.includes("Invalid token signature") ||
+      error.message?.includes("jwt")
+        ? "Invalid or expired Google credential"
+        : "Google login failed";
+    res.status(401).json({ success: false, message });
   }
 };
 

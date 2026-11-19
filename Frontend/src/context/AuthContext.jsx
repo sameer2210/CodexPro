@@ -1,151 +1,196 @@
-import React, { createContext, useContext, useEffect, useMemo } from "react";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { loginUser, logout as reduxLogout } from "../store/slices/authSlice";
-import axiosClient from "../utils/axiosClient";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import axiosClient from "../api/config";
+import { clearAcademySession, getAcademyToken } from "../api/authTokens";
 
 const AuthContext = createContext();
 
-const readLocalUser = () => {
+const readAcademyUser = () => {
   try {
-    return JSON.parse(localStorage.getItem("user") || "{}");
+    return JSON.parse(localStorage.getItem("academy_user") || "null");
   } catch {
-    return {};
+    return null;
   }
 };
 
+const persistAcademySession = (user, token) => {
+  localStorage.setItem("academy_token", token);
+  localStorage.setItem("academy_user", JSON.stringify(user));
+};
+
 /**
- * AuthContext bridges two preserved identity systems:
- * - Team/collab: Redux authSlice + /api/auth (username/teamName)
- * - User/academy: localStorage user + /api/user (emailId/_id)
- * Do not unify these systems; prefer the identity that has concrete fields.
+ * Academy / individual-user authentication only.
+ * Team collaboration auth remains in Redux authSlice + codex_token.
  */
 export const AuthProvider = ({ children }) => {
-  const dispatch = useAppDispatch();
-  const reduxUser = useAppSelector((state) => state.auth.user);
-  const reduxToken = useAppSelector((state) => state.auth.token);
-  const reduxIsAuthenticated = useAppSelector(
-    (state) => state.auth.isAuthenticated,
-  );
-
-  const token =
-    reduxToken ||
-    localStorage.getItem("codex_token") ||
-    localStorage.getItem("token");
-  const isAuthenticated = reduxIsAuthenticated || !!token;
+  const [token, setToken] = useState(() => getAcademyToken());
+  const [user, setUser] = useState(() => readAcademyUser());
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (token) {
-      localStorage.setItem("token", token);
-      localStorage.setItem("codex_token", token);
-    }
-  }, [token]);
+    setToken(getAcademyToken());
+    setUser(readAcademyUser());
+  }, []);
 
-  useEffect(() => {
-    if (reduxUser?.username || reduxUser?.teamName) {
-      localStorage.setItem("user", JSON.stringify(reduxUser));
-    }
-  }, [reduxUser]);
+  const isAuthenticated = !!token;
 
-  const login = async (identifier, password) => {
-    const isEmail = identifier?.includes("@");
-
+  const login = useCallback(async (emailId, password) => {
+    setIsLoading(true);
     try {
-      if (isEmail) {
-        // User/academy identity — backend expects emailId
-        const response = await axiosClient.post("/user/login", {
-          emailId: identifier,
+      const normalizedEmail = String(emailId || "")
+        .trim()
+        .toLowerCase();
+      const response = await axiosClient.post("/user/login", {
+        emailId: normalizedEmail,
+        password,
+      });
+      const data = response?.data;
+      if (data?.token && data?.user) {
+        persistAcademySession(data.user, data.token);
+        setToken(data.token);
+        setUser(data.user);
+        return { success: true, identity: "user", user: data.user };
+      }
+      return {
+        success: false,
+        message: data?.message || "Login failed",
+      };
+    } catch (error) {
+      const data = error.response?.data;
+      return {
+        success: false,
+        message: data?.message || error.message || "Login failed",
+        needsVerification: !!data?.needsVerification,
+        email: data?.email,
+      };
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const register = useCallback(
+    async ({ firstName, emailId, password, confirmPassword }) => {
+      setIsLoading(true);
+      try {
+        const response = await axiosClient.post("/user/register", {
+          firstName: String(firstName || "").trim(),
+          emailId: String(emailId || "").trim().toLowerCase(),
           password,
+          confirmPassword,
         });
         const data = response?.data;
         if (data?.token && data?.user) {
-          localStorage.setItem("user", JSON.stringify(data.user));
-          localStorage.setItem("token", data.token);
-          localStorage.setItem("codex_token", data.token);
-          return { success: true, identity: "user" };
+          persistAcademySession(data.user, data.token);
+          setToken(data.token);
+          setUser(data.user);
+          return { success: true, user: data.user, needsVerification: true };
         }
         return {
           success: false,
-          message: data?.message || "Login failed",
+          message: data?.message || "Registration failed",
         };
+      } catch (error) {
+        return {
+          success: false,
+          message:
+            error.response?.data?.message ||
+            error.message ||
+            "Registration failed",
+        };
+      } finally {
+        setIsLoading(false);
       }
+    },
+    [],
+  );
 
-      // Team/collab identity
-      const payload = {
-        username: identifier,
-        teamName: "DemoTeam",
-        password,
-      };
-      const res = await dispatch(loginUser(payload));
-      if (loginUser.fulfilled.match(res)) {
-        localStorage.setItem("user", JSON.stringify(res.payload.user));
-        return { success: true, identity: "team" };
+  const loginWithGoogle = useCallback(async (credential) => {
+    setIsLoading(true);
+    try {
+      const response = await axiosClient.post("/user/googleLogin", {
+        credential,
+      });
+      const data = response?.data;
+      if (data?.token && data?.user) {
+        persistAcademySession(data.user, data.token);
+        setToken(data.token);
+        setUser(data.user);
+        return { success: true, user: data.user };
       }
       return {
         success: false,
-        message: res.payload || "Login failed",
+        message: data?.message || "Google sign-in failed",
       };
     } catch (error) {
-      // Email path failed — optional team fallback only for non-email was already handled
       return {
         success: false,
-        message: error.response?.data?.message || error.message,
+        message:
+          error.response?.data?.message ||
+          error.message ||
+          "Google sign-in failed",
       };
+    } finally {
+      setIsLoading(false);
     }
-  };
+  }, []);
 
-  const logout = async () => {
+  const logout = useCallback(async () => {
     try {
       await axiosClient.post("/user/logout").catch(() => {});
-    } catch (err) {
-      console.error("Logout API error:", err);
+    } catch {
+      /* ignore */
     }
-    dispatch(reduxLogout());
-    localStorage.removeItem("user");
-    localStorage.removeItem("token");
-    localStorage.removeItem("codex_token");
-    localStorage.removeItem("codex_username");
-    localStorage.removeItem("codex_team");
-  };
+    clearAcademySession();
+    setToken(null);
+    setUser(null);
+  }, []);
 
-  const user = useMemo(() => {
-    const localUser = readLocalUser();
-    const hasAcademyUser = !!(localUser?._id && localUser?.emailId);
-    const hasTeamUser = !!(reduxUser?.username || reduxUser?.teamName);
-    if (hasAcademyUser && !hasTeamUser) return localUser;
-    if (hasTeamUser && !hasAcademyUser) return reduxUser;
-    // If both present, prefer academy user for profile fields; team pages use Redux directly
-    if (hasAcademyUser) return localUser;
-    return reduxUser || localUser || {};
-  }, [reduxUser]);
-
-  return (
-    <AuthContext.Provider
-      value={{
-        user: { ...user, token },
-        token,
-        isAuthenticated,
-        login,
-        logout,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({
+      user: user ? { ...user, token } : null,
+      token,
+      isAuthenticated,
+      isLoading,
+      login,
+      register,
+      loginWithGoogle,
+      logout,
+      identity: "academy",
+    }),
+    [
+      user,
+      token,
+      isAuthenticated,
+      isLoading,
+      login,
+      register,
+      loginWithGoogle,
+      logout,
+    ],
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    const localUser = readLocalUser();
     return {
-      user: localUser,
-      token:
-        localStorage.getItem("codex_token") || localStorage.getItem("token"),
-      isAuthenticated: !!(
-        localStorage.getItem("codex_token") || localStorage.getItem("token")
-      ),
+      user: readAcademyUser(),
+      token: getAcademyToken(),
+      isAuthenticated: !!getAcademyToken(),
+      isLoading: false,
       login: async () => ({ success: false }),
+      register: async () => ({ success: false }),
+      loginWithGoogle: async () => ({ success: false }),
       logout: async () => {},
+      identity: "academy",
     };
   }
   return context;

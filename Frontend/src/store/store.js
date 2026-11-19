@@ -46,11 +46,19 @@ const rootReducer = combineReducers({
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 // Error logging middleware (for rejected actions)
+const AUTH_TOAST_SKIP = new Set([
+  "auth/login/rejected",
+  "auth/register/rejected",
+]);
+
 const errorLogger = () => (next) => (action) => {
   if (action.meta?.rejectedWithValue) {
     const message = action.payload || "Something went wrong";
     console.error("Rejected action:", action.type, message);
-    notify(message, "error");
+    // Team Login/Register pages own their error toasts — avoid duplicates
+    if (!AUTH_TOAST_SKIP.has(action.type)) {
+      notify(message, "error");
+    }
   }
   return next(action);
 };

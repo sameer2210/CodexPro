@@ -43,10 +43,12 @@ Directory names show intended organization, not that every feature works. Prefer
 | Error handler | `common/middleware/errorHandler.js` mounted | **Implemented** |
 | `src/modules/**`, `unifiedAuth`, Redis `rateLimiter.js`, `routes/user.js`, `database/connection.js` | Unwired | **Deferred** |
 
-## Dual identity (Verified — do not unify in casual refactors)
+## Dual identity (Verified — do not unify)
 
-1. **Team/collab:** `/api/auth`, projects, messages, webrtc, Socket.IO; Redux `authSlice`.
-2. **User/academy:** `/api/user`, problems, submissions, contests, playlists, discussions, AI, payments; AuthContext academy path + localStorage user.
+1. **Team/collab:** `/login`, `/register` → Redux `authSlice` → `codex_token` → `/api/auth`, projects, messages, webrtc, Socket.IO.
+2. **User/academy:** `/academy/login`, `/academy/register` (+ Google) → `AuthContext` → `academy_token` → `/api/user` and academy APIs.
+
+**Implemented (2026-11-20 auth pass):** Team `motion` crash fixed; Academy pages; GIS Google ID-token Sign-In; token isolation; no silent Google↔password email merge.
 
 ## Reconnected routes (Implemented)
 
