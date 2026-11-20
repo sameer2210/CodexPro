@@ -9,7 +9,7 @@
     "start": "node server.js",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules MONGODB_URI=mongodb://localhost:27017/codex-test jest --runInBand --passWithNoTests"
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules NODE_ENV=test JWT_SECRET=codex-auth-test-jwt-secret-32chars-min!! GOOGLE_CLIENT_ID=test-google-client-id.apps.googleusercontent.com FRONTEND_URLS=http://localhost:5173 MONGODB_URI=mongodb://127.0.0.1:27017/codex-auth-test jest --runInBand --config jest.config.cjs --passWithNoTests"
   },
   "keywords": [
     "express",
@@ -52,6 +52,7 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-node": "^0.0.0",
     "jest": "^30.2.0",
+    "mongodb-memory-server": "^10.4.3",
     "nodemon": "^1.15.1",
     "prettier": "^3.3.3",
     "supertest": "^7.2.2"

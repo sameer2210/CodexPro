@@ -9,7 +9,10 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "format": "prettier --write .",
-    "test": "vitest --passWithNoTests"
+    "test": "vitest --passWithNoTests",
+    "test:run": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
@@ -38,6 +41,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.21.0",
+    "@playwright/test": "^1.65.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@types/react": "^19.0.10",
